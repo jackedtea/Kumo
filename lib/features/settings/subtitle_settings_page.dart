@@ -3,12 +3,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/tokens.dart';
 import '../../core/languages.dart';
 import '../player/playback_controller.dart';
+import '../player/subtitle_fonts.dart';
 import 'player_settings.dart';
 import '../../l10n/app_localizations.dart';
 import 'settings_widgets.dart';
@@ -93,6 +96,65 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
     await ref.read(playbackControllerProvider.notifier).applySmartSubtitles();
   }
 
+  /// Desktops, where libass can reach every font installed on the machine.
+  /// Android's libass sees only what the app carries.
+  static bool get _systemFontsReachable =>
+      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
+  Future<void> _pickFont(PlayerSettings settings) async {
+    final current = settings.subtitleFont;
+    final custom = isBundledSubtitleFont(current) ? null : current;
+
+    // A family name, or the empty string for "type one".
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
+        Widget row(String family, {String? subtitle}) => ListTile(
+              // Each name in its own face: choosing a font by its name alone
+              // is choosing blind.
+              title: Text(family, style: TextStyle(fontFamily: family)),
+              subtitle: subtitle == null ? null : Text(subtitle),
+              trailing: family == current
+                  ? const Icon(Icons.check_rounded)
+                  : null,
+              onTap: () => Navigator.of(sheetContext).pop(family),
+            );
+
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              for (final BundledSubtitleFont f in bundledSubtitleFonts)
+                row(f.family),
+              if (custom != null) row(custom, subtitle: l10n.fontInstalled),
+              if (_systemFontsReachable)
+                ListTile(
+                  leading: const Icon(Icons.font_download_outlined),
+                  title: Text(l10n.fontOther),
+                  onTap: () => Navigator.of(sheetContext).pop(''),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    if (chosen == null || !mounted) return;
+
+    final family = chosen.isEmpty ? await _askFontName(custom) : chosen;
+    if (family == null || family.isEmpty) return;
+    await _save(settings.copyWith(subtitleFont: family));
+  }
+
+  Future<String?> _askFontName(String? initial) {
+    return showDialog<String>(
+      context: context,
+      builder: (_) => _FontNameDialog(initial: initial),
+    );
+  }
+
   Future<void> _pickDelay(PlayerSettings settings) async {
     final chosen = await showModalBottomSheet<int>(
       context: context,
@@ -136,9 +198,15 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
           textScale: settings.subtitleTextScale,
           backgroundOpacity: settings.subtitleBackgroundOpacity,
           colour: settings.subtitleColour,
+          font: settings.subtitleFont,
         ),
         SettingsSection(title: l10n.style),
-        SettingsValueRow(title: l10n.font, value: 'Roboto'),
+        SettingsValueRow(
+          title: l10n.font,
+          value: settings.subtitleFont,
+          subtitle: l10n.subtitleFontSub,
+          onTap: () => _pickFont(settings),
+        ),
         SettingsSliderRow(
           title: l10n.textSize,
           valueLabel: '${(settings.subtitleTextScale * 100).round()}%',
@@ -227,11 +295,13 @@ class _Preview extends StatelessWidget {
     required this.textScale,
     required this.backgroundOpacity,
     required this.colour,
+    required this.font,
   });
 
   final double textScale;
   final double backgroundOpacity;
   final Color colour;
+  final String font;
 
   @override
   Widget build(BuildContext context) {
@@ -263,9 +333,61 @@ class _Preview extends StatelessWidget {
         ),
         child: Text(
           'The tide turns at midnight.',
-          style: TextStyle(color: colour, fontSize: 15 * textScale),
+          style: TextStyle(
+            color: colour,
+            fontSize: 15 * textScale,
+            fontFamily: font,
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// The name of a font installed on the computer, typed. Its own widget so the
+/// controller outlives the dialog's closing animation.
+class _FontNameDialog extends StatefulWidget {
+  const _FontNameDialog({this.initial});
+
+  final String? initial;
+
+  @override
+  State<_FontNameDialog> createState() => _FontNameDialogState();
+}
+
+class _FontNameDialogState extends State<_FontNameDialog> {
+  late final _name = TextEditingController(text: widget.initial ?? '');
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.of(context).pop(_name.text.trim());
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.fontOther),
+      content: TextField(
+        controller: _name,
+        autofocus: true,
+        autocorrect: false,
+        decoration: InputDecoration(
+          labelText: l10n.fontFamilyName,
+          helperText: l10n.fontFamilyNameHint,
+        ),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l10n.actionSave)),
+      ],
     );
   }
 }

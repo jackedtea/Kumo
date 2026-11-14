@@ -26,6 +26,7 @@ import 'segment_skipper.dart';
 import 'server_tracks.dart';
 import 'silent_end.dart';
 import 'smart_subtitles.dart';
+import 'subtitle_fonts.dart';
 
 /// Hand-written, per the project's no-codegen rule for Riverpod.
 final playbackControllerProvider =
@@ -1317,6 +1318,12 @@ class PlaybackController extends Notifier<PlaybackState> {
       await mpvCache.create(recursive: true);
       await platform.setProperty('cache-dir', mpvCache.path);
 
+      // The fonts the app carries, where libass can read them. Before the
+      // first file, because libass reads the folder when a subtitle track
+      // is set up. On a desktop the system's own fonts stay reachable too.
+      final fonts = await prepareSubtitleFontsDir();
+      if (fonts != null) await platform.setProperty('sub-fonts-dir', fonts);
+
       // Unset by media_kit, so mpv falls back to its own default and can end
       // up attempting an interop that fails — on Windows the log shows
       // "dxva2-egl: Failed to create EGL surface".
@@ -1353,6 +1360,8 @@ class PlaybackController extends Notifier<PlaybackState> {
         '${settings.mpvSubtitleFontSize}',
       );
       await platform.setProperty('sub-color', settings.mpvSubtitleColour);
+      // Plain-text subtitles only; an ASS file keeps the fonts it names.
+      await platform.setProperty('sub-font', settings.subtitleFont);
       await platform.setProperty(
         'sub-back-color',
         settings.mpvSubtitleBackColour,

@@ -87,14 +87,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewList => 'List view';
 
   @override
-  String get viewGrid => 'Grid view';
-
-  @override
-  String notImplemented(String feature) {
-    return '$feature — not implemented yet';
-  }
-
-  @override
   String get continueWatching => 'Continue watching';
 
   @override
@@ -1836,20 +1828,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pureBlackSub => 'Saves power on OLED screens';
 
   @override
-  String get layout => 'Layout';
-
-  @override
-  String get defaultLibraryView => 'Default library view';
-
-  @override
   String get autoConnectServer => 'Open the last server on launch';
 
   @override
   String get autoConnectServerSub =>
       'Skip the server list and sign in to the server used most recently';
-
-  @override
-  String get density => 'Density';
 
   @override
   String get playback => 'Playback';
@@ -2464,9 +2447,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followVideo => 'Follow video';
 
   @override
-  String get needsTranscodingServer => 'Needs a server that can transcode';
-
-  @override
   String get noPreference => 'No preference';
 
   @override
@@ -2494,12 +2474,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subtitlePreviewLine => 'The tide turns at midnight.';
-
-  @override
-  String get grid => 'Grid';
-
-  @override
-  String get comfortable => 'Comfortable';
 
   @override
   String get audioOutput => 'Output';
@@ -3516,4 +3490,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get otherAddressesSub =>
       'One per line. Kumo uses whichever answers first, so the server works both at home and away.';
+
+  @override
+  String get qualityAuto => 'Auto';
+
+  @override
+  String qualityUpTo(String quality) {
+    return 'Up to $quality';
+  }
+
+  @override
+  String get qualityCapSub =>
+      'The highest quality Auto may use. The server plays the file as it is when it fits, and converts it down when it does not. A quality picked in the player applies to that video only.';
+
+  @override
+  String get qualityNoLimit => 'Original (no limit)';
+
+  @override
+  String get subtitleFontSub =>
+      'For SRT and WebVTT subtitles. ASS subtitles keep their own fonts.';
+
+  @override
+  String get fontInstalled => 'Installed on this computer';
+
+  @override
+  String get fontOther => 'Installed font…';
+
+  @override
+  String get fontFamilyName => 'Font name';
+
+  @override
+  String get fontFamilyNameHint => 'As the system lists it, e.g. Segoe UI';
 }

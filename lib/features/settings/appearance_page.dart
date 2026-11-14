@@ -93,9 +93,9 @@ class AppearancePage extends ConsumerWidget {
           value: settings.pureBlack,
           onChanged: (v) => controller.update(settings.copyWith(pureBlack: v)),
         ),
-        SettingsSection(title: l10n.layout),
-        SettingsValueRow(title: l10n.defaultLibraryView, value: l10n.grid),
-        SettingsValueRow(title: l10n.density, value: l10n.comfortable),
+        // No Layout section: "Default library view" and "Density" were rows
+        // that did nothing but say so. A library's grid or list is chosen on
+        // the library itself (View options) and kept on the server.
       ],
     );
   }
@@ -137,9 +137,16 @@ class _ThemeCard extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Expanded(
-              child: ClipRRect(
-                borderRadius: radii.chipAll,
-                child: _Preview(mode: mode),
+              // Outlined, so the light card stands out from a light page.
+              child: Container(
+                foregroundDecoration: BoxDecoration(
+                  borderRadius: radii.chipAll,
+                  border: Border.all(color: scheme.outlineVariant),
+                ),
+                child: ClipRRect(
+                  borderRadius: radii.chipAll,
+                  child: _Preview(mode: mode),
+                ),
               ),
             ),
             SizedBox(height: context.spacing.xs),
@@ -156,26 +163,101 @@ class _ThemeCard extends StatelessWidget {
   }
 }
 
+/// A screen in miniature: an app bar, a row of posters in the accent and two
+/// lines of text, in the light or dark palette — or both side by side for
+/// "follow the system".
+///
+/// Every part has a size of its own. The first version was bare
+/// `ColoredBox`es, which with no child shrink to nothing, so all three cards
+/// drew empty.
 class _Preview extends StatelessWidget {
   const _Preview({required this.mode});
 
   final ThemeMode mode;
 
-  static const _light = Color(0xFFF6FAFE);
-  static const _dark = Color(0xFF0F1417);
-
   @override
   Widget build(BuildContext context) {
+    final accent = context.colors.primary;
+
     if (mode == ThemeMode.system) {
-      // Split diagonally, the way the design shows "follows the system".
       return Row(
-        children: const <Widget>[
-          Expanded(child: ColoredBox(color: _light)),
-          Expanded(child: ColoredBox(color: _dark)),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(child: _MiniScreen(palette: _Palette.light, accent: accent)),
+          Expanded(child: _MiniScreen(palette: _Palette.dark, accent: accent)),
         ],
       );
     }
-    return ColoredBox(color: mode == ThemeMode.light ? _light : _dark);
+    return _MiniScreen(
+      palette: mode == ThemeMode.light ? _Palette.light : _Palette.dark,
+      accent: accent,
+    );
+  }
+}
+
+/// The few colours a miniature screen needs. Fixed rather than read from the
+/// theme: the card for Dark has to look dark while the app is light.
+enum _Palette {
+  light(Color(0xFFF6FAFE), Color(0xFFDDE3EA), Color(0xFFC4CAD1)),
+  dark(Color(0xFF0F1417), Color(0xFF2A3136), Color(0xFF3F484E));
+
+  const _Palette(this.background, this.bar, this.line);
+
+  final Color background;
+  final Color bar;
+  final Color line;
+}
+
+class _MiniScreen extends StatelessWidget {
+  const _MiniScreen({required this.palette, required this.accent});
+
+  final _Palette palette;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget block(Color colour, {double? width, double height = 6}) =>
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: colour,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        );
+
+    return ColoredBox(
+      color: palette.background,
+      child: SizedBox.expand(
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              block(palette.bar, height: 8, width: double.infinity),
+              const SizedBox(height: 6),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(child: block(accent)),
+                    const SizedBox(width: 4),
+                    Expanded(child: block(accent.withValues(alpha: 0.55))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              block(palette.line, width: double.infinity, height: 4),
+              const SizedBox(height: 3),
+              FractionallySizedBox(
+                widthFactor: 0.6,
+                child: block(palette.line, height: 4),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

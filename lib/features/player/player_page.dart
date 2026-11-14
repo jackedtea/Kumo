@@ -66,6 +66,9 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
   static const _chromeTimeout = Duration(seconds: 3);
   static const _speeds = <double>[0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
+  /// The quality sheet's Auto row. Not a rung of the ladder: no override.
+  static const _autoQualityId = 'auto';
+
   bool _chromeVisible = true;
   bool _fullscreen = false;
 
@@ -84,6 +87,7 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
   late final PlayerUiController _playerUi;
   late final NowPlayingController _nowPlaying;
   late final AudioSession _audio;
+  late final StreamQualityOverrideController _qualityOverride;
 
   /// Held for the life of the screen; released on the way out, which hands
   /// the window back to whatever claimed it before.
@@ -113,6 +117,16 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
     _playerUi = ref.read(playerUiProvider.notifier);
     _nowPlaying = ref.read(nowPlayingProvider.notifier);
     _audio = ref.read(audioSessionProvider.notifier);
+    _qualityOverride = ref.read(streamQualityOverrideProvider.notifier);
+
+    // Auto is where a fresh player starts anyway; a fixed choice from Player
+    // settings is applied before the first frame of the film.
+    final rotation = ref.read(playerSettingsProvider).defaultRotation;
+    if (rotation != RotationMode.auto) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _playerUi.startWith(rotation);
+      });
+    }
 
     // The notifier outlives this page, so opening happens after the first
     // frame — mutating a provider during build is not allowed.
@@ -196,6 +210,9 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
     _guard(() => unawaited(_playback.stop()));
     _guard(_playerUi.reset);
     _guard(() => unawaited(_nowPlaying.stop()));
+    // A quality picked for this film was for this film; the next starts on
+    // Auto again.
+    _guard(_qualityOverride.clear);
 
     // The rest of the app is not a video player: leaving the bars hidden
     // would strand every screen after this one without a status bar.
@@ -524,7 +541,6 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
                           onSkipSegment: (segment) => controller.seek(
                             segment.end + const Duration(milliseconds: 1),
                           ),
-                          notImplemented: _notImplemented,
                         ),
                       ),
 
@@ -625,11 +641,23 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
       selected: current.id,
     );
 
+    final override = ref.read(streamQualityOverrideProvider);
+    final cap = ref.read(streamQualityCapProvider);
+
     await TrackSheet.show(
       context: context,
       title: l10n.playbackQuality,
-      selectedId: current.id,
+      selectedId: override?.id ?? _autoQualityId,
       options: <TrackOption>[
+        // Auto first: the server decides under the cap Player settings set
+        // for this network, which is what every film starts on.
+        TrackOption(
+          id: _autoQualityId,
+          label: l10n.qualityAuto,
+          detail: l10n.qualityUpTo(
+            cap.isOriginal ? l10n.qualityOriginal : cap.label,
+          ),
+        ),
         for (final StreamQuality q in offered)
           TrackOption(
             id: q.id,
@@ -642,15 +670,17 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
       onSelected: (option) async {
         // `TrackOption.value` is a double, for the speed sheet it was written
         // for; the id is what carries a quality.
-        final chosen = qualityById(option.id);
-        if (chosen.id == current.id) return;
+        final chosen =
+            option.id == _autoQualityId ? null : qualityById(option.id);
+        ref.read(streamQualityOverrideProvider.notifier).set(chosen);
+        // Auto over a cap equal to the rung that was in force changes
+        // nothing the server would see; no reason to interrupt the film.
+        if (ref.read(streamQualityProvider).id == current.id) return;
 
-        // Read before the await: the film keeps running while the sheet is
+        // Read before the reopen: the film keeps running while the sheet is
         // open, and reopening at a position from ten seconds ago is a visible
         // jump backwards.
         final resume = ref.read(playbackControllerProvider).position;
-
-        await ref.read(streamQualityProvider.notifier).set(chosen);
         // The URL already playing encodes the decision the server made under
         // the old cap, so the new one only takes effect on a fresh resolve.
         await controller.reopenCurrent(at: resume);
@@ -981,13 +1011,6 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
     );
   }
 
-  void _notImplemented(String what) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).notImplemented(what)),
-      ),
-    );
-  }
 }
 
 class _VideoSurface extends StatelessWidget {

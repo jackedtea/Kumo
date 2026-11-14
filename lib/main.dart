@@ -15,6 +15,7 @@ import 'app/app.dart';
 import 'app/desktop_window.dart';
 import 'app/system_ui.dart';
 import 'app/television.dart';
+import 'features/player/subtitle_fonts.dart';
 
 /// No arguments are read any more.
 ///
@@ -58,5 +59,14 @@ void _registerBundledFontLicenses() {
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('assets/fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(<String>['Roboto'], license);
+    // The subtitle faces ship inside the app too.
+    for (final BundledSubtitleFont font in bundledSubtitleFonts) {
+      final asset = font.license;
+      if (asset == null) continue;
+      yield LicenseEntryWithLineBreaks(
+        <String>[font.family],
+        await rootBundle.loadString(asset),
+      );
+    }
   });
 }

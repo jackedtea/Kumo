@@ -248,18 +248,6 @@ abstract class AppLocalizations {
   /// **'List view'**
   String get viewList;
 
-  /// No description provided for @viewGrid.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid view'**
-  String get viewGrid;
-
-  /// No description provided for @notImplemented.
-  ///
-  /// In en, this message translates to:
-  /// **'{feature} — not implemented yet'**
-  String notImplemented(String feature);
-
   /// No description provided for @continueWatching.
   ///
   /// In en, this message translates to:
@@ -3362,18 +3350,6 @@ abstract class AppLocalizations {
   /// **'Saves power on OLED screens'**
   String get pureBlackSub;
 
-  /// No description provided for @layout.
-  ///
-  /// In en, this message translates to:
-  /// **'Layout'**
-  String get layout;
-
-  /// No description provided for @defaultLibraryView.
-  ///
-  /// In en, this message translates to:
-  /// **'Default library view'**
-  String get defaultLibraryView;
-
   /// No description provided for @autoConnectServer.
   ///
   /// In en, this message translates to:
@@ -3385,12 +3361,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip the server list and sign in to the server used most recently'**
   String get autoConnectServerSub;
-
-  /// No description provided for @density.
-  ///
-  /// In en, this message translates to:
-  /// **'Density'**
-  String get density;
 
   /// No description provided for @playback.
   ///
@@ -4460,12 +4430,6 @@ abstract class AppLocalizations {
   /// **'Follow video'**
   String get followVideo;
 
-  /// No description provided for @needsTranscodingServer.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs a server that can transcode'**
-  String get needsTranscodingServer;
-
   /// No description provided for @noPreference.
   ///
   /// In en, this message translates to:
@@ -4519,18 +4483,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The tide turns at midnight.'**
   String get subtitlePreviewLine;
-
-  /// No description provided for @grid.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid'**
-  String get grid;
-
-  /// No description provided for @comfortable.
-  ///
-  /// In en, this message translates to:
-  /// **'Comfortable'**
-  String get comfortable;
 
   /// No description provided for @audioOutput.
   ///
@@ -6349,6 +6301,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One per line. Kumo uses whichever answers first, so the server works both at home and away.'**
   String get otherAddressesSub;
+
+  /// No description provided for @qualityAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get qualityAuto;
+
+  /// No description provided for @qualityUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {quality}'**
+  String qualityUpTo(String quality);
+
+  /// No description provided for @qualityCapSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The highest quality Auto may use. The server plays the file as it is when it fits, and converts it down when it does not. A quality picked in the player applies to that video only.'**
+  String get qualityCapSub;
+
+  /// No description provided for @qualityNoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Original (no limit)'**
+  String get qualityNoLimit;
+
+  /// No description provided for @subtitleFontSub.
+  ///
+  /// In en, this message translates to:
+  /// **'For SRT and WebVTT subtitles. ASS subtitles keep their own fonts.'**
+  String get subtitleFontSub;
+
+  /// No description provided for @fontInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed on this computer'**
+  String get fontInstalled;
+
+  /// No description provided for @fontOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed font…'**
+  String get fontOther;
+
+  /// No description provided for @fontFamilyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Font name'**
+  String get fontFamilyName;
+
+  /// No description provided for @fontFamilyNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'As the system lists it, e.g. Segoe UI'**
+  String get fontFamilyNameHint;
 }
 
 class _AppLocalizationsDelegate

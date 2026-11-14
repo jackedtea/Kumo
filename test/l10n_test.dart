@@ -130,8 +130,8 @@ void main() {
       final en = await load(const Locale('en'));
       final vi = await load(const Locale('vi'));
 
-      expect(en.notImplemented('Cast'), contains('Cast'));
-      expect(vi.notImplemented('Cast'), contains('Cast'));
+      expect(en.qualityUpTo('720p'), contains('720p'));
+      expect(vi.qualityUpTo('720p'), contains('720p'));
 
       expect(en.connectionOk(3, 12), contains('3'));
       expect(vi.connectionOk(3, 12), allOf(contains('3'), contains('12')));

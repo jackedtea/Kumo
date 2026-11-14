@@ -87,14 +87,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get viewList => 'Dạng danh sách';
 
   @override
-  String get viewGrid => 'Dạng lưới';
-
-  @override
-  String notImplemented(String feature) {
-    return '$feature — chưa hỗ trợ';
-  }
-
-  @override
   String get continueWatching => 'Xem tiếp';
 
   @override
@@ -1821,20 +1813,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get pureBlackSub => 'Tiết kiệm pin trên màn hình OLED';
 
   @override
-  String get layout => 'Bố cục';
-
-  @override
-  String get defaultLibraryView => 'Kiểu xem thư viện mặc định';
-
-  @override
   String get autoConnectServer => 'Tự động vào máy chủ gần nhất';
 
   @override
   String get autoConnectServerSub =>
       'Bỏ qua danh sách máy chủ và đăng nhập vào máy chủ dùng gần đây nhất';
-
-  @override
-  String get density => 'Mật độ';
 
   @override
   String get playback => 'Phát lại';
@@ -2449,9 +2432,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get followVideo => 'Theo video';
 
   @override
-  String get needsTranscodingServer => 'Cần máy chủ có khả năng chuyển mã';
-
-  @override
   String get noPreference => 'Không ưu tiên';
 
   @override
@@ -2477,12 +2457,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get subtitlePreviewLine => 'Thuỷ triều đổi chiều lúc nửa đêm.';
-
-  @override
-  String get grid => 'Lưới';
-
-  @override
-  String get comfortable => 'Thoải mái';
 
   @override
   String get audioOutput => 'Đầu ra';
@@ -3494,4 +3468,35 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get otherAddressesSub =>
       'Mỗi dòng một địa chỉ. Kumo dùng địa chỉ nào trả lời trước, nên server dùng được cả ở nhà lẫn bên ngoài.';
+
+  @override
+  String get qualityAuto => 'Tự động';
+
+  @override
+  String qualityUpTo(String quality) {
+    return 'Tối đa $quality';
+  }
+
+  @override
+  String get qualityCapSub =>
+      'Chất lượng cao nhất mà Tự động được dùng. Server phát nguyên tệp khi vừa giới hạn, và chuyển mã xuống khi vượt. Chất lượng chọn trong player chỉ áp dụng cho video đang xem.';
+
+  @override
+  String get qualityNoLimit => 'Gốc (không giới hạn)';
+
+  @override
+  String get subtitleFontSub =>
+      'Cho phụ đề SRT và WebVTT. Phụ đề ASS giữ font riêng của nó.';
+
+  @override
+  String get fontInstalled => 'Đã cài trên máy này';
+
+  @override
+  String get fontOther => 'Font đã cài trên máy…';
+
+  @override
+  String get fontFamilyName => 'Tên font';
+
+  @override
+  String get fontFamilyNameHint => 'Như tên hệ thống hiển thị, ví dụ Segoe UI';
 }

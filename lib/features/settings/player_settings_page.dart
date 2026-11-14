@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../servers/media_library_source.dart';
+import '../../servers/stream_preferences.dart';
 import '../player/playback_controller.dart';
+import '../player/player_ui_state.dart';
 import 'player_settings.dart';
 import '../../l10n/app_localizations.dart';
 import 'settings_widgets.dart';
@@ -121,19 +123,57 @@ class PlayerSettingsPage extends ConsumerWidget {
           value: settings.swipeGestures,
           onChanged: (v) => save(settings.copyWith(swipeGestures: v)),
         ),
-        SettingsValueRow(
-          title: AppLocalizations.of(context).rotation,
-          value: AppLocalizations.of(context).followVideo,
-        ),
+        // A desktop window has no orientation to hold.
+        if (Platform.isAndroid || Platform.isIOS)
+          SettingsValueRow(
+            title: AppLocalizations.of(context).rotation,
+            value: _rotationLabel(context, settings.defaultRotation),
+            onTap: () => _pickRotation(context, settings, save),
+          ),
+        // The most Auto may use on each network. The player's quality pill
+        // still picks a rung for the film on screen, and Auto there means
+        // these.
         SettingsSection(title: AppLocalizations.of(context).streamingQuality),
-        SettingsValueRow(title: AppLocalizations.of(context).onWifi, value: AppLocalizations.of(context).original),
-        SettingsValueRow(
-          title: AppLocalizations.of(context).onCellular,
-          value: AppLocalizations.of(context).original,
-          subtitle: AppLocalizations.of(context).needsTranscodingServer,
-        ),
+        SettingsNote(AppLocalizations.of(context).qualityCapSub),
+        _QualityCapRow(metered: false),
+        _QualityCapRow(metered: true),
       ],
     );
+  }
+
+  static String _rotationLabel(BuildContext context, RotationMode mode) {
+    final l10n = AppLocalizations.of(context);
+    return mode == RotationMode.auto ? l10n.followVideo : mode.label(l10n);
+  }
+
+  Future<void> _pickRotation(
+    BuildContext context,
+    PlayerSettings settings,
+    Future<void> Function(PlayerSettings) save,
+  ) async {
+    final chosen = await showModalBottomSheet<RotationMode>(
+      context: context,
+      useSafeArea: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (final RotationMode mode in RotationMode.values)
+              ListTile(
+                leading: Icon(mode.icon),
+                title: Text(_rotationLabel(sheetContext, mode)),
+                trailing: mode == settings.defaultRotation
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                onTap: () => Navigator.of(sheetContext).pop(mode),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null) return;
+    await save(settings.copyWith(defaultRotation: chosen));
   }
 
   Future<void> _pickHardwareDecoding(
@@ -238,6 +278,64 @@ class PlayerSettingsPage extends ConsumerWidget {
 
     if (chosen == null) return;
     await save(Duration(seconds: chosen));
+  }
+}
+
+/// Auto's cap on one kind of network, and the sheet that changes it.
+class _QualityCapRow extends ConsumerWidget {
+  const _QualityCapRow({required this.metered});
+
+  /// Mobile data rather than Wi-Fi.
+  final bool metered;
+
+  static String _label(AppLocalizations l10n, StreamQuality q) =>
+      q.isOriginal ? l10n.qualityNoLimit : q.label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final defaults = ref.watch(streamQualityDefaultsProvider);
+    final current = defaults.forNetwork(metered: metered);
+
+    return SettingsValueRow(
+      title: metered ? l10n.onCellular : l10n.onWifi,
+      value: _label(l10n, current),
+      onTap: () => _pick(context, ref, current),
+    );
+  }
+
+  Future<void> _pick(
+    BuildContext context,
+    WidgetRef ref,
+    StreamQuality current,
+  ) async {
+    final chosen = await showModalBottomSheet<StreamQuality>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              for (final StreamQuality q in streamQualities)
+                ListTile(
+                  title: Text(_label(l10n, q)),
+                  trailing: q.id == current.id
+                      ? const Icon(Icons.check_rounded)
+                      : null,
+                  onTap: () => Navigator.of(sheetContext).pop(q),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (chosen == null) return;
+    final defaults = ref.read(streamQualityDefaultsProvider.notifier);
+    await (metered ? defaults.setCellular(chosen) : defaults.setWifi(chosen));
   }
 }
 

@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../servers/media_library_source.dart';
+import '../player/player_ui_state.dart' show RotationMode;
+import '../player/subtitle_fonts.dart' show defaultSubtitleFont;
 
 /// How mpv should pick a decoder.
 ///
@@ -166,6 +168,8 @@ class PlayerSettings {
     this.syncDeviceVolume = false,
     this.gapless = GaplessAudio.automatic,
     this.replayGain = ReplayGain.off,
+    this.defaultRotation = RotationMode.auto,
+    this.subtitleFont = defaultSubtitleFont,
   });
 
   factory PlayerSettings.fromJson(Map<String, dynamic> json) {
@@ -205,6 +209,14 @@ class PlayerSettings {
         (g) => g.name == json['replayGain'],
         orElse: () => ReplayGain.off,
       ),
+      defaultRotation: RotationMode.values.firstWhere(
+        (r) => r.name == json['defaultRotation'],
+        orElse: () => RotationMode.auto,
+      ),
+      subtitleFont: switch (json['subtitleFont']) {
+        final String f when f.trim().isNotEmpty => f.trim(),
+        _ => defaultSubtitleFont,
+      },
     );
   }
 
@@ -289,6 +301,16 @@ class PlayerSettings {
 
   final ReplayGain replayGain;
 
+  /// How the player holds the phone when a video opens. Auto follows the
+  /// video's shape; the rotation button in the player still changes it for
+  /// that one film.
+  final RotationMode defaultRotation;
+
+  /// The typeface for plain-text subtitles (SRT, WebVTT): one the app
+  /// carries, or on a desktop any installed font by its family name. ASS
+  /// subtitles keep the fonts they name.
+  final String subtitleFont;
+
   /// mpv's default subtitle size, which the scale multiplies.
   static const _baseSubtitleSize = 55;
 
@@ -341,6 +363,8 @@ class PlayerSettings {
         'syncDeviceVolume': syncDeviceVolume,
         'gapless': gapless.name,
         'replayGain': replayGain.name,
+        'defaultRotation': defaultRotation.name,
+        'subtitleFont': subtitleFont,
       };
 
   PlayerSettings copyWith({
@@ -365,6 +389,8 @@ class PlayerSettings {
     bool? syncDeviceVolume,
     GaplessAudio? gapless,
     ReplayGain? replayGain,
+    RotationMode? defaultRotation,
+    String? subtitleFont,
   }) {
     return PlayerSettings(
       hardwareDecoding: hardwareDecoding ?? this.hardwareDecoding,
@@ -392,6 +418,8 @@ class PlayerSettings {
       syncDeviceVolume: syncDeviceVolume ?? this.syncDeviceVolume,
       gapless: gapless ?? this.gapless,
       replayGain: replayGain ?? this.replayGain,
+      defaultRotation: defaultRotation ?? this.defaultRotation,
+      subtitleFont: subtitleFont ?? this.subtitleFont,
     );
   }
 }

@@ -38,10 +38,6 @@ class GeneralSettingsPage extends ConsumerWidget {
           value: LocaleController.labelFor(locale, l10n),
           onTap: () => _pickLanguage(context, ref, locale),
         ),
-        SettingsValueRow(
-          title: l10n.defaultLibraryView,
-          value: l10n.viewGrid,
-        ),
         SettingsSwitchRow(
           title: l10n.autoConnectServer,
           subtitle: l10n.autoConnectServerSub,

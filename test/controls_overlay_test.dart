@@ -90,7 +90,6 @@ Future<void> pumpControls(
           onZoom: onZoom ?? () {},
           skipSegment: skipSegment,
           onSkipSegment: (_) {},
-          notImplemented: (_) {},
         ),
         ),
       ),

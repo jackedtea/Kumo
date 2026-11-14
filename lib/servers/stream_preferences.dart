@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart' show debugPrint, immutable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../downloads/download_settings.dart';
+
 /// A quality the user can ask a server for.
 ///
 /// A ceiling, not a demand: the server hands the file over untouched when it
@@ -167,39 +169,125 @@ StreamQuality qualityById(String? id) {
   return streamQualities.first;
 }
 
-/// The quality cap every server request is made under.
-class StreamQualityController extends Notifier<StreamQuality> {
-  static const _prefsKey = 'stream_quality_v1';
+/// The quality cap chosen for each kind of network.
+@immutable
+class StreamQualityDefaults {
+  const StreamQualityDefaults({
+    this.wifi = const StreamQuality(id: 'original', label: 'Original'),
+    this.cellular = const StreamQuality(id: 'original', label: 'Original'),
+  });
+
+  /// Wi-Fi, Ethernet, and anything the platform cannot name.
+  final StreamQuality wifi;
+
+  /// Mobile data, where every megabit is paid for.
+  final StreamQuality cellular;
+
+  StreamQuality forNetwork({required bool metered}) =>
+      metered ? cellular : wifi;
+
+  StreamQualityDefaults copyWith({
+    StreamQuality? wifi,
+    StreamQuality? cellular,
+  }) =>
+      StreamQualityDefaults(
+        wifi: wifi ?? this.wifi,
+        cellular: cellular ?? this.cellular,
+      );
+}
+
+/// The two caps, persisted. Original for both out of the box: the common case
+/// is a server on the same network, where re-encoding costs picture quality
+/// and CPU and buys nothing — and on mobile data the user is better asked
+/// once, in Player settings, than surprised by a soft picture.
+class StreamQualityDefaultsController
+    extends Notifier<StreamQualityDefaults> {
+  /// The Wi-Fi key is the one the single setting used to live under, so a
+  /// choice made before there were two carries over as the Wi-Fi one.
+  static const _wifiKey = 'stream_quality_v1';
+  static const _cellularKey = 'stream_quality_cellular_v1';
 
   @override
-  StreamQuality build() {
+  StreamQualityDefaults build() {
     Future<void>.microtask(_restore);
-    // Original: the common case is a server on the same network, where
-    // re-encoding costs picture quality and CPU and buys nothing.
-    return streamQualities.first;
+    return const StreamQualityDefaults();
   }
 
   Future<void> _restore() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final id = prefs.getString(_prefsKey);
-      if (id != null) state = qualityById(id);
+      final wifi = prefs.getString(_wifiKey);
+      final cellular = prefs.getString(_cellularKey);
+      state = state.copyWith(
+        wifi: wifi == null ? null : qualityById(wifi),
+        cellular: cellular == null ? null : qualityById(cellular),
+      );
     } catch (e) {
       debugPrint('Unreadable stream quality, using the default: $e');
     }
   }
 
-  Future<void> set(StreamQuality quality) async {
-    state = quality;
+  Future<void> setWifi(StreamQuality quality) async {
+    state = state.copyWith(wifi: quality);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsKey, quality.id);
+    await prefs.setString(_wifiKey, quality.id);
   }
+
+  Future<void> setCellular(StreamQuality quality) async {
+    state = state.copyWith(cellular: quality);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cellularKey, quality.id);
+  }
+
 }
 
-final streamQualityProvider =
-    NotifierProvider<StreamQualityController, StreamQuality>(
-      StreamQualityController.new,
+/// A quality picked in the player for what is being watched, or null for
+/// Auto — the cap Player settings set for the network the device is on.
+///
+/// Memory only, and dropped when the player closes: the settings are the
+/// standing answer, and a one-off choice for a bad connection must not
+/// quietly become it.
+class StreamQualityOverrideController extends Notifier<StreamQuality?> {
+  @override
+  StreamQuality? build() => null;
+
+  void set(StreamQuality? quality) => state = quality;
+
+  void clear() => state = null;
+}
+
+final streamQualityOverrideProvider =
+    NotifierProvider<StreamQualityOverrideController, StreamQuality?>(
+      StreamQualityOverrideController.new,
     );
+
+/// Auto's cap: the most a stream may be on the network the device is on now.
+final streamQualityCapProvider = Provider<StreamQuality>((ref) {
+  final defaults = ref.watch(streamQualityDefaultsProvider);
+  return defaults.forNetwork(metered: ref.watch(streamOnMeteredProvider));
+});
+
+final streamQualityDefaultsProvider =
+    NotifierProvider<StreamQualityDefaultsController, StreamQualityDefaults>(
+      StreamQualityDefaultsController.new,
+    );
+
+/// Whether the device is on mobile data. False while the platform has not
+/// said, and wherever it cannot: the Wi-Fi cap is the safe guess for a
+/// desktop or a television.
+final streamOnMeteredProvider = Provider<bool>(
+  (ref) => ref.watch(downloadNetworkProvider).value == DownloadNetwork.metered,
+);
+
+/// The quality cap every server request is made under: what the player was
+/// told for this session, else Auto's cap for the network. Under a cap the
+/// server still decides — it plays the file as it is when it fits, and
+/// transcodes down to the cap when it does not.
+final streamQualityProvider = Provider<StreamQuality>(
+  (ref) =>
+      ref.watch(streamQualityOverrideProvider) ??
+      ref.watch(streamQualityCapProvider),
+);
 
 /// An audio and subtitle choice made *before* playback starts.
 ///

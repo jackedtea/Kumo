@@ -173,7 +173,6 @@ class SettingsIndexPage extends ConsumerWidget {
   Widget _tile(BuildContext context, _SettingsEntry e) {
     final spacing = context.spacing;
     final scheme = context.colors;
-    final l10n = AppLocalizations.of(context);
     final subtitle = e.subtitle;
 
     return ListTile(
@@ -188,9 +187,7 @@ class SettingsIndexPage extends ConsumerWidget {
       subtitle: subtitle == null ? null : Text(subtitle),
       trailing: Icon(Icons.chevron_right_rounded, color: scheme.outline),
       onTap: e.destination == null
-          ? () => ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.notImplemented(e.title))),
-              )
+          ? null
           : () => context.push(e.destination!),
     );
   }

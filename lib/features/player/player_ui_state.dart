@@ -184,6 +184,18 @@ class PlayerUiController extends Notifier<PlayerUiState> {
 
   void unlock() => state = state.copyWith(locked: false);
 
+  /// Starts a video in the rotation Player settings chose. Called as the
+  /// player opens, so each film begins from the setting rather than from
+  /// whatever the last one was turned to.
+  void startWith(RotationMode mode) {
+    state = state.copyWith(rotation: mode);
+    if (mode == RotationMode.auto) {
+      _applyAuto();
+    } else {
+      SystemChrome.setPreferredOrientations(mode.orientations);
+    }
+  }
+
   void cycleRotation() {
     final next = state.rotation.next;
     state = state.copyWith(rotation: next);

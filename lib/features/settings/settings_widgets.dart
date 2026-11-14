@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/tokens.dart';
-import '../../l10n/app_localizations.dart';
 
 /// Scaffold shared by every settings sub-page, so they cannot drift apart.
 class SettingsScaffold extends StatelessWidget {
@@ -135,7 +134,9 @@ class SettingsValueRow extends StatelessWidget {
               ?.copyWith(color: context.colors.onSurfaceVariant),
         ),
       ),
-      onTap: onTap ?? () => notImplemented(context, title),
+      // No action means a value to read, not a control: nothing happens
+      // on a tap, rather than a snackbar saying so.
+      onTap: onTap,
     );
   }
 }
@@ -222,8 +223,3 @@ class SettingsSliderRow extends StatelessWidget {
   }
 }
 
-void notImplemented(BuildContext context, String what) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(AppLocalizations.of(context).notImplemented(what))),
-  );
-}

@@ -530,6 +530,21 @@ order of cost: server-side burn-in when transcoding (the Subtitle settings switc
 exists for this, and only helps server sources); patching media_kit's render path;
 swapping the backend to `fvp`/libmdk, which `refs/NipaPlay-Reload` vendors.
 
+### Subtitle font (2026-11-14)
+
+`PlayerSettings.subtitleFont` → mpv `sub-font`, which styles **plain-text** subtitles
+only; an ASS file keeps the fonts it names. The app carries Roboto plus three OFL
+faces in `assets/fonts/subtitles/` (Noto Sans, Be Vietnam Pro, Lora — listed in
+`features/player/subtitle_fonts.dart`), each checked to cover Vietnamese in full:
+Atkinson Hyperlegible Next was tried and dropped for lacking ư/ệ, since libass
+borrows missing glyphs from another face mid-line. `prepareSubtitleFontsDir` copies
+them to `<app support>/subtitle-fonts/` and `_configureNative` points
+`sub-fonts-dir` there before the first file — on Android that is the only way libass
+sees any font. They are also Flutter fonts in `pubspec.yaml`, so the settings preview
+and the picker draw each name in its face, and their OFL notices are registered in
+`main.dart`. On Windows/Linux/macOS the picker also takes the name of any installed
+font ("Installed font…"), which libass finds through the system.
+
 ## Smart subtitles
 
 `features/player/smart_subtitles.dart` holds the rule as a **pure function** —
@@ -1115,6 +1130,16 @@ it. Three rules it keeps:
   the same split `parsePropfind` follows.
 - **Errors are sentences.** A 401 is flagged `isUnauthorised`, because it is the one
   failure with an answer nothing else has: ask for the password again.
+
+**Stream quality is a cap per network, with Auto** (2026-11-14,
+`servers/stream_preferences.dart`). Player settings › Streaming quality sets
+the most Auto may use on Wi-Fi and on mobile data (`StreamQualityDefaults`,
+both Original by default; the Wi-Fi one reads the old `stream_quality_v1` key).
+`streamQualityProvider` is the session override (`streamQualityOverrideProvider`,
+set from the player's quality sheet, memory only, cleared when the player
+closes) or else the cap for the network now (`streamOnMeteredProvider`, from
+`downloadNetworkProvider`). Under a cap the server still direct-plays a file that
+fits. The quality sheet's first row is Auto ("Up to …").
 
 **One server, several addresses** (2026-11-14, `servers/server_addresses.dart`).
 `ServerProfile.addresses` holds the server's others beside `uri` (LAN and public).

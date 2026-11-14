@@ -52,7 +52,6 @@ class ControlsOverlay extends StatelessWidget {
     this.skipForward = const Duration(seconds: 30),
     this.skipSegment,
     required this.onSkipSegment,
-    required this.notImplemented,
     this.chromeVisible = true,
     this.streamControlsBelow = false,
   });
@@ -119,7 +118,6 @@ class ControlsOverlay extends StatelessWidget {
   final MediaSegment? skipSegment;
 
   final ValueChanged<MediaSegment> onSkipSegment;
-  final void Function(String) notImplemented;
 
   /// The amounts from Player settings. The transport buttons used to be fixed
   /// at 10 and 30 seconds, which quietly ignored the setting the gestures
