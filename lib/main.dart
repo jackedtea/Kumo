@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -19,8 +19,8 @@ import 'app/television.dart';
 /// No arguments are read any more.
 ///
 /// `main` used to take the file named on the command line and hand it to the
-/// player, which is what made `mPlayer video.mkv` and "open with mPlayer"
-/// work on desktop. There is no local source left to open one with — mPlayer
+/// player, which is what made `Kumo video.mkv` and "open with Kumo"
+/// work on desktop. There is no local source left to open one with — Kumo
 /// plays what a media server gives it — so nothing names a file here.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +47,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [isTelevisionProvider.overrideWithValue(television)],
-      child: const MPlayerApp(),
+      child: const KumoApp(),
     ),
   );
 }

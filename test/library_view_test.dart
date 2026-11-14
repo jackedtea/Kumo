@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -6,10 +6,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/features/player/player_ui_state.dart';
-import 'package:mplayer/features/servers/library_view_settings.dart';
-import 'package:mplayer/servers/jellyfin_dto.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/features/player/player_ui_state.dart';
+import 'package:kumo/features/servers/library_view_settings.dart';
+import 'package:kumo/servers/jellyfin_dto.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 void main() {
   group('collections', () {

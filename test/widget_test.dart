@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/app/tokens.dart';
-import 'package:mplayer/features/servers/server_library.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/app/tokens.dart';
+import 'package:kumo/features/servers/server_library.dart';
 
 /// Pumps the real app at a specific logical window size.
 ///
@@ -37,7 +37,7 @@ Future<void> pumpAppAt(
         if (connected)
           activeServerProvider.overrideWithValue(const FakeLibrarySource()),
       ],
-      child: const MPlayerApp(),
+      child: const KumoApp(),
     ),
   );
   await tester.pumpAndSettle();

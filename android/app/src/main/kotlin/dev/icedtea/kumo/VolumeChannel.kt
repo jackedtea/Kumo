@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.content.Context
 import android.database.ContentObserver
@@ -22,8 +22,8 @@ import kotlin.math.roundToInt
 class VolumeChannel(context: Context) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/volume"
-        const val EVENTS = "dev.icedtea.mplayer/volume-events"
+        const val CHANNEL = "dev.icedtea.kumo/volume"
+        const val EVENTS = "dev.icedtea.kumo/volume-events"
     }
 
     private val resolver = context.applicationContext.contentResolver

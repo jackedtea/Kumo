@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,13 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/features/servers/server_library.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/widgets/backdrop_header.dart';
-import 'package:mplayer/widgets/detail_header.dart';
-import 'package:mplayer/widgets/gradient_art.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/features/servers/server_library.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/widgets/backdrop_header.dart';
+import 'package:kumo/widgets/detail_header.dart';
+import 'package:kumo/widgets/gradient_art.dart';
 
 class _Movie extends FakeLibrarySource {
   const _Movie({this.certificate = 'PG-13'});
@@ -49,7 +49,7 @@ Future<void> _open(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [activeServerProvider.overrideWithValue(source)],
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();

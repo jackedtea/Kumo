@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -15,7 +15,7 @@ import java.io.File
  *
  * Dart finds the release, picks the APK for this device's ABI and downloads
  * it; this side only does the three things Dart cannot: name the ABIs the
- * device runs, say whether the user has let mPlayer install packages, and
+ * device runs, say whether the user has let Kumo install packages, and
  * start the installer with a `content://` URI it is allowed to read. As with
  * every channel here, **Kotlin decides nothing**.
  *
@@ -28,7 +28,7 @@ class UpdateChannel(
 ) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/update"
+        const val CHANNEL = "dev.icedtea.kumo/update"
         private const val TAG = "UpdateChannel"
         private const val APK_TYPE = "application/vnd.android.package-archive"
     }

@@ -1,8 +1,8 @@
-# mPlayer — Implementation Plan
+# Kumo — Implementation Plan
 
 > ## ⚠ Scope change, 2026-10-18 — read this before any phase below
 >
-> **The local sources were removed. mPlayer plays only what a media server
+> **The local sources were removed. Kumo plays only what a media server
 > gives it.** The built-in player is untouched and remains the point of the
 > app; what went is the device library, SAF folders, the Android media index,
 > SMB and WebDAV shares, the folder browser, the Files tab, and the intents
@@ -36,7 +36,7 @@
 
 Cross-platform client for a Jellyfin/Emby media server, with a built-in player.
 
-- **Package**: `mplayer` · **Bundle ID**: `dev.icedtea.mplayer` · **Display name**: mPlayer
+- **Package**: `kumo` · **Bundle ID**: `dev.icedtea.kumo` · **Display name**: Kumo
 - **Priority platforms**: Android, Windows, Linux. iOS/macOS are scaffolded but deferred until a Mac is available.
 - **Reference source**: [NipaPlay-Reload](../../refs/NipaPlay-Reload) (MIT) — service layer to adapt, not to fork wholesale.
 
@@ -44,11 +44,11 @@ Cross-platform client for a Jellyfin/Emby media server, with a built-in player.
 
 ## Expected workspace layout
 
-After the planned move to `D:\Work\Projects\mPlayer-app`:
+After the planned move to `D:\Work\Projects\Kumo-app`:
 
 ```
-D:\Work\Projects\mPlayer-app\
-├── mPlayer\              ← this Flutter app
+D:\Work\Projects\Kumo-app\
+├── Kumo\              ← this Flutter app
 │   ├── docs\PLAN.md      ← this file
 │   ├── lib\
 │   ├── assets\icon\      ← generated PNGs (source of truth is icon.svg at app root)
@@ -57,7 +57,7 @@ D:\Work\Projects\mPlayer-app\
     └── NipaPlay-Reload\  ← read-only reference
 ```
 
-Paths in this document are relative to the app root (`mPlayer/`).
+Paths in this document are relative to the app root (`Kumo/`).
 
 ---
 
@@ -171,15 +171,15 @@ until something needs one.
 ## Phase 0 — Foundation
 
 - [x] Delete Ghosten-Player, move NipaPlay-Reload to `refs/`
-- [x] `flutter create` with `--org dev.icedtea --project-name mplayer`, all 5 platforms
+- [x] `flutter create` with `--org dev.icedtea --project-name kumo`, all 5 platforms
 - [x] Add dependencies, resolve to stable versions
 - [x] Verify `media_kit` builds and links on Windows
 - [x] Verify `media_kit` builds and links on Android
 - [x] `icon.svg` → launcher icons for Android (incl. adaptive + monochrome), iOS, Windows, macOS
 - [x] Linux `.desktop` + hicolor icon set in `linux/packaging/`
-- [x] Display name `mPlayer` on every platform
+- [x] Display name `Kumo` on every platform
 - [x] Smoke-test page + passing widget/unit tests
-- [x] Move workspace to `D:\Work\Projects\mPlayer-app`
+- [x] Move workspace to `D:\Work\Projects\Kumo-app`
 - [x] `git init`, first commit, `.gitignore` review
 - [x] GPL-3.0-or-later `LICENSE` + per-file SPDX headers
 - [ ] Run the smoke test on a real Android device and confirm video actually renders (build success ≠ playback success)
@@ -475,8 +475,8 @@ Deliberately **without** metadata scraping. Jellyfin and Emby already supply met
 - [x] Window size/position persistence — `app/desktop_window.dart`. A minimised or
       fullscreen window is deliberately not saved, and a position on a monitor that has
       since been unplugged is discarded rather than restored off-screen
-- [ ] File association: open a video file with mPlayer (Windows registry, Linux `.desktop` MimeType already declared)
-- [x] Command-line argument handling (`mPlayer video.mkv`) — the Windows and Linux
+- [ ] File association: open a video file with Kumo (Windows registry, Linux `.desktop` MimeType already declared)
+- [x] Command-line argument handling (`Kumo video.mkv`) — the Windows and Linux
       runners already forward the arguments; `main` feeds them to `incomingMediaProvider`
 - [x] Drag-and-drop a file onto the window — `desktop_drop`, wrapping the navigator so a
       drop anywhere plays, not only on the Files tab

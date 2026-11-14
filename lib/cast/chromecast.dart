@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -25,8 +25,8 @@ class Chromecast {
 
   static final Chromecast instance = Chromecast._();
 
-  static const _channel = MethodChannel('dev.icedtea.mplayer/chromecast');
-  static const _events = EventChannel('dev.icedtea.mplayer/chromecast-events');
+  static const _channel = MethodChannel('dev.icedtea.kumo/chromecast');
+  static const _events = EventChannel('dev.icedtea.kumo/chromecast-events');
 
   final _devices = StreamController<List<CastDevice>>.broadcast();
   final _sessions = StreamController<bool>.broadcast();

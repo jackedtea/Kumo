@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -11,11 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/features/servers/servers_list_page.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/servers/server_registry.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/features/servers/servers_list_page.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/servers/server_registry.dart';
 
 /// Answers Quick Connect approvals with [answer], and keeps the codes.
 class _QuickConnectServer extends FakeLibrarySource {
@@ -54,7 +54,7 @@ Future<GoRouter> _pump(WidgetTester tester, Size size) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [serverRegistryProvider.overrideWith(_SignedInRegistry.new)],
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();

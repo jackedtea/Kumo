@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -89,7 +89,7 @@ class AdminSession {
   /// Where the client connects from, as the server sees it.
   final String remoteAddress;
 
-  /// The app on the far end — "Jellyfin Web", "mPlayer", "Infuse".
+  /// The app on the far end — "Jellyfin Web", "Kumo", "Infuse".
   final String client;
 
   /// What is on screen, or null for a session that is merely connected.

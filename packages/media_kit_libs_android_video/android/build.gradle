@@ -57,7 +57,7 @@ task downloadDependencies(type: Exec) {
         outputDir.mkdirs()
 
         // ---------------------------------------------------------------
-        // mPlayer fork of media_kit_libs_android_video 1.3.8.
+        // Kumo fork of media_kit_libs_android_video 1.3.8.
         //
         // Upstream downloads the `default` flavour, whose FFmpeg whitelists
         // 58 decoders — ssa, ass, dvbsub, dvdsub, subrip, text and webvtt are

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -7,15 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/core/models/media_models.dart';
-import 'package:mplayer/features/player/playback_controller.dart';
-import 'package:mplayer/features/player/playback_state.dart';
-import 'package:mplayer/features/player/player_page.dart';
-import 'package:mplayer/features/remote/remote_receiver.dart';
-import 'package:mplayer/remote/remote_protocol.dart';
-import 'package:mplayer/sources/media_source.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/core/models/media_models.dart';
+import 'package:kumo/features/player/playback_controller.dart';
+import 'package:kumo/features/player/playback_state.dart';
+import 'package:kumo/features/player/player_page.dart';
+import 'package:kumo/features/remote/remote_receiver.dart';
+import 'package:kumo/remote/remote_protocol.dart';
+import 'package:kumo/sources/media_source.dart';
 
 class _FakePlayback extends PlaybackController {
   @override
@@ -56,7 +56,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MPlayerApp(router: router),
+        child: KumoApp(router: router),
       ),
     );
     await tester.pumpAndSettle();

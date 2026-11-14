@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/app/locale_controller.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
+import 'package:kumo/app/locale_controller.dart';
+import 'package:kumo/l10n/app_localizations.dart';
 
 /// Resolves the delegate for [locale] the way MaterialApp would.
 Future<AppLocalizations> load(Locale locale) =>
@@ -123,7 +123,7 @@ void main() {
 
     test('the product name is not translated', () async {
       final vi = await load(const Locale('vi'));
-      expect(vi.appTitle, 'mPlayer');
+      expect(vi.appTitle, 'Kumo');
     });
 
     test('placeholders survive translation', () async {

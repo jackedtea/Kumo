@@ -1,16 +1,16 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/features/admin/admin_api_keys_page.dart';
-import 'package:mplayer/features/admin/admin_config_form.dart';
-import 'package:mplayer/features/admin/admin_live_tv_page.dart';
-import 'package:mplayer/features/admin/admin_logs_page.dart';
-import 'package:mplayer/features/admin/admin_session_sheet.dart';
-import 'package:mplayer/features/admin/admin_storage_page.dart';
+import 'package:kumo/features/admin/admin_api_keys_page.dart';
+import 'package:kumo/features/admin/admin_config_form.dart';
+import 'package:kumo/features/admin/admin_live_tv_page.dart';
+import 'package:kumo/features/admin/admin_logs_page.dart';
+import 'package:kumo/features/admin/admin_session_sheet.dart';
+import 'package:kumo/features/admin/admin_storage_page.dart';
 
 void main() {
   test('a key shows its ends only', () {

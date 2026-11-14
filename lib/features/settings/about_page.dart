@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -77,7 +77,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                 ),
               ),
               SizedBox(height: spacing.md),
-              Text('mPlayer', style: context.texts.titleLarge),
+              Text('Kumo', style: context.texts.titleLarge),
               SizedBox(height: spacing.xs),
               Text(
                 'Version $_version · build $_build',
@@ -125,7 +125,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
           title: AppLocalizations.of(context).openSourceLicences,
           onTap: (c) => showLicensePage(
             context: c,
-            applicationName: 'mPlayer',
+            applicationName: 'Kumo',
             applicationVersion: 'Version $_version · build $_build',
             applicationLegalese:
                 'Copyright (C) 2026 Nam\nGPL-3.0-or-later',
@@ -156,7 +156,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
             spacing.lg,
           ),
           child: Text(
-            'mPlayer is not affiliated with, endorsed by, or sponsored by the '
+            'Kumo is not affiliated with, endorsed by, or sponsored by the '
             'Jellyfin project.',
             style: context.texts.bodySmall?.copyWith(color: scheme.outline),
           ),

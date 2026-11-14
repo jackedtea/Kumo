@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.app.PendingIntent
 import android.app.PictureInPictureParams
@@ -34,8 +34,8 @@ class PipChannel(
 ) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/pip"
-        const val EVENTS = "dev.icedtea.mplayer/pip-events"
+        const val CHANNEL = "dev.icedtea.kumo/pip"
+        const val EVENTS = "dev.icedtea.kumo/pip-events"
 
         /** API 26 introduced PiP; the whole feature is inert below it. */
         private const val MIN_SDK = Build.VERSION_CODES.O
@@ -43,7 +43,7 @@ class PipChannel(
         /** API 31 can enter PiP on its own when the user leaves. */
         private const val AUTO_ENTER_SDK = Build.VERSION_CODES.S
 
-        private const val ACTION_CONTROL = "dev.icedtea.mplayer.PIP_CONTROL"
+        private const val ACTION_CONTROL = "dev.icedtea.kumo.PIP_CONTROL"
         private const val EXTRA_CONTROL = "control"
 
         private const val CONTROL_BACK = "back"

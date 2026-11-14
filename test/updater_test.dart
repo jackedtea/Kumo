@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -12,12 +12,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/core/install_source.dart';
-import 'package:mplayer/core/update_check.dart';
-import 'package:mplayer/core/updater.dart';
-import 'package:mplayer/features/settings/update_dialog.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/core/install_source.dart';
+import 'package:kumo/core/update_check.dart';
+import 'package:kumo/core/updater.dart';
+import 'package:kumo/features/settings/update_dialog.dart';
+import 'package:kumo/l10n/app_localizations.dart';
 
 ReleaseAsset _asset(String name) =>
     ReleaseAsset(name: name, url: 'https://dl/$name', size: 50 * 1024 * 1024);
@@ -28,11 +28,11 @@ final _release = ReleaseInfo(
   url: 'https://github.com/jackedtea/mPlayer/releases/tag/v1.3.0',
   notes: '## What changed\n- **Faster** home\n\n| File | For |\n|---|---|',
   assets: <ReleaseAsset>[
-    _asset('mPlayer-1.3.0-android-arm64-v8a.apk'),
-    _asset('mPlayer-1.3.0-android-armeabi-v7a.apk'),
-    _asset('mPlayer-1.3.0-android-x86_64.apk'),
-    _asset('mPlayer-1.3.0-windows-x64-setup.exe'),
-    _asset('mPlayer-1.3.0-linux-x64.deb'),
+    _asset('Kumo-1.3.0-android-arm64-v8a.apk'),
+    _asset('Kumo-1.3.0-android-armeabi-v7a.apk'),
+    _asset('Kumo-1.3.0-android-x86_64.apk'),
+    _asset('Kumo-1.3.0-windows-x64-setup.exe'),
+    _asset('Kumo-1.3.0-linux-x64.deb'),
   ],
 );
 
@@ -163,7 +163,7 @@ void main() {
         'body': 'notes',
         'assets': <Object?>[
           <String, dynamic>{
-            'name': 'mPlayer-1.3.0-windows-x64-setup.exe',
+            'name': 'Kumo-1.3.0-windows-x64-setup.exe',
             'browser_download_url': 'https://dl/win-setup.exe',
             'size': 1234,
           },
@@ -203,12 +203,12 @@ void main() {
         version: '1.4.0',
         tag: 'v1.4.0',
         url: '',
-        assets: <ReleaseAsset>[_asset('mPlayer-1.4.0-android-universal.apk')],
+        assets: <ReleaseAsset>[_asset('Kumo-1.4.0-android-universal.apk')],
       );
       for (final abi in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
         expect(
           assetFor(release, UpdatePlatform.android, abis: <String>[abi])?.name,
-          'mPlayer-1.4.0-android-universal.apk',
+          'Kumo-1.4.0-android-universal.apk',
         );
       }
     });
@@ -219,21 +219,21 @@ void main() {
         tag: 'v1.5.0',
         url: '',
         assets: <ReleaseAsset>[
-          _asset('mPlayer-1.5.0-android-universal.apk'),
-          _asset('mPlayer-1.5.0-android-arm64-v8a.apk'),
+          _asset('Kumo-1.5.0-android-universal.apk'),
+          _asset('Kumo-1.5.0-android-arm64-v8a.apk'),
         ],
       );
       expect(
         assetFor(release, UpdatePlatform.android,
                 abis: <String>['arm64-v8a', 'armeabi-v7a'])
             ?.name,
-        'mPlayer-1.5.0-android-arm64-v8a.apk',
+        'Kumo-1.5.0-android-arm64-v8a.apk',
       );
       // No ABI of its own in the release: the universal one still installs.
       expect(
         assetFor(release, UpdatePlatform.android, abis: <String>['x86_64'])
             ?.name,
-        'mPlayer-1.5.0-android-universal.apk',
+        'Kumo-1.5.0-android-universal.apk',
       );
     });
 
@@ -397,7 +397,7 @@ void main() {
       await tester.tap(find.text('Update now'));
       await tester.pumpAndSettle();
 
-      expect(installer.downloaded, <String>['mPlayer-1.3.0-android-arm64-v8a.apk']);
+      expect(installer.downloaded, <String>['Kumo-1.3.0-android-arm64-v8a.apk']);
       expect(find.textContaining('installer is open'), findsOneWidget);
     });
 
@@ -408,7 +408,7 @@ void main() {
       await tester.tap(find.text('Update now'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Allow mPlayer to install apps'), findsOneWidget);
+      expect(find.textContaining('Allow Kumo to install apps'), findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);
     });
 

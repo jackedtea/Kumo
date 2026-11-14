@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -46,7 +46,7 @@ abstract final class RemoteProtocol {
   static const path = '/remote';
 
   /// Identifies this app's datagrams among whatever else shares the port.
-  static const app = 'mplayer-remote';
+  static const app = 'kumo-remote';
 
   // Message types.
   static const hello = 'hello';
@@ -220,14 +220,14 @@ abstract final class RemoteAuth {
   static List<int> accountKey(String serverId, String userId) =>
       sha256.convert(
         utf8.encode(
-          'mplayer-remote-account-v1|'
+          'kumo-remote-account-v1|'
           '${serverId.toLowerCase()}|${userId.toLowerCase()}',
         ),
       ).bytes;
 
   /// The key a PIN stands for while pairing.
   static List<int> pinKey(String pin) =>
-      sha256.convert(utf8.encode('mplayer-remote-pin-v1|$pin')).bytes;
+      sha256.convert(utf8.encode('kumo-remote-pin-v1|$pin')).bytes;
 
   /// What both sides keep after a successful pairing. Derived on each side
   /// rather than sent, so it never crosses the network.
@@ -238,7 +238,7 @@ abstract final class RemoteAuth {
   ) =>
       Hmac(sha256, pinKey(pin))
           .convert(<int>[
-            ...utf8.encode('mplayer-remote-secret-v1|'),
+            ...utf8.encode('kumo-remote-secret-v1|'),
             ...receiverNonce,
             ...phoneNonce,
           ])
@@ -253,7 +253,7 @@ abstract final class RemoteAuth {
     required String phoneId,
   }) {
     final transcript = BytesBuilder(copy: false)
-      ..add(utf8.encode('mplayer-remote-$purpose-v1|'))
+      ..add(utf8.encode('kumo-remote-$purpose-v1|'))
       ..add(receiverNonce)
       ..add(phoneNonce);
     // Length-prefixed, so "ab"+"c" and "a"+"bc" cannot sign the same bytes.

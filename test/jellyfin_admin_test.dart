@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,12 +9,12 @@ import 'dart:typed_data' show Uint8List;
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/servers/jellyfin_admin.dart';
-import 'package:mplayer/servers/jellyfin_admin_dto.dart';
-import 'package:mplayer/servers/jellyfin_source.dart' show ClientIdentity;
-import 'package:mplayer/servers/media_library_source.dart' show ServerException;
-import 'package:mplayer/servers/server_admin.dart';
-import 'package:mplayer/servers/server_profile.dart';
+import 'package:kumo/servers/jellyfin_admin.dart';
+import 'package:kumo/servers/jellyfin_admin_dto.dart';
+import 'package:kumo/servers/jellyfin_source.dart' show ClientIdentity;
+import 'package:kumo/servers/media_library_source.dart' show ServerException;
+import 'package:kumo/servers/server_admin.dart';
+import 'package:kumo/servers/server_profile.dart';
 
 /// Answers requests from a table instead of a network.
 class _FakeAdapter implements HttpClientAdapter {
@@ -138,7 +138,7 @@ void main() {
     test('a message carries a timeout', () async {
       final (admin, adapter) = adminWith((_) => _json(<String, dynamic>{}));
 
-      await admin.messageSession('s1', header: 'mPlayer', text: 'dinner');
+      await admin.messageSession('s1', header: 'Kumo', text: 'dinner');
 
       expect(adapter.requests.single.uri.path, '/Sessions/s1/Message');
       // Without one, some clients leave the message up until it is dismissed

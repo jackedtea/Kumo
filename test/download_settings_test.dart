@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -12,13 +12,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/downloads/download_engine.dart';
-import 'package:mplayer/downloads/download_models.dart';
-import 'package:mplayer/downloads/download_platform.dart';
-import 'package:mplayer/downloads/download_settings.dart';
-import 'package:mplayer/downloads/download_store.dart';
-import 'package:mplayer/downloads/downloads_controller.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/downloads/download_engine.dart';
+import 'package:kumo/downloads/download_models.dart';
+import 'package:kumo/downloads/download_platform.dart';
+import 'package:kumo/downloads/download_settings.dart';
+import 'package:kumo/downloads/download_store.dart';
+import 'package:kumo/downloads/downloads_controller.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 import 'fake_library_source.dart';
 import 'file_server.dart';
@@ -58,7 +58,7 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
-    root = await Directory.systemTemp.createTemp('mplayer_dlsettings_');
+    root = await Directory.systemTemp.createTemp('kumo_dlsettings_');
     store = DownloadStore(root);
     server = FileServer();
     await server.start();

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/app/system_ui.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/app/system_ui.dart';
 
 /// The window claim must not cost the navigator its route stack.
 ///
@@ -24,7 +24,7 @@ void main() {
   testWidgets('a claim does not tear the navigator down', (tester) async {
     final router = buildRouter();
     await tester.pumpWidget(
-      ProviderScope(child: MPlayerApp(router: router)),
+      ProviderScope(child: KumoApp(router: router)),
     );
     await tester.pumpAndSettle();
 
@@ -76,7 +76,7 @@ void main() {
     // the screen must not do.
     final router = buildRouter();
     await tester.pumpWidget(
-      ProviderScope(child: MPlayerApp(router: router)),
+      ProviderScope(child: KumoApp(router: router)),
     );
     await tester.pumpAndSettle();
 

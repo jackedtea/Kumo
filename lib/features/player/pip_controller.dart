@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -40,10 +40,10 @@ final pipProvider = NotifierProvider<PipController, PipState>(
   PipController.new,
 );
 
-/// See `android/app/src/main/kotlin/dev/icedtea/mplayer/PipChannel.kt`.
+/// See `android/app/src/main/kotlin/dev/icedtea/kumo/PipChannel.kt`.
 class PipController extends Notifier<PipState> {
-  static const _channel = MethodChannel('dev.icedtea.mplayer/pip');
-  static const _events = EventChannel('dev.icedtea.mplayer/pip-events');
+  static const _channel = MethodChannel('dev.icedtea.kumo/pip');
+  static const _events = EventChannel('dev.icedtea.kumo/pip-events');
 
   final _controls = StreamController<PipControl>.broadcast();
 

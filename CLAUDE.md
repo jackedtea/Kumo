@@ -1,10 +1,10 @@
-# mPlayer
+# Kumo
 
 Cross-platform **client** for a Jellyfin media server: browse a library,
 play it in the built-in player, cast it to a television, administer the
 server.
 
-**The player is intact. The local sources are gone.** mPlayer no longer opens
+**The player is intact. The local sources are gone.** Kumo no longer opens
 a file from the device, a SAF folder, the Android media index, an SMB share or
 a WebDAV mount — it plays what a server resolves and nothing else. Read
 "Current state" before anything else; several sections below describe code
@@ -14,7 +14,7 @@ that has been removed, and they say so where they do.
 
 ## Current state (2026-10-18)
 
-**mPlayer is a media-server client with a built-in player.**
+**Kumo is a media-server client with a built-in player.**
 
 Real, end to end: sign in to a Jellyfin server, browse its libraries,
 open a film or an episode and **play it in the app** — chapters, the track
@@ -161,7 +161,7 @@ Also open:
   dashboard (2026-11-10: the per-screen shortcuts beside it duplicated the
   dashboard and had already drifted from it). **About is the last row**, under the
   server section (2026-11-11); the page prints no version line of its own — the
-  hard-coded "mPlayer 1.0.0 · build 1" it had was never the real version.
+  hard-coded "Kumo 1.0.0 · build 1" it had was never the real version.
   A Quick Connect row approves another device's code
   (`POST /QuickConnect/Authorize`); its 401/403 means the feature is off, so it
   bypasses `_send`, which would read them as an expired session.
@@ -236,14 +236,14 @@ Also open:
   something in it has focus, only in traditional highlight mode — a tap
   leaves no ring behind.
 - **Television** is detected once before `runApp`
-  (`app/television.dart` → `MainActivity`'s `dev.icedtea.mplayer/device`
+  (`app/television.dart` → `MainActivity`'s `dev.icedtea.kumo/device`
   channel: leanback feature or TV UI mode) and lands in
   `isTelevisionProvider`, false everywhere else and in tests. It gets the rail
   at any width, the banner, larger tiles, and an autofocused Resume.
   The manifest declares leanback optional and adds `LEANBACK_LAUNCHER`;
   `android:banner` is `@drawable/tv_banner` (xhdpi 320×180, xxhdpi 480×270:
-  the icon's gradient, glyph and the name). Those PNGs are drawn by
-  `tool/make_tv_banner.py` (Pillow) — rerun it rather than editing them.
+  the icon's gradient, the cloud and the name). Those PNGs are drawn by
+  `tool/make_icons.py` — rerun it rather than editing them.
 - **Player keys** (`_handleKey`): while the player's own node is focused, or
   the chrome is hidden, arrows seek and Enter/Select plays-pauses (the first
   press over a hidden chrome only shows it); up/down move into the controls,
@@ -382,7 +382,7 @@ shared bits (`download_ui.dart`: `watchDownload`, `DownloadBadge`,
   navigation bar, since only the Home branch drops it.
 - **Android keeps the engine alive** with `DownloadService.kt`, a
   `dataSync` foreground service, through `DownloadChannel.kt`
-  (`dev.icedtea.mplayer/downloads`: `update` {title, text, percent} /
+  (`dev.icedtea.kumo/downloads`: `update` {title, text, percent} /
   `stop`). It decides nothing: `DownloadsController` pushes the running
   file's title and percent from `listenSelf`, only when they change, and
   stops the service when nothing runs. The text is localised with
@@ -614,7 +614,7 @@ the two lists and picks the renderer from `CastDevice.kind`.
 
 ## Phone remote (2026-11-02)
 
-mPlayer on a phone drives mPlayer on a desktop (Windows/Linux) or an Android
+Kumo on a phone drives Kumo on a desktop (Windows/Linux) or an Android
 TV on the same network. Casting hands a stream to someone else's player; this
 drives **our own** player on the other machine, so the receiver plays with its
 own sign-in, its own tracks and its own settings.
@@ -702,7 +702,7 @@ Android and iOS, which is the signal to do nothing.
   lock: exactly one process can bind it, so failing to bind *is* how a second
   launch knows it is the second. It then connects, which raises the running
   window, and exits. No lock file to go stale after a crash. It used to carry
-  the file path from `mPlayer video.mkv` across; nothing is read from the
+  the file path from `Kumo video.mkv` across; nothing is read from the
   socket now, and the connection itself is the whole message.
 - Size and position are restored before the window is shown, through
   `waitUntilReadyToShow`, or the user watches it appear at the default size and jump.
@@ -909,9 +909,9 @@ Four rules from that bundle that are easy to violate by accident:
 
 ## Identity
 
-- Dart package name: `mplayer` (lowercase — Dart forbids uppercase in package names)
-- Bundle ID: `dev.icedtea.mplayer`
-- Display name: **mPlayer** (set in AndroidManifest, Windows CMakeLists/Runner.rc/main.cpp, Linux CMakeLists/my_application.cc, iOS Info.plist, macOS AppInfo.xcconfig)
+- Dart package name: `kumo` (lowercase — Dart forbids uppercase in package names)
+- Bundle ID: `dev.icedtea.kumo`
+- Display name: **Kumo** (set in AndroidManifest, Windows CMakeLists/Runner.rc/main.cpp, Linux CMakeLists/my_application.cc, iOS Info.plist, macOS AppInfo.xcconfig)
 
 ## License
 
@@ -920,7 +920,7 @@ Four rules from that bundle that are easy to violate by accident:
 Every file under `lib/` (and new source files you add) carries a four-line header:
 
 ```dart
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -991,11 +991,15 @@ with the local sources rather than waiting for a schema that is not coming.
 
 ## Launcher icons
 
-`icon.svg` at the app root is the design source — the blue squircle with the white play
-triangle and the cast waves, kept in sync with `../logo/mplayer-logo/`. Regenerate with:
+The mark is a **white cloud (kumo, 雲) with a play triangle cut out of it**, on a sky
+gradient (`#6CB8FF` → `#3A62E0`). It is defined once, in `tool/make_icons.py`, which
+writes `icon.svg`, every PNG under `assets/icon/`, the Linux hicolor icons and the TV
+banner. Change the shapes there, never a PNG. Regenerate with:
 
 ```bash
+python tool/make_icons.py                # needs: pip install pillow resvg-py
 dart run flutter_launcher_icons          # Android, iOS, Windows, macOS
+dart run flutter_native_splash:create
 ```
 
 Four PNGs under `assets/icon/` feed it, and each exists for a reason:
@@ -1012,7 +1016,11 @@ Four PNGs under `assets/icon/` feed it, and each exists for a reason:
 Only `icon.png` and `icon_256.png` are bundled as Flutter assets — the rest are build-time
 sources.
 
-Linux is not covered by that tool — its icons live in `linux/packaging/icons/hicolor/` alongside the `.desktop` file, regenerated from `icon.svg` by hand when the artwork changes.
+Linux is not covered by flutter_launcher_icons — its icons live in `linux/packaging/icons/hicolor/` alongside the `.desktop` file, and `tool/make_icons.py` writes them.
+
+The Android status-bar icon (`res/drawable/ic_notification.xml`) is still the bare play
+triangle: a status-bar icon is masked to its alpha, and the cloud's cut-out is too fine to
+survive at 24dp.
 
 ## CI / release
 
@@ -1022,7 +1030,7 @@ job.**
 
 Desktop ships installers, not portable archives:
 
-- **Windows** — `windows/packaging/mplayer.iss`, compiled by Inno Setup's `ISCC` into
+- **Windows** — `windows/packaging/kumo.iss`, compiled by Inno Setup's `ISCC` into
   `<base>-windows-x64-setup.exe`. **Per-user only** (`PrivilegesRequired=lowest`,
   installs under `%LOCALAPPDATA%\Programs`), so the in-app updater can run it silently
   without UAC. The release `AppId` GUID must never change — it is what makes a new
@@ -1035,7 +1043,7 @@ Desktop ships installers, not portable archives:
 - **Linux** — `linux/packaging/build-deb.sh` into `<base>-linux-x64.deb`: bundle in
   `/opt/<package>`, launcher on PATH, `.desktop` and hicolor icons. `Depends` comes from
   `dpkg-shlibdeps`, not a hand-written list (libmpv's package follows its soname). A dev
-  build is package `mplayer-dev` with its own folder, command, `.desktop` and **icon
+  build is package `kumo-dev` with its own folder, command, `.desktop` and **icon
   names** — two packages owning one path is a dpkg error.
 - The asset suffixes are matched by `assetFor` in `core/update_check.dart`; renaming one
   side without the other leaves the desktop updater finding nothing.
@@ -1060,7 +1068,7 @@ another produced a duplicate YAML key where the later silently wins. The workflo
 clean now; a duplicate-key scan is the way to check after editing it.
 
 - **`main` is the only production branch**; every other ref builds as a dev channel —
-  application id gets `.canary` and the app names itself **mPlayer (Dev)** (so both
+  application id gets `.canary` and the app names itself **Kumo (Dev)** (so both
   installs coexist and are told apart in the launcher), version name and artifact name
   get `-dev-<short-sha>`, and the release is marked prerelease.
 - Signing comes from repository secrets: `KEYSTORE` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` /
@@ -1465,7 +1473,7 @@ WebView around a native player rather than anything to port, but it is the **ref
 what a Jellyfin client is expected to do**: media segments, trickplay, the device profile,
 the quality ladder. Media segments and trickplay above follow its behaviour deliberately,
 including its defaults — read `player/mediasegments/` and `player/ui/TrickplayHelper.kt`.
-Still missing from mPlayer next to it: offline downloads, a server switcher, and the
+Still missing from Kumo next to it: offline downloads, a server switcher, and the
 Android Auto media-browse tree.
 
 `../refs/plezy` (see its LICENSE) — a shipping Flutter client for Plex, Jellyfin and Emby

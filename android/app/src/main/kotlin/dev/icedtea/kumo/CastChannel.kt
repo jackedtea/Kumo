@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.net.Uri
 import com.google.android.gms.common.images.WebImage
@@ -36,8 +36,8 @@ class CastChannel(
 ) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/chromecast"
-        const val EVENTS = "dev.icedtea.mplayer/chromecast-events"
+        const val CHANNEL = "dev.icedtea.kumo/chromecast"
+        const val EVENTS = "dev.icedtea.kumo/chromecast-events"
         private const val TAG = "CastChannel"
     }
 

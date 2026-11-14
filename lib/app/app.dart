@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -25,13 +25,13 @@ import 'theme.dart';
 /// standing up the whole shell.
 ///
 /// It used to do rather more. A file handed over by the system — "open with
-/// mPlayer", a drop on the window, a second launch carrying a path — was
+/// Kumo", a drop on the window, a second launch carrying a path — was
 /// resolved here and pushed onto the player, because it could arrive whichever
 /// screen was showing. None of that survives the device library going: there
 /// is no local source to resolve a path against, so the intent filters, the
 /// drop target and the single-instance handoff are gone with it.
-class MPlayerApp extends ConsumerStatefulWidget {
-  const MPlayerApp({super.key, this.router, this.themeMode});
+class KumoApp extends ConsumerStatefulWidget {
+  const KumoApp({super.key, this.router, this.themeMode});
 
   final GoRouter? router;
 
@@ -40,10 +40,10 @@ class MPlayerApp extends ConsumerStatefulWidget {
   final ThemeMode? themeMode;
 
   @override
-  ConsumerState<MPlayerApp> createState() => _MPlayerAppState();
+  ConsumerState<KumoApp> createState() => _KumoAppState();
 }
 
-class _MPlayerAppState extends ConsumerState<MPlayerApp> {
+class _KumoAppState extends ConsumerState<KumoApp> {
   late final GoRouter _router = widget.router ?? buildRouter();
 
   @override
@@ -70,7 +70,7 @@ class _MPlayerAppState extends ConsumerState<MPlayerApp> {
     ColorScheme? dynamicDark,
   }) {
     return MaterialApp.router(
-      title: 'mPlayer',
+      title: 'Kumo',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(
         Brightness.light,

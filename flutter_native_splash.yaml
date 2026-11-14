@@ -2,9 +2,8 @@
 #
 #     dart run flutter_native_splash:create
 #
-# The source is `mplayer-dark` from ../logo/mplayer-logo — the design bundle
-# names that variant as the one for the splash, and it is the only variant
-# with a background of its own rather than one borrowed from the page.
+# The source is assets/icon/splash.png, the cloud alone on transparent,
+# drawn by tool/make_icons.py; the navy below is its background.
 #
 # The same navy in light mode as in dark, deliberately. The splash is on
 # screen for the moment before the app has decided anything, and a white flash
@@ -29,10 +28,8 @@ flutter_native_splash:
 
   android_12:
     # Android 12 masks the splash icon to a circle covering the middle two
-    # thirds. The artwork's rounded corners fall outside that and are clipped
-    # — invisibly, because the icon background below is the same navy. The
-    # marks themselves sit well inside it: the furthest, the outer cast wave,
-    # reaches about 86% of the mask's radius.
+    # thirds. The cloud is drawn at 62% of the 512 grid, so its widest point
+    # stays well inside that circle.
     image: assets/icon/splash.png
     image_dark: assets/icon/splash.png
     color: "#0C2A4A"

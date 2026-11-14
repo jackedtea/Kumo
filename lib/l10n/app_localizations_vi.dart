@@ -9,7 +9,7 @@ class AppLocalizationsVi extends AppLocalizations {
   AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
-  String get appTitle => 'mPlayer';
+  String get appTitle => 'Kumo';
 
   @override
   String get navStorage => 'Tệp';
@@ -152,7 +152,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get noServerBody =>
-      'mPlayer phát nội dung từ máy chủ media. Thêm một máy chủ Jellyfin để duyệt thư viện, đồng bộ tiến độ xem giữa các thiết bị và truy cập từ bất cứ đâu.';
+      'Kumo phát nội dung từ máy chủ media. Thêm một máy chủ Jellyfin để duyệt thư viện, đồng bộ tiến độ xem giữa các thiết bị và truy cập từ bất cứ đâu.';
 
   @override
   String get addJellyfinServer => 'Thêm máy chủ Jellyfin';
@@ -162,7 +162,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get otherServersNotice =>
-      'mPlayer dùng với máy chủ Jellyfin. Emby và Plex không được hỗ trợ.';
+      'Kumo dùng với máy chủ Jellyfin. Emby và Plex không được hỗ trợ.';
 
   @override
   String get previewConnectedServer => 'Xem thử máy chủ đã kết nối';
@@ -2022,11 +2022,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get updateCheckEveryLaunchSub => 'Thay vì mỗi ngày một lần';
 
   @override
-  String get updateOfferBody => 'Đã có phiên bản mPlayer mới để cài đặt.';
+  String get updateOfferBody => 'Đã có phiên bản Kumo mới để cài đặt.';
 
   @override
   String updateOfferBodySized(String size) {
-    return 'Đã có phiên bản mPlayer mới để cài đặt ($size MB).';
+    return 'Đã có phiên bản Kumo mới để cài đặt ($size MB).';
   }
 
   @override
@@ -2045,7 +2045,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get updateDownloading => 'Đang tải bản cập nhật…';
 
   @override
-  String get updateInstalling => 'Đang cài đặt — mPlayer sẽ khởi động lại.';
+  String get updateInstalling => 'Đang cài đặt — Kumo sẽ khởi động lại.';
 
   @override
   String get updateInstallerOpened =>
@@ -2053,11 +2053,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get updateNeedsPermission =>
-      'Hãy cho phép mPlayer cài ứng dụng trong trang cài đặt vừa mở, rồi quay lại và thử lại.';
+      'Hãy cho phép Kumo cài ứng dụng trong trang cài đặt vừa mở, rồi quay lại và thử lại.';
 
   @override
   String get updateNotWritable =>
-      'mPlayer không ghi được vào thư mục cài đặt nên không tự cập nhật được. Hãy tải bản mới từ trang release.';
+      'Kumo không ghi được vào thư mục cài đặt nên không tự cập nhật được. Hãy tải bản mới từ trang release.';
 
   @override
   String get updateFailed =>
@@ -2090,7 +2090,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get notAffiliated =>
-      'mPlayer không liên kết, không được bảo trợ hay tài trợ bởi dự án Jellyfin.';
+      'Kumo không liên kết, không được bảo trợ hay tài trợ bởi dự án Jellyfin.';
 
   @override
   String get subtitles => 'Phụ đề';
@@ -2189,14 +2189,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get remoteSettingsSub =>
-      'Dùng điện thoại này điều khiển mPlayer trên máy tính hoặc TV';
+      'Dùng điện thoại này điều khiển Kumo trên máy tính hoặc TV';
 
   @override
-  String get remoteSearching => 'Đang tìm mPlayer trong mạng này…';
+  String get remoteSearching => 'Đang tìm Kumo trong mạng này…';
 
   @override
   String get remoteNoDevices =>
-      'Chưa thấy máy tính hay TV nào. Hãy mở mPlayer trên thiết bị đó và kiểm tra hai máy cùng một mạng.';
+      'Chưa thấy máy tính hay TV nào. Hãy mở Kumo trên thiết bị đó và kiểm tra hai máy cùng một mạng.';
 
   @override
   String get remoteConnectByAddress => 'Kết nối bằng địa chỉ';
@@ -2277,7 +2277,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String remoteVersion(String name) {
-    return '$name chạy phiên bản mPlayer khác. Hãy cập nhật cả hai.';
+    return '$name chạy phiên bản Kumo khác. Hãy cập nhật cả hai.';
   }
 
   @override
@@ -2290,7 +2290,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get remoteReceiverSettingSub =>
-      'mPlayer trên điện thoại cùng mạng có thể điều khiển việc phát ở đây. Điện thoại mới phải nhập mã hiện trên màn hình.';
+      'Kumo trên điện thoại cùng mạng có thể điều khiển việc phát ở đây. Điện thoại mới phải nhập mã hiện trên màn hình.';
 
   @override
   String get remoteForgetPhones => 'Quên các điện thoại đã ghép nối';
@@ -2303,7 +2303,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String remotePairingTitle(String name) {
-    return '$name muốn điều khiển mPlayer';
+    return '$name muốn điều khiển Kumo';
   }
 
   @override
@@ -2613,7 +2613,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyNoTelemetryBody =>
-      'Không có SDK bên thứ ba nào thu thập gì. mPlayer chỉ liên lạc với máy chủ và chia sẻ mà bạn tự cấu hình, ngoài ra không gì khác.';
+      'Không có SDK bên thứ ba nào thu thập gì. Kumo chỉ liên lạc với máy chủ và chia sẻ mà bạn tự cấu hình, ngoài ra không gì khác.';
 
   @override
   String get privacyLocal => 'Thư viện của bạn nằm lại trên máy';
@@ -2634,7 +2634,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyUpdatesBody =>
-      'Khi bật \"Tự động kiểm tra cập nhật\", mPlayer hỏi API releases của GitHub mỗi ngày một lần xem có bản mới không — một yêu cầu ẩn danh, không kèm mã định danh nào. Tắt trong Cài đặt → Chung thì chỉ kiểm tra khi bạn bấm \"Kiểm tra cập nhật\". Bản cập nhật được tải từ chính trang release đó.';
+      'Khi bật \"Tự động kiểm tra cập nhật\", Kumo hỏi API releases của GitHub mỗi ngày một lần xem có bản mới không — một yêu cầu ẩn danh, không kèm mã định danh nào. Tắt trong Cài đặt → Chung thì chỉ kiểm tra khi bạn bấm \"Kiểm tra cập nhật\". Bản cập nhật được tải từ chính trang release đó.';
 
   @override
   String get privacyCasting =>
@@ -2646,7 +2646,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyFooter =>
-      'mPlayer là phần mềm tự do theo GPL-3.0-or-later. Bạn có thể đọc mã nguồn và tự kiểm chứng mọi điều trên trang này.';
+      'Kumo là phần mềm tự do theo GPL-3.0-or-later. Bạn có thể đọc mã nguồn và tự kiểm chứng mọi điều trên trang này.';
 
   @override
   String get noChaptersInFile => 'Tệp này không có chương';

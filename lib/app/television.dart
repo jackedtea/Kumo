@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -21,7 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<bool> detectTelevision() async {
   if (!Platform.isAndroid) return false;
   try {
-    return await const MethodChannel('dev.icedtea.mplayer/device')
+    return await const MethodChannel('dev.icedtea.kumo/device')
             .invokeMethod<bool>('isTelevision') ??
         false;
   } on PlatformException {

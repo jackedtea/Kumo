@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'mPlayer';
+  String get appTitle => 'Kumo';
 
   @override
   String get navStorage => 'Files';
@@ -152,7 +152,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noServerBody =>
-      'mPlayer plays what a media server gives it. Add a Jellyfin server to browse your library, keep your watch state in step across devices, and reach it from anywhere.';
+      'Kumo plays what a media server gives it. Add a Jellyfin server to browse your library, keep your watch state in step across devices, and reach it from anywhere.';
 
   @override
   String get addJellyfinServer => 'Add Jellyfin server';
@@ -162,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otherServersNotice =>
-      'mPlayer works with Jellyfin servers. Emby and Plex are not supported.';
+      'Kumo works with Jellyfin servers. Emby and Plex are not supported.';
 
   @override
   String get previewConnectedServer => 'Preview a connected server';
@@ -2037,12 +2037,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateCheckEveryLaunchSub => 'Instead of once a day';
 
   @override
-  String get updateOfferBody =>
-      'A newer version of mPlayer is ready to install.';
+  String get updateOfferBody => 'A newer version of Kumo is ready to install.';
 
   @override
   String updateOfferBodySized(String size) {
-    return 'A newer version of mPlayer is ready to install ($size MB).';
+    return 'A newer version of Kumo is ready to install ($size MB).';
   }
 
   @override
@@ -2061,7 +2060,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateDownloading => 'Downloading the update…';
 
   @override
-  String get updateInstalling => 'Installing — mPlayer will restart.';
+  String get updateInstalling => 'Installing — Kumo will restart.';
 
   @override
   String get updateInstallerOpened =>
@@ -2069,11 +2068,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateNeedsPermission =>
-      'Allow mPlayer to install apps in the settings page that just opened, then come back and try again.';
+      'Allow Kumo to install apps in the settings page that just opened, then come back and try again.';
 
   @override
   String get updateNotWritable =>
-      'mPlayer cannot write to the folder it is installed in, so it cannot update itself. Download the new version from the release page instead.';
+      'Kumo cannot write to the folder it is installed in, so it cannot update itself. Download the new version from the release page instead.';
 
   @override
   String get updateFailed =>
@@ -2106,7 +2105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notAffiliated =>
-      'mPlayer is not affiliated with, endorsed by, or sponsored by the Jellyfin project.';
+      'Kumo is not affiliated with, endorsed by, or sponsored by the Jellyfin project.';
 
   @override
   String get subtitles => 'Subtitles';
@@ -2205,14 +2204,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remoteSettingsSub =>
-      'Control mPlayer on a computer or TV from this phone';
+      'Control Kumo on a computer or TV from this phone';
 
   @override
-  String get remoteSearching => 'Looking for mPlayer on this network…';
+  String get remoteSearching => 'Looking for Kumo on this network…';
 
   @override
   String get remoteNoDevices =>
-      'No computer or TV found yet. Open mPlayer on it and make sure both are on the same network.';
+      'No computer or TV found yet. Open Kumo on it and make sure both are on the same network.';
 
   @override
   String get remoteConnectByAddress => 'Connect by address';
@@ -2293,7 +2292,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String remoteVersion(String name) {
-    return '$name runs a different version of mPlayer. Update both.';
+    return '$name runs a different version of Kumo. Update both.';
   }
 
   @override
@@ -2306,7 +2305,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remoteReceiverSettingSub =>
-      'mPlayer on a phone on this network can control playback here. A new phone has to enter the code shown on screen.';
+      'Kumo on a phone on this network can control playback here. A new phone has to enter the code shown on screen.';
 
   @override
   String get remoteForgetPhones => 'Forget paired phones';
@@ -2319,7 +2318,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String remotePairingTitle(String name) {
-    return '$name wants to control mPlayer';
+    return '$name wants to control Kumo';
   }
 
   @override
@@ -2630,7 +2629,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyNoTelemetryBody =>
-      'There is no third-party SDK collecting anything. mPlayer contacts the servers and shares you configure, and nothing else.';
+      'There is no third-party SDK collecting anything. Kumo contacts the servers and shares you configure, and nothing else.';
 
   @override
   String get privacyLocal => 'Your library stays on your device';
@@ -2651,7 +2650,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyUpdatesBody =>
-      'While \"Check for updates automatically\" is on, mPlayer asks the GitHub releases API once a day whether a newer build exists — one anonymous request, with no identifier. Turn it off in Settings → General and checks happen only when you press \"Check for updates\". Updates download from the same release page.';
+      'While \"Check for updates automatically\" is on, Kumo asks the GitHub releases API once a day whether a newer build exists — one anonymous request, with no identifier. Turn it off in Settings → General and checks happen only when you press \"Check for updates\". Updates download from the same release page.';
 
   @override
   String get privacyCasting => 'Casting opens a server on your network';
@@ -2662,7 +2661,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyFooter =>
-      'mPlayer is free software under the GPL-3.0-or-later. You can read the source and check every claim on this page for yourself.';
+      'Kumo is free software under the GPL-3.0-or-later. You can read the source and check every claim on this page for yourself.';
 
   @override
   String get noChaptersInFile => 'This file has no chapters';

@@ -1,15 +1,15 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/cast/cast_device.dart';
-import 'package:mplayer/cast/chromecast.dart';
-import 'package:mplayer/cast/ssdp.dart';
-import 'package:mplayer/cast/upnp.dart';
-import 'package:mplayer/features/cast/cast_controller.dart';
+import 'package:kumo/cast/cast_device.dart';
+import 'package:kumo/cast/chromecast.dart';
+import 'package:kumo/cast/ssdp.dart';
+import 'package:kumo/cast/upnp.dart';
+import 'package:kumo/features/cast/cast_controller.dart';
 
 /// A real Samsung reply, reordered and re-cased the way vendors vary.
 const _searchReply = 'HTTP/1.1 200 OK\r\n'

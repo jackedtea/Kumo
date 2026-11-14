@@ -1,9 +1,9 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
-/// Where this copy of mPlayer was installed from, and so who updates it.
+/// Where this copy of Kumo was installed from, and so who updates it.
 ///
 /// The in-app updater replaces the app with the build GitHub publishes. That
 /// is right for a copy that came from GitHub — an APK opened by hand, the
@@ -35,7 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @immutable
 class InstallSource {
-  /// Installed by hand from a GitHub release; mPlayer updates itself.
+  /// Installed by hand from a GitHub release; Kumo updates itself.
   const InstallSource.direct()
       : store = null,
         storeUri = null;
@@ -140,13 +140,13 @@ Future<InstallSource> detectInstallSource() async {
       return const InstallSource.store('App Store');
     }
   } catch (e) {
-    debugPrint('Could not tell where mPlayer was installed from: $e');
+    debugPrint('Could not tell where Kumo was installed from: $e');
   }
   return const InstallSource.direct();
 }
 
 Future<InstallSource> _android() async {
-  const channel = MethodChannel('dev.icedtea.mplayer/update');
+  const channel = MethodChannel('dev.icedtea.kumo/update');
   final answer =
       await channel.invokeMapMethod<String, String?>('installSource');
   return androidInstallSource(

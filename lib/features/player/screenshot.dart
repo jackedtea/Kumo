@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -39,7 +39,7 @@ Future<Directory> screenshotDirectory() async {
 
   base ??= await getApplicationDocumentsDirectory();
 
-  final dir = Directory(p.join(base.path, 'mPlayer', 'Screenshots'));
+  final dir = Directory(p.join(base.path, 'Kumo', 'Screenshots'));
   await dir.create(recursive: true);
   return dir;
 }

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -20,7 +20,7 @@ class ClientIdentity {
   const ClientIdentity({
     required this.deviceId,
     required this.deviceName,
-    this.client = 'mPlayer',
+    this.client = 'Kumo',
     this.version = '1.0.0',
   });
 
@@ -680,7 +680,7 @@ class JellyfinSource implements MediaLibrarySource {
 
   // ---------------------------------------------------------- display
 
-  static const _groupCollectionsPref = 'mplayerGroupCollections';
+  static const _groupCollectionsPref = 'kumoGroupCollections';
 
   @override
   Future<bool> groupsCollections(String viewId) async {
@@ -1211,7 +1211,7 @@ class JellyfinAuth {
     // why — rather than signing in and failing on the first library.
     if (isEmbyPublicInfo(data)) {
       throw const ServerException(
-        'This is an Emby server. mPlayer works with Jellyfin only.',
+        'This is an Emby server. Kumo works with Jellyfin only.',
       );
     }
 

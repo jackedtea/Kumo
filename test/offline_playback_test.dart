@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -11,18 +11,18 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/downloads/download_engine.dart';
-import 'package:mplayer/downloads/download_models.dart';
-import 'package:mplayer/downloads/download_store.dart';
-import 'package:mplayer/downloads/downloads_controller.dart';
-import 'package:mplayer/downloads/offline_media_source.dart';
-import 'package:mplayer/downloads/offline_meta.dart';
-import 'package:mplayer/features/servers/servers_empty_page.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
-import 'package:mplayer/servers/jellyfin_media_source.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/sources/media_source.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/downloads/download_engine.dart';
+import 'package:kumo/downloads/download_models.dart';
+import 'package:kumo/downloads/download_store.dart';
+import 'package:kumo/downloads/downloads_controller.dart';
+import 'package:kumo/downloads/offline_media_source.dart';
+import 'package:kumo/downloads/offline_meta.dart';
+import 'package:kumo/features/servers/servers_empty_page.dart';
+import 'package:kumo/l10n/app_localizations.dart';
+import 'package:kumo/servers/jellyfin_media_source.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/sources/media_source.dart';
 
 import 'fake_library_source.dart';
 
@@ -79,7 +79,7 @@ void main() {
   late DownloadStore store;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('mplayer_offline_');
+    root = await Directory.systemTemp.createTemp('kumo_offline_');
     store = DownloadStore(root);
   });
 

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -76,7 +76,7 @@ String authorizationHeader({
   // version, so each falls back to something non-empty rather
   // than being sent blank.
   final resolvedClient = _meaningful(client).isEmpty
-      ? 'mPlayer'
+      ? 'Kumo'
       : _meaningful(client);
   final resolvedDevice =
       _meaningful(device).isEmpty ? resolvedClient : _meaningful(device);

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.icedtea.mplayer"
+    namespace = "dev.icedtea.kumo"
     // Pinned ahead of flutter.compileSdkVersion (36 on Flutter 3.44):
     // flutter_secure_storage 11.x requires compiling against SDK 37.
     compileSdk = 37
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "dev.icedtea.mplayer"
+        applicationId = "dev.icedtea.kumo"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -46,7 +46,7 @@ android {
         // environment variable: "this build has its own application id" and
         // "this build needs its own name" are the same fact, and splitting
         // them is how they end up disagreeing.
-        val appName = if (appIdSuffix == null) "mPlayer" else "mPlayer (Dev)"
+        val appName = if (appIdSuffix == null) "Kumo" else "Kumo (Dev)"
 
         // Both, because they are read in different places: the launcher icon
         // uses the application's label, while the "Open with" chooser shows

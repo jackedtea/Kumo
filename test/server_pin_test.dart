@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -10,13 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/features/home/home_page.dart';
-import 'package:mplayer/features/servers/pin_lock.dart';
-import 'package:mplayer/features/servers/servers_list_page.dart';
-import 'package:mplayer/servers/server_pin.dart';
-import 'package:mplayer/servers/server_profile.dart';
-import 'package:mplayer/servers/server_registry.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/features/home/home_page.dart';
+import 'package:kumo/features/servers/pin_lock.dart';
+import 'package:kumo/features/servers/servers_list_page.dart';
+import 'package:kumo/servers/server_pin.dart';
+import 'package:kumo/servers/server_profile.dart';
+import 'package:kumo/servers/server_registry.dart';
 
 /// Signed in to one server, with the PIN held in memory rather than in a
 /// keychain and checked by the real hash.
@@ -63,7 +63,7 @@ Future<void> _launch(WidgetTester tester, _PinRegistry registry) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [serverRegistryProvider.overrideWith(() => registry)],
-      child: const MPlayerApp(),
+      child: const KumoApp(),
     ),
   );
   await tester.pumpAndSettle();

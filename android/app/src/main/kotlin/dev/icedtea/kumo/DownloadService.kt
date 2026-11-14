@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -28,8 +28,8 @@ import android.util.Log
 class DownloadService : Service() {
 
     companion object {
-        const val ACTION_UPDATE = "dev.icedtea.mplayer.download.UPDATE"
-        const val ACTION_STOP = "dev.icedtea.mplayer.download.STOP"
+        const val ACTION_UPDATE = "dev.icedtea.kumo.download.UPDATE"
+        const val ACTION_STOP = "dev.icedtea.kumo.download.STOP"
 
         const val EXTRA_TITLE = "title"
         const val EXTRA_TEXT = "text"
@@ -57,7 +57,7 @@ class DownloadService : Service() {
         }
 
         val notification = notification(
-            title = intent?.getStringExtra(EXTRA_TITLE) ?: "mPlayer",
+            title = intent?.getStringExtra(EXTRA_TITLE) ?: "Kumo",
             text = intent?.getStringExtra(EXTRA_TEXT) ?: "",
             percent = intent?.getIntExtra(EXTRA_PERCENT, -1) ?: -1,
         )

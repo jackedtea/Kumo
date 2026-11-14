@@ -9,7 +9,7 @@
 # data/ beside itself — with a launcher on PATH, the .desktop entry and the
 # hicolor icons in their usual places.
 #
-# A dev build is a separate package (`mplayer-dev`) with its own folder,
+# A dev build is a separate package (`kumo-dev`) with its own folder,
 # command, .desktop entry and icon names, so it installs beside a release
 # build rather than over it, as the `.canary` application id does on
 # Android. The icon names matter as much as the rest: two packages shipping
@@ -27,16 +27,16 @@ OUTPUT="$3"
 
 BUNDLE="build/linux/x64/release/bundle"
 PACKAGING="linux/packaging"
-BINARY="mPlayer"
+BINARY="Kumo"
 
 if [ "$CHANNEL" = "dev" ]; then
-  PACKAGE="mplayer-dev"
-  APP_ID="dev.icedtea.mplayer.canary"
-  NAME="mPlayer (Dev)"
+  PACKAGE="kumo-dev"
+  APP_ID="dev.icedtea.kumo.canary"
+  NAME="Kumo (Dev)"
 else
-  PACKAGE="mplayer"
-  APP_ID="dev.icedtea.mplayer"
-  NAME="mPlayer"
+  PACKAGE="kumo"
+  APP_ID="dev.icedtea.kumo"
+  NAME="Kumo"
 fi
 
 # A hyphen in a Debian version starts the revision, so the app's own
@@ -55,7 +55,7 @@ install -d "$ROOT/opt/$PACKAGE" "$ROOT/usr/bin" \
 cp -a "$BUNDLE/." "$ROOT/opt/$PACKAGE/"
 ln -s "/opt/$PACKAGE/$BINARY" "$ROOT/usr/bin/$PACKAGE"
 
-for SRC in "$PACKAGING"/icons/hicolor/*/apps/dev.icedtea.mplayer.*; do
+for SRC in "$PACKAGING"/icons/hicolor/*/apps/dev.icedtea.kumo.*; do
   SIZE="$(basename "$(dirname "$(dirname "$SRC")")")"
   EXT="${SRC##*.}"
   install -D -m 644 "$SRC" \
@@ -67,7 +67,7 @@ done
 sed -e "s|^Name=.*|Name=$NAME|" \
     -e "s|^Exec=.*|Exec=$PACKAGE %U|" \
     -e "s|^Icon=.*|Icon=$APP_ID|" \
-    "$PACKAGING/dev.icedtea.mplayer.desktop" \
+    "$PACKAGING/dev.icedtea.kumo.desktop" \
   > "$ROOT/usr/share/applications/$APP_ID.desktop"
 chmod 644 "$ROOT/usr/share/applications/$APP_ID.desktop"
 

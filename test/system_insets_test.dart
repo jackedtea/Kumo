@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/app/system_ui.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/app/system_ui.dart';
 
 /// Every screen has to keep its content clear of the system bars.
 ///
@@ -44,7 +44,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     final router = buildRouter();
-    await tester.pumpWidget(ProviderScope(child: MPlayerApp(router: router)));
+    await tester.pumpWidget(ProviderScope(child: KumoApp(router: router)));
     await tester.pumpAndSettle();
     return router;
   }
@@ -202,7 +202,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        ProviderScope(child: MPlayerApp(router: buildRouter())),
+        ProviderScope(child: KumoApp(router: buildRouter())),
       );
       await tester.pumpAndSettle();
     }

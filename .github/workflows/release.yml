@@ -134,14 +134,14 @@ jobs:
 
           if [ "$IS_DEV" = "true" ]; then
             TAG="dev-${SHORT_SHA}"
-            RELEASE_NAME="mPlayer ${VERSION}-dev.${SHORT_SHA}"
-            ARTIFACT_BASE="mPlayer-${VERSION}-dev-${SHORT_SHA}"
+            RELEASE_NAME="Kumo ${VERSION}-dev.${SHORT_SHA}"
+            ARTIFACT_BASE="Kumo-${VERSION}-dev-${SHORT_SHA}"
             APP_ID_SUFFIX=".canary"
             VERSION_NAME_SUFFIX="-dev-${SHORT_SHA}"
           else
             TAG="v${VERSION}"
-            RELEASE_NAME="mPlayer ${VERSION}"
-            ARTIFACT_BASE="mPlayer-${VERSION}"
+            RELEASE_NAME="Kumo ${VERSION}"
+            ARTIFACT_BASE="Kumo-${VERSION}"
             APP_ID_SUFFIX=""
             VERSION_NAME_SUFFIX=""
           fi
@@ -482,7 +482,7 @@ jobs:
             "/DOutputBase=$env:OUTPUT_BASE"
           )
           if ($env:IS_DEV -eq 'true') { $defines += '/DDev' }
-          & $iscc @defines windows\packaging\mplayer.iss
+          & $iscc @defines windows\packaging\kumo.iss
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
       - uses: actions/upload-artifact@v7
@@ -616,7 +616,7 @@ jobs:
             echo "**Commit** \`${{ needs.prepare.outputs.short_sha }}\` on \`${{ needs.prepare.outputs.branch }}\`"
             echo ""
             if [ "${{ needs.prepare.outputs.is_dev }}" = "true" ]; then
-              echo "Dev build — application id ends in \`.canary\` and the app calls itself **mPlayer (Dev)**, so it installs and reads alongside a release build."
+              echo "Dev build — application id ends in \`.canary\` and the app calls itself **Kumo (Dev)**, so it installs and reads alongside a release build."
             fi
             if [ "${{ needs.android.outputs.signed }}" != "true" ]; then
               echo ""
@@ -773,7 +773,7 @@ jobs:
                parse_mode: "HTML",
                disable_web_page_preview: true,
                text: ("<b>" + $status + "</b>\n"
-                 + "<b>mPlayer</b> " + $name + "\n"
+                 + "<b>Kumo</b> " + $name + "\n"
                  + "Channel: <code>" + $channel + "</code>\n"
                  + "Branch: <code>" + $branch + "</code> · Commit: <code>" + $sha + "</code>"
                  + (if $warn == "" then "" else "\n" + $warn end)

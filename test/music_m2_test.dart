@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -11,19 +11,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/cast/cast_renderer.dart';
-import 'package:mplayer/cast/upnp.dart';
-import 'package:mplayer/core/models/media_models.dart';
-import 'package:mplayer/features/cast/cast_controller.dart';
-import 'package:mplayer/features/music/audio_session.dart';
-import 'package:mplayer/features/player/playback_controller.dart';
-import 'package:mplayer/features/player/playback_state.dart';
-import 'package:mplayer/features/servers/server_library.dart';
-import 'package:mplayer/remote/remote_protocol.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/sources/media_source.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/cast/cast_renderer.dart';
+import 'package:kumo/cast/upnp.dart';
+import 'package:kumo/core/models/media_models.dart';
+import 'package:kumo/features/cast/cast_controller.dart';
+import 'package:kumo/features/music/audio_session.dart';
+import 'package:kumo/features/player/playback_controller.dart';
+import 'package:kumo/features/player/playback_state.dart';
+import 'package:kumo/features/servers/server_library.dart';
+import 'package:kumo/remote/remote_protocol.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/sources/media_source.dart';
 
 MediaRef _ref(String id) => MediaRef(sourceId: 'p1', itemId: id, title: id);
 
@@ -114,7 +114,7 @@ Future<(GoRouter, ProviderContainer)> _pump(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();

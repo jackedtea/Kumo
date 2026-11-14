@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -8,11 +8,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/features/player/playback_controller.dart';
-import 'package:mplayer/features/player/playback_state.dart';
-import 'package:mplayer/features/player/track_dialog.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/features/player/playback_controller.dart';
+import 'package:kumo/features/player/playback_state.dart';
+import 'package:kumo/features/player/track_dialog.dart';
+import 'package:kumo/l10n/app_localizations.dart';
 
 const _english = MediaTrack(
   id: '1',

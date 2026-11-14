@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.Manifest
 import android.app.Activity
@@ -22,7 +22,7 @@ class DownloadChannel(
 ) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/downloads"
+        const val CHANNEL = "dev.icedtea.kumo/downloads"
 
         private const val NOTIFICATION_PERMISSION_REQUEST = 0x4E44
     }
@@ -51,7 +51,7 @@ class DownloadChannel(
     private fun update(arguments: Map<*, *>?) {
         val intent = Intent(activity, DownloadService::class.java)
             .setAction(DownloadService.ACTION_UPDATE)
-            .putExtra(DownloadService.EXTRA_TITLE, arguments?.get("title") as? String ?: "mPlayer")
+            .putExtra(DownloadService.EXTRA_TITLE, arguments?.get("title") as? String ?: "Kumo")
             .putExtra(DownloadService.EXTRA_TEXT, arguments?.get("text") as? String ?: "")
             .putExtra(
                 DownloadService.EXTRA_PERCENT,

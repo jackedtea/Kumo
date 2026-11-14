@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -8,11 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/features/player/more_menu.dart';
-import 'package:mplayer/features/player/stable_insets.dart';
-import 'package:mplayer/features/player/track_sheet.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/features/player/more_menu.dart';
+import 'package:kumo/features/player/stable_insets.dart';
+import 'package:kumo/features/player/track_sheet.dart';
+import 'package:kumo/l10n/app_localizations.dart';
 
 /// A phone on its side: status bar along the top, navigation bar down the
 /// right — or neither, in sticky immersion.

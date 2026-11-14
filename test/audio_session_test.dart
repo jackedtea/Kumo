@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,16 +9,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/core/models/media_models.dart';
-import 'package:mplayer/features/music/audio_session.dart';
-import 'package:mplayer/features/music/mini_player.dart';
-import 'package:mplayer/features/music/now_playing_page.dart';
-import 'package:mplayer/features/player/playback_controller.dart';
-import 'package:mplayer/features/player/playback_state.dart';
-import 'package:mplayer/features/player/player_page.dart';
-import 'package:mplayer/sources/media_source.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/core/models/media_models.dart';
+import 'package:kumo/features/music/audio_session.dart';
+import 'package:kumo/features/music/mini_player.dart';
+import 'package:kumo/features/music/now_playing_page.dart';
+import 'package:kumo/features/player/playback_controller.dart';
+import 'package:kumo/features/player/playback_state.dart';
+import 'package:kumo/features/player/player_page.dart';
+import 'package:kumo/sources/media_source.dart';
 
 /// The controller with no decoder behind it: it keeps the state a real one
 /// would, and writes down what it was asked.
@@ -106,7 +106,7 @@ Future<(GoRouter, _FakePlayback, ProviderContainer)> _pump(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();

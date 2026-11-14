@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -11,15 +11,15 @@ import 'package:flutter/services.dart';
 
 /// The device's own media volume, for "Sync volume with device".
 ///
-/// See `android/app/src/main/kotlin/dev/icedtea/mplayer/VolumeChannel.kt`.
+/// See `android/app/src/main/kotlin/dev/icedtea/kumo/VolumeChannel.kt`.
 /// Android only: a desktop's master volume belongs to the whole machine, and
 /// a player that moves it is a player that makes the notification chime
 /// deafening.
 class DeviceVolume {
   const DeviceVolume._();
 
-  static const _channel = MethodChannel('dev.icedtea.mplayer/volume');
-  static const _events = EventChannel('dev.icedtea.mplayer/volume-events');
+  static const _channel = MethodChannel('dev.icedtea.kumo/volume');
+  static const _events = EventChannel('dev.icedtea.kumo/volume-events');
 
   static bool get available => Platform.isAndroid;
 

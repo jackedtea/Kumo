@@ -25,22 +25,22 @@
   #define OutputDir "..\..\build\installer"
 #endif
 #ifndef OutputBase
-  #define OutputBase "mPlayer-setup"
+  #define OutputBase "Kumo-setup"
 #endif
 
 #ifdef Dev
-  #define AppName "mPlayer (Dev)"
+  #define AppName "Kumo (Dev)"
   #define AppIdGuid "{{9AD90D96-80D4-4A0E-A18D-3E2B89501F3F}"
-  #define DirName "mPlayer Dev"
+  #define DirName "Kumo Dev"
 #else
-  #define AppName "mPlayer"
+  #define AppName "Kumo"
   ; Never change this: it is how Windows knows a new installer is an
   ; upgrade of the installed app rather than a second copy of it.
   #define AppIdGuid "{{6FC87BAC-15D7-47D1-92F5-D86C665D35AD}"
-  #define DirName "mPlayer"
+  #define DirName "Kumo"
 #endif
 
-#define ExeName "mPlayer.exe"
+#define ExeName "Kumo.exe"
 
 [Setup]
 AppId={#AppIdGuid}

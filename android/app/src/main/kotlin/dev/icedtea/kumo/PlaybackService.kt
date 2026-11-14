@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -35,7 +35,7 @@ import kotlin.concurrent.thread
  * the only thing that keeps the decoder running once the user leaves. The
  * service owns three things that go with that: the notification, a
  * [MediaSession] so headset buttons and the lock screen work, and audio
- * focus, so mPlayer yields to a call and does not talk over another player.
+ * focus, so Kumo yields to a call and does not talk over another player.
  *
  * It decides nothing. Every button and every focus change is forwarded to
  * Dart, which owns the actual player — two sides both acting on the same
@@ -44,9 +44,9 @@ import kotlin.concurrent.thread
 class PlaybackService : Service() {
 
     companion object {
-        const val ACTION_UPDATE = "dev.icedtea.mplayer.NOW_PLAYING_UPDATE"
-        const val ACTION_STOP = "dev.icedtea.mplayer.NOW_PLAYING_STOP"
-        private const val ACTION_CONTROL = "dev.icedtea.mplayer.NOW_PLAYING_CONTROL"
+        const val ACTION_UPDATE = "dev.icedtea.kumo.NOW_PLAYING_UPDATE"
+        const val ACTION_STOP = "dev.icedtea.kumo.NOW_PLAYING_STOP"
+        private const val ACTION_CONTROL = "dev.icedtea.kumo.NOW_PLAYING_CONTROL"
         private const val EXTRA_CONTROL = "control"
 
         const val EXTRA_TITLE = "title"
@@ -91,7 +91,7 @@ class PlaybackService : Service() {
     private var receiverRegistered = false
     private var started = false
 
-    private var title: String = "mPlayer"
+    private var title: String = "Kumo"
     private var subtitle: String? = null
     private var album: String = ""
     private var artUrl: String = ""
@@ -128,7 +128,7 @@ class PlaybackService : Service() {
         when (change) {
             // Ducking is not offered: lowering a film's volume for a
             // notification chime leaves the user having missed the dialogue
-            // either way, so mPlayer pauses and lets them resume.
+            // either way, so Kumo pauses and lets them resume.
             AudioManager.AUDIOFOCUS_LOSS,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK,
@@ -315,7 +315,7 @@ class PlaybackService : Service() {
     }
 
     private fun createSession() {
-        val media = MediaSession(this, "mPlayer")
+        val media = MediaSession(this, "Kumo")
         media.setCallback(object : MediaSession.Callback() {
             override fun onPlay() {
                 listener?.invoke(CONTROL_PLAY, null)

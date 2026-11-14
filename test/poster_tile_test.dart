@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -6,11 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/app/tokens.dart';
-import 'package:mplayer/core/models/library_models.dart';
-import 'package:mplayer/widgets/gradient_art.dart';
-import 'package:mplayer/widgets/poster_tile.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/app/tokens.dart';
+import 'package:kumo/core/models/library_models.dart';
+import 'package:kumo/widgets/gradient_art.dart';
+import 'package:kumo/widgets/poster_tile.dart';
 
 /// Every poster in a grid row has to be the same size.
 ///

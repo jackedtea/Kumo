@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.app.UiModeManager
 import android.content.pm.PackageManager
@@ -16,7 +16,7 @@ import io.flutter.plugin.common.MethodChannel
  *
  * Gone with the device library: [MediaStoreChannel] (the system media index),
  * `SafChannel` (folders the user granted explicitly) and `IntentChannel` (the
- * VIEW and SEND intents that carried a file in). mPlayer reads none of the
+ * VIEW and SEND intents that carried a file in). Kumo reads none of the
  * user's own files any more — it plays what a media server gives it.
  *
  * What stays belongs to the player, which stays: picture in picture, the
@@ -114,7 +114,7 @@ class MainActivity : FlutterActivity() {
         // A fact, not a decision: Dart chooses what a television gets.
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "dev.icedtea.mplayer/device",
+            "dev.icedtea.kumo/device",
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "isTelevision" -> result.success(isTelevision())

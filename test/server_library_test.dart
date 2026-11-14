@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -6,10 +6,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/core/models/media_models.dart';
-import 'package:mplayer/features/servers/server_library.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/core/models/media_models.dart';
+import 'package:kumo/features/servers/server_library.dart';
+import 'package:kumo/l10n/app_localizations.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 Future<AppLocalizations> english() =>
     AppLocalizations.delegate.load(const Locale('en'));

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -33,13 +33,13 @@ final nowPlayingProvider = NotifierProvider<NowPlayingController, bool>(
 /// The media notification, the lock-screen controls and audio focus.
 ///
 /// State is `true` while the notification is up. Everything real happens in
-/// `android/app/src/main/kotlin/dev/icedtea/mplayer/PlaybackService.kt`; this
+/// `android/app/src/main/kotlin/dev/icedtea/kumo/PlaybackService.kt`; this
 /// pushes what is playing and turns what comes back into events the player
 /// applies. Nothing here decides anything, so the notification cannot end up
 /// claiming a state the decoder is not in.
 class NowPlayingController extends Notifier<bool> {
-  static const _channel = MethodChannel('dev.icedtea.mplayer/now-playing');
-  static const _events = EventChannel('dev.icedtea.mplayer/now-playing-events');
+  static const _channel = MethodChannel('dev.icedtea.kumo/now-playing');
+  static const _events = EventChannel('dev.icedtea.kumo/now-playing-events');
 
   /// The lock screen works the position out from the last one it was told
   /// plus the speed, so it only has to be corrected now and then.

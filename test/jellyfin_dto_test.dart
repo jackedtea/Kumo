@@ -1,13 +1,13 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/servers/jellyfin_dto.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/servers/server_profile.dart';
+import 'package:kumo/servers/jellyfin_dto.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/servers/server_profile.dart';
 
 final _base = Uri.parse('https://media.home.lan');
 
@@ -37,7 +37,7 @@ void main() {
   group('authorization header', () {
     test('has the shape Jellyfin parses', () {
       final header = authorizationHeader(
-        client: 'mPlayer',
+        client: 'Kumo',
         device: 'Pixel 8',
         deviceId: 'abc-123',
         version: '1.0.0',
@@ -45,7 +45,7 @@ void main() {
       );
 
       expect(header, startsWith('MediaBrowser '));
-      expect(header, contains('Client="mPlayer"'));
+      expect(header, contains('Client="Kumo"'));
       // Encoded, space and all — the server decodes while parsing.
       expect(header, contains('Device="Pixel%208"'));
       expect(header, contains('DeviceId="abc-123"'));
@@ -56,7 +56,7 @@ void main() {
       // An empty Token field reads as a malformed request rather than an
       // anonymous one.
       final header = authorizationHeader(
-        client: 'mPlayer',
+        client: 'Kumo',
         device: 'PC',
         deviceId: 'id',
         version: '1.0.0',
@@ -70,7 +70,7 @@ void main() {
       // rather than sending it, and a phone named in Vietnamese is entirely
       // ordinary. Percent-encoding is what makes the header sendable at all.
       final header = authorizationHeader(
-        client: 'mPlayer',
+        client: 'Kumo',
         device: 'Điện thoại của Nam',
         deviceId: 'id',
         version: '1.0.0',
@@ -84,7 +84,7 @@ void main() {
     test('quotes and commas cannot break the grammar', () {
       // The header has no escape of its own for either.
       final header = authorizationHeader(
-        client: 'mPlayer',
+        client: 'Kumo',
         device: 'Nam"s, PC',
         deviceId: 'id',
         version: '1.0.0',
@@ -105,8 +105,8 @@ void main() {
         version: '',
       );
 
-      expect(header, contains('Client="mPlayer"'));
-      expect(header, contains('Device="mPlayer"'));
+      expect(header, contains('Client="Kumo"'));
+      expect(header, contains('Device="Kumo"'));
       expect(header, contains('Version="1.0"'));
       // An empty DeviceId is a parse error; the server recovers it from the
       // token on an authenticated request.

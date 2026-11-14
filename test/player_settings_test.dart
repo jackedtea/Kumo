@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -8,11 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/features/settings/player_settings.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
-import 'package:mplayer/l10n/app_localizations_en.dart';
-import 'package:mplayer/l10n/app_localizations_vi.dart';
+import 'package:kumo/features/settings/player_settings.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/l10n/app_localizations.dart';
+import 'package:kumo/l10n/app_localizations_en.dart';
+import 'package:kumo/l10n/app_localizations_vi.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

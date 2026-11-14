@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -14,10 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/features/servers/server_library.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/features/servers/server_library.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 class _Server extends FakeLibrarySource {
   const _Server();
@@ -37,7 +37,7 @@ Future<GoRouter> _pump(WidgetTester tester) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [activeServerProvider.overrideWithValue(const _Server())],
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();

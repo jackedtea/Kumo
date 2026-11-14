@@ -36,7 +36,7 @@
     <!--
       Handing a downloaded update to the system installer. The installer
       still asks the user to confirm every install, and Android's own
-      "Install unknown apps" switch for mPlayer has to be on first.
+      "Install unknown apps" switch for Kumo has to be on first.
     -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
@@ -44,13 +44,13 @@
       **No media-read permissions.** READ_MEDIA_VIDEO, READ_EXTERNAL_STORAGE
       and READ_MEDIA_VISUAL_USER_SELECTED were here for the Files tab, which
       was built from MediaStore because scoped storage forbids listing shared
-      storage directly. There is no device library any more: mPlayer plays
+      storage directly. There is no device library any more: Kumo plays
       what a media server gives it, so asking for access to the user's own
       videos would be asking for something it has no use for.
     -->
 
     <!--
-      A touchscreen is not required: mPlayer is driveable with a remote or a
+      A touchscreen is not required: Kumo is driveable with a remote or a
       mouse. Declaring it optional is also what keeps the app installable on
       Android TV and on Chromebooks without a touch panel.
     -->
@@ -66,7 +66,7 @@
         android:networkSecurityConfig="@xml/network_security_config">
         <!--
           singleTask rather than Flutter's default singleTop. It was for the
-          VIEW intents: with singleTop, one arriving while mPlayer was in the
+          VIEW intents: with singleTop, one arriving while Kumo was in the
           background built a second MainActivity on top of the first and the
           user ended up with a stack of players. No intent is routed here now,
           but a second launch still has no business becoming a second activity.
@@ -112,10 +112,10 @@
             </intent-filter>
 
             <!--
-              **Every VIEW and SEND filter is gone.** mPlayer used to claim
+              **Every VIEW and SEND filter is gone.** Kumo used to claim
               video/*, a long list of containers Android has no MIME type for,
               the streaming schemes, and the share sheet, so that "open with
-              mPlayer" and "send to mPlayer" reached its player. The player is
+              Kumo" and "send to Kumo" reached its player. The player is
               still here, but it only opens what a media server resolved —
               there is no local source left to turn a handed-over file into
               something playable. An app that appeared in the chooser and then
@@ -130,7 +130,7 @@
         -->
         <meta-data
             android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-            android:value="dev.icedtea.mplayer.CastOptionsProvider"/>
+            android:value="dev.icedtea.kumo.CastOptionsProvider"/>
 
         <!--
           Not exported: every start comes from this app's own channel, and the

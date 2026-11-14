@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -19,7 +19,7 @@ final downloadPlatformProvider =
     Provider<DownloadPlatform>((ref) => DownloadPlatform());
 
 class DownloadPlatform {
-  static const _channel = MethodChannel('dev.icedtea.mplayer/downloads');
+  static const _channel = MethodChannel('dev.icedtea.kumo/downloads');
 
   /// Whether there is anything to show a notification on. Checked before
   /// the text is even worded, so a desktop never pays for it.

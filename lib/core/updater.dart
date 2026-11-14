@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -260,7 +260,7 @@ enum InstallOutcome {
   /// The system installer is up (Android); the user takes it from here.
   started,
 
-  /// Android has not been allowed to install from mPlayer; its settings page
+  /// Android has not been allowed to install from Kumo; its settings page
   /// for that has been opened.
   needsPermission,
 
@@ -278,7 +278,7 @@ class UpdateInstaller {
 
   final Dio _dio;
 
-  static const _channel = MethodChannel('dev.icedtea.mplayer/update');
+  static const _channel = MethodChannel('dev.icedtea.kumo/update');
 
   /// Android's ABIs, most preferred first; empty anywhere else.
   Future<List<String>> androidAbis() async {
@@ -419,7 +419,7 @@ class UpdateInstaller {
   /// Whether this user can create files in [dir] — the only test that
   /// answers for ACLs, read-only mounts and Program Files alike.
   static bool _writable(String dir) {
-    final probe = File(p.join(dir, '.mplayer-update-probe'));
+    final probe = File(p.join(dir, '.kumo-update-probe'));
     try {
       probe.writeAsStringSync('');
       probe.deleteSync();

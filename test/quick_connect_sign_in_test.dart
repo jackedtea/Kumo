@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -12,9 +12,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/servers/jellyfin_source.dart';
-import 'package:mplayer/servers/server_registry.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/servers/jellyfin_source.dart';
+import 'package:kumo/servers/server_registry.dart';
 
 /// A Jellyfin that answers the probe and Quick Connect, and never approves.
 class _Server implements HttpClientAdapter {
@@ -86,7 +86,7 @@ Future<void> _openSheet(WidgetTester tester, _Server server) async {
       overrides: [
         serverRegistryProvider.overrideWith(() => _EmptyRegistry(server)),
       ],
-      child: const MPlayerApp(),
+      child: const KumoApp(),
     ),
   );
   await tester.pumpAndSettle();

@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -8,10 +8,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mplayer/remote/remote_client.dart';
-import 'package:mplayer/remote/remote_protocol.dart';
-import 'package:mplayer/remote/remote_server.dart';
-import 'package:mplayer/remote/remote_trust.dart';
+import 'package:kumo/remote/remote_client.dart';
+import 'package:kumo/remote/remote_protocol.dart';
+import 'package:kumo/remote/remote_server.dart';
+import 'package:kumo/remote/remote_trust.dart';
 
 import 'fake_keychain.dart';
 

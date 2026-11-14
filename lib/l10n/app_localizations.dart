@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer'**
+  /// **'Kumo'**
   String get appTitle;
 
   /// No description provided for @navStorage.
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @noServerBody.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer plays what a media server gives it. Add a Jellyfin server to browse your library, keep your watch state in step across devices, and reach it from anywhere.'**
+  /// **'Kumo plays what a media server gives it. Add a Jellyfin server to browse your library, keep your watch state in step across devices, and reach it from anywhere.'**
   String get noServerBody;
 
   /// No description provided for @addJellyfinServer.
@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @otherServersNotice.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer works with Jellyfin servers. Emby and Plex are not supported.'**
+  /// **'Kumo works with Jellyfin servers. Emby and Plex are not supported.'**
   String get otherServersNotice;
 
   /// No description provided for @previewConnectedServer.
@@ -3731,13 +3731,13 @@ abstract class AppLocalizations {
   /// No description provided for @updateOfferBody.
   ///
   /// In en, this message translates to:
-  /// **'A newer version of mPlayer is ready to install.'**
+  /// **'A newer version of Kumo is ready to install.'**
   String get updateOfferBody;
 
   /// No description provided for @updateOfferBodySized.
   ///
   /// In en, this message translates to:
-  /// **'A newer version of mPlayer is ready to install ({size} MB).'**
+  /// **'A newer version of Kumo is ready to install ({size} MB).'**
   String updateOfferBodySized(String size);
 
   /// No description provided for @updateNow.
@@ -3773,7 +3773,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateInstalling.
   ///
   /// In en, this message translates to:
-  /// **'Installing — mPlayer will restart.'**
+  /// **'Installing — Kumo will restart.'**
   String get updateInstalling;
 
   /// No description provided for @updateInstallerOpened.
@@ -3785,13 +3785,13 @@ abstract class AppLocalizations {
   /// No description provided for @updateNeedsPermission.
   ///
   /// In en, this message translates to:
-  /// **'Allow mPlayer to install apps in the settings page that just opened, then come back and try again.'**
+  /// **'Allow Kumo to install apps in the settings page that just opened, then come back and try again.'**
   String get updateNeedsPermission;
 
   /// No description provided for @updateNotWritable.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer cannot write to the folder it is installed in, so it cannot update itself. Download the new version from the release page instead.'**
+  /// **'Kumo cannot write to the folder it is installed in, so it cannot update itself. Download the new version from the release page instead.'**
   String get updateNotWritable;
 
   /// No description provided for @updateFailed.
@@ -3851,7 +3851,7 @@ abstract class AppLocalizations {
   /// No description provided for @notAffiliated.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer is not affiliated with, endorsed by, or sponsored by the Jellyfin project.'**
+  /// **'Kumo is not affiliated with, endorsed by, or sponsored by the Jellyfin project.'**
   String get notAffiliated;
 
   /// No description provided for @subtitles.
@@ -4043,19 +4043,19 @@ abstract class AppLocalizations {
   /// No description provided for @remoteSettingsSub.
   ///
   /// In en, this message translates to:
-  /// **'Control mPlayer on a computer or TV from this phone'**
+  /// **'Control Kumo on a computer or TV from this phone'**
   String get remoteSettingsSub;
 
   /// No description provided for @remoteSearching.
   ///
   /// In en, this message translates to:
-  /// **'Looking for mPlayer on this network…'**
+  /// **'Looking for Kumo on this network…'**
   String get remoteSearching;
 
   /// No description provided for @remoteNoDevices.
   ///
   /// In en, this message translates to:
-  /// **'No computer or TV found yet. Open mPlayer on it and make sure both are on the same network.'**
+  /// **'No computer or TV found yet. Open Kumo on it and make sure both are on the same network.'**
   String get remoteNoDevices;
 
   /// No description provided for @remoteConnectByAddress.
@@ -4175,7 +4175,7 @@ abstract class AppLocalizations {
   /// No description provided for @remoteVersion.
   ///
   /// In en, this message translates to:
-  /// **'{name} runs a different version of mPlayer. Update both.'**
+  /// **'{name} runs a different version of Kumo. Update both.'**
   String remoteVersion(String name);
 
   /// No description provided for @remotePlayFailed.
@@ -4193,7 +4193,7 @@ abstract class AppLocalizations {
   /// No description provided for @remoteReceiverSettingSub.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer on a phone on this network can control playback here. A new phone has to enter the code shown on screen.'**
+  /// **'Kumo on a phone on this network can control playback here. A new phone has to enter the code shown on screen.'**
   String get remoteReceiverSettingSub;
 
   /// No description provided for @remoteForgetPhones.
@@ -4217,7 +4217,7 @@ abstract class AppLocalizations {
   /// No description provided for @remotePairingTitle.
   ///
   /// In en, this message translates to:
-  /// **'{name} wants to control mPlayer'**
+  /// **'{name} wants to control Kumo'**
   String remotePairingTitle(String name);
 
   /// No description provided for @remotePairingBody.
@@ -4763,7 +4763,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNoTelemetryBody.
   ///
   /// In en, this message translates to:
-  /// **'There is no third-party SDK collecting anything. mPlayer contacts the servers and shares you configure, and nothing else.'**
+  /// **'There is no third-party SDK collecting anything. Kumo contacts the servers and shares you configure, and nothing else.'**
   String get privacyNoTelemetryBody;
 
   /// No description provided for @privacyLocal.
@@ -4799,7 +4799,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyUpdatesBody.
   ///
   /// In en, this message translates to:
-  /// **'While \"Check for updates automatically\" is on, mPlayer asks the GitHub releases API once a day whether a newer build exists — one anonymous request, with no identifier. Turn it off in Settings → General and checks happen only when you press \"Check for updates\". Updates download from the same release page.'**
+  /// **'While \"Check for updates automatically\" is on, Kumo asks the GitHub releases API once a day whether a newer build exists — one anonymous request, with no identifier. Turn it off in Settings → General and checks happen only when you press \"Check for updates\". Updates download from the same release page.'**
   String get privacyUpdatesBody;
 
   /// No description provided for @privacyCasting.
@@ -4817,7 +4817,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyFooter.
   ///
   /// In en, this message translates to:
-  /// **'mPlayer is free software under the GPL-3.0-or-later. You can read the source and check every claim on this page for yourself.'**
+  /// **'Kumo is free software under the GPL-3.0-or-later. You can read the source and check every claim on this page for yourself.'**
   String get privacyFooter;
 
   /// No description provided for @noChaptersInFile.

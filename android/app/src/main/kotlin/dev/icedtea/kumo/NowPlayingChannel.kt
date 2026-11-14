@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.Manifest
 import android.app.Activity
@@ -25,8 +25,8 @@ class NowPlayingChannel(
 ) {
 
     companion object {
-        const val CHANNEL = "dev.icedtea.mplayer/now-playing"
-        const val EVENTS = "dev.icedtea.mplayer/now-playing-events"
+        const val CHANNEL = "dev.icedtea.kumo/now-playing"
+        const val EVENTS = "dev.icedtea.kumo/now-playing-events"
 
         /** Any code; nothing depends on the answer. See [askForNotifications]. */
         private const val NOTIFICATION_PERMISSION_REQUEST = 0x4E50
@@ -91,7 +91,7 @@ class NowPlayingChannel(
             .setAction(PlaybackService.ACTION_UPDATE)
             .putExtra(
                 PlaybackService.EXTRA_TITLE,
-                arguments?.get("title") as? String ?: "mPlayer",
+                arguments?.get("title") as? String ?: "Kumo",
             )
             .putExtra(
                 PlaybackService.EXTRA_SUBTITLE,

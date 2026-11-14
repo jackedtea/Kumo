@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,9 +9,9 @@ import 'dart:typed_data' show Uint8List;
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/servers/jellyfin_source.dart';
-import 'package:mplayer/servers/media_library_source.dart';
-import 'package:mplayer/servers/server_profile.dart';
+import 'package:kumo/servers/jellyfin_source.dart';
+import 'package:kumo/servers/media_library_source.dart';
+import 'package:kumo/servers/server_profile.dart';
 
 /// Answers requests from a table instead of a network.
 ///

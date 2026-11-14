@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -12,11 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_library_source.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
-import 'package:mplayer/features/servers/server_library.dart';
-import 'package:mplayer/servers/jellyfin_source.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
+import 'package:kumo/features/servers/server_library.dart';
+import 'package:kumo/servers/jellyfin_source.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 /// A library holding two films in one box set, and whether they are asked for
 /// grouped decides which comes back.
@@ -82,7 +82,7 @@ Future<void> _pump(WidgetTester tester, MediaLibrarySource server) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [activeServerProvider.overrideWithValue(server)],
-      child: MPlayerApp(router: router),
+      child: KumoApp(router: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -225,21 +225,21 @@ void main() {
       final post = sent.last;
       expect(post.method, 'POST');
       expect(post.uri.path, '/DisplayPreferences/v1');
-      expect(post.uri.queryParameters['client'], 'mPlayer');
+      expect(post.uri.queryParameters['client'], 'Kumo');
       expect(post.uri.queryParameters['userId'], 'u1');
 
       final body = jsonDecode(jsonEncode(post.data)) as Map<String, dynamic>;
       expect(body['SortBy'], 'SortName');
       expect(body['CustomPrefs'], <String, dynamic>{
         'homesection0': 'resume',
-        'mplayerGroupCollections': 'true',
+        'kumoGroupCollections': 'true',
       });
     });
 
     test('reads back what was saved, and off when nothing was', () async {
       expect(await source().groupsCollections('v1'), isFalse);
 
-      (stored['CustomPrefs'] as Map<String, dynamic>)['mplayerGroupCollections'] =
+      (stored['CustomPrefs'] as Map<String, dynamic>)['kumoGroupCollections'] =
           'true';
       expect(await source().groupsCollections('v1'), isTrue);
     });

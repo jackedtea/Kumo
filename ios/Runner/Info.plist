@@ -7,7 +7,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>mPlayer</string>
+		<string>Kumo</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>mplayer</string>
+		<string>kumo</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -84,7 +84,7 @@
 		<!-- iOS 14+ prompts before an app may talk to devices on the LAN, and
 	     refuses silently without a reason string. -->
 		<key>NSLocalNetworkUsageDescription</key>
-		<string>mPlayer connects to media servers and network shares on your local network.</string>
+		<string>Kumo connects to media servers and network shares on your local network.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

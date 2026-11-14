@@ -1,23 +1,23 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mplayer/core/install_source.dart';
+import 'package:kumo/core/install_source.dart';
 
 void main() {
   group('Android', () {
     test('a store installer is a store, with its page', () {
       final source = androidInstallSource(
         installer: 'com.android.vending',
-        package: 'dev.icedtea.mplayer',
+        package: 'dev.icedtea.kumo',
       );
       expect(source.fromStore, isTrue);
       expect(source.store, 'Google Play');
       expect(source.storeUri.toString(),
-          'market://details?id=dev.icedtea.mplayer');
+          'market://details?id=dev.icedtea.kumo');
     });
 
     test('an APK opened by hand updates itself', () {
@@ -37,9 +37,9 @@ void main() {
   group('Linux', () {
     test('Flatpak and Snap are stores', () {
       expect(linuxInstallSource(const {}, flatpakInfo: true).store, 'Flatpak');
-      expect(linuxInstallSource(const {'FLATPAK_ID': 'dev.icedtea.mplayer'})
+      expect(linuxInstallSource(const {'FLATPAK_ID': 'dev.icedtea.kumo'})
           .store, 'Flatpak');
-      expect(linuxInstallSource(const {'SNAP': '/snap/mplayer/1'}).store,
+      expect(linuxInstallSource(const {'SNAP': '/snap/kumo/1'}).store,
           'Snap Store');
     });
 

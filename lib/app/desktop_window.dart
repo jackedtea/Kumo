@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -50,7 +50,7 @@ Future<void> restoreWindow() async {
         size: saved?.size ?? const Size(1280, 800),
         minimumSize: const Size(480, 360),
         center: saved == null,
-        title: 'mPlayer',
+        title: 'Kumo',
       ),
       () async {
         // Position after size: setting them together lets a window restored
@@ -96,9 +96,9 @@ Future<void> saveWindowBounds() async {
 ///
 /// When it is not, the running window is raised and this process should exit.
 ///
-/// It used to carry a file across as well: a second `mPlayer video.mkv`
+/// It used to carry a file across as well: a second `Kumo video.mkv`
 /// handed its path to the instance already running rather than opening a
-/// second player to fight the first over the audio device. mPlayer opens no
+/// second player to fight the first over the audio device. Kumo opens no
 /// local files now, so there is nothing to carry — but a second launch still
 /// has no business becoming a second window, and bringing the existing one
 /// forward is what the user meant by launching it.

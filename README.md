@@ -1,11 +1,11 @@
-# mPlayer
+# Kumo
 
 Cross-platform client for a Jellyfin media server, with a built-in
 player and casting to DLNA renderers and Chromecast.
 
-**It plays only what a server gives it.** mPlayer used to be a video player
+**It plays only what a server gives it.** Kumo used to be a video player
 with a server client attached — the device library, SMB and WebDAV shares,
-"open with mPlayer" — and all of that is gone. The player is still here; the
+"open with Kumo" — and all of that is gone. The player is still here; the
 local sources it used to open are not.
 
 Built with Flutter. Priority platforms: Android, Windows, Linux — iOS/macOS are scaffolded but deferred.
@@ -23,7 +23,7 @@ Linux additionally needs system libmpv: `sudo apt install libmpv-dev mpv`.
 
 ## License
 
-mPlayer is free software, licensed under the **GNU General Public License v3.0 or later**.
+Kumo is free software, licensed under the **GNU General Public License v3.0 or later**.
 The full text is in [LICENSE](LICENSE).
 
     Copyright (C) 2026 Nam <namicedtea@gmail.com>

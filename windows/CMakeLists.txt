@@ -1,10 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(mplayer LANGUAGES CXX)
+project(kumo LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "mPlayer")
+set(BINARY_NAME "Kumo")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -104,7 +104,7 @@ endif()
 # not carry a ~120 MB binary; the guard makes it a one-time cost per build dir.
 #
 # LICENCE: these builds are GPL, not LGPL like the trimmed one. That is fine
-# precisely because mPlayer is GPL-3.0-or-later — see README's third-party
+# precisely because Kumo is GPL-3.0-or-later — see README's third-party
 # table. It would not be fine for a permissively licensed app.
 # **This pin goes stale on its own.** shinchiro's repository publishes a build
 # per day and prunes old releases, so the tag a working pin names stops

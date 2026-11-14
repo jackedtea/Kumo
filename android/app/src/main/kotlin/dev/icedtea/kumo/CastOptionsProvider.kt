@@ -1,4 +1,4 @@
-package dev.icedtea.mplayer
+package dev.icedtea.kumo
 
 import android.content.Context
 import com.google.android.gms.cast.CastMediaControlIntent
@@ -16,7 +16,7 @@ import com.google.android.gms.cast.framework.SessionProvider
  *
  * The **default media receiver** is used deliberately. A custom receiver would
  * mean registering an application with Google and hosting a web receiver, for
- * no gain: mPlayer sends a plain URL and drives the standard transport.
+ * no gain: Kumo sends a plain URL and drives the standard transport.
  *
  * That receiver decides what plays. It handles MP4/H.264 and WebM, and does
  * **not** handle Matroska — which is most of what this player exists for. A
@@ -30,7 +30,7 @@ class CastOptionsProvider : OptionsProvider {
             .setReceiverApplicationId(
                 CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID,
             )
-            // mPlayer draws its own device picker and its own transport, so
+            // Kumo draws its own device picker and its own transport, so
             // none of the SDK's UI is wanted — leaving it enabled would put a
             // second, differently styled controller in the notification shade
             // next to the one PlaybackService already posts.

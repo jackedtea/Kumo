@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,12 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/theme.dart';
-import 'package:mplayer/downloads/download_models.dart';
-import 'package:mplayer/downloads/downloads_controller.dart';
-import 'package:mplayer/features/downloads/download_settings_page.dart';
-import 'package:mplayer/l10n/app_localizations.dart';
-import 'package:mplayer/servers/media_library_source.dart';
+import 'package:kumo/app/theme.dart';
+import 'package:kumo/downloads/download_models.dart';
+import 'package:kumo/downloads/downloads_controller.dart';
+import 'package:kumo/features/downloads/download_settings_page.dart';
+import 'package:kumo/l10n/app_localizations.dart';
+import 'package:kumo/servers/media_library_source.dart';
 
 const _film = ServerItem(id: 'i1', title: 'The Film', kind: ServerItemKind.movie);
 

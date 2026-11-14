@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mplayer/app/app.dart';
-import 'package:mplayer/app/router.dart';
+import 'package:kumo/app/app.dart';
+import 'package:kumo/app/router.dart';
 
 /// The three widths the design fixes behaviour at. Every screen is checked at
 /// all three, because a layout that only works on a phone is not done.
@@ -85,7 +85,7 @@ Future<GoRouter> pumpRouterAt(WidgetTester tester, Size size) async {
   addTearDown(tester.view.reset);
 
   final router = buildRouter();
-  await tester.pumpWidget(ProviderScope(child: MPlayerApp(router: router)));
+  await tester.pumpWidget(ProviderScope(child: KumoApp(router: router)));
   await tester.pumpAndSettle();
   return router;
 }

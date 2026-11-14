@@ -1,4 +1,4 @@
-// This file is part of mPlayer.
+// This file is part of Kumo.
 // Copyright (C) 2026 Nam <namicedtea@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
@@ -117,7 +117,7 @@ class DiagnosticsPage extends ConsumerWidget {
   Future<void> _copy(BuildContext context, PlaybackState state) async {
     final info = await PackageInfo.fromPlatform();
     final report = StringBuffer()
-      ..writeln('mPlayer ${info.version} (build ${info.buildNumber})')
+      ..writeln('Kumo ${info.version} (build ${info.buildNumber})')
       ..writeln('${_platform()} · ${Platform.operatingSystemVersion}')
       ..writeln('Locale: ${Platform.localeName}')
       ..writeln();
