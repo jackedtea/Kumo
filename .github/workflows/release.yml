@@ -301,12 +301,13 @@ jobs:
         env:
           MAIN_KEYSTORE: ${{ secrets.KEYSTORE }}
           MAIN_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          MAIN_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           MAIN_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           DEV_KEYSTORE: ${{ secrets.KEYSTORE_DEV }}
           DEV_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD_DEV }}
-          DEV_KEY_ALIAS: ${{ secrets.KEY_ALIAS_DEV }}
           DEV_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD_DEV }}
+          # One alias for both keystores: it only names the key inside each
+          # file, so sharing it shares nothing else.
+          SHARED_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           # The branch being built, not `GITHUB_REF_NAME`: a scheduled run's
           # ref is the default branch whichever branch it builds.
           BRANCH: ${{ needs.prepare.outputs.branch }}
@@ -316,12 +317,10 @@ jobs:
           if [ "$BRANCH" = "main" ]; then
             B64="${MAIN_KEYSTORE:-}"
             STORE_PASSWORD="${MAIN_KEYSTORE_PASSWORD:-}"
-            ALIAS="${MAIN_KEY_ALIAS:-}"
             KEY_PASSWORD="${MAIN_KEY_PASSWORD:-}"
           else
             B64="${DEV_KEYSTORE:-}"
             STORE_PASSWORD="${DEV_KEYSTORE_PASSWORD:-}"
-            ALIAS="${DEV_KEY_ALIAS:-}"
             KEY_PASSWORD="${DEV_KEY_PASSWORD:-}"
           fi
 
@@ -332,6 +331,14 @@ jobs:
             echo "::warning::No keystore secret for '${BRANCH}'; the APK will be debug-signed."
             echo "signed=false" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+
+          ALIAS="${SHARED_KEY_ALIAS:-}"
+          if [ -z "$ALIAS" ]; then
+            # A keystore without an alias fails deep inside Gradle's signing
+            # task; say what is missing here instead.
+            echo "::error::Secret KEY_ALIAS is empty; it names the key in both keystores."
+            exit 1
           fi
 
           KEYSTORE_FILE="${GITHUB_WORKSPACE}/android/app/ci-keystore.jks"
