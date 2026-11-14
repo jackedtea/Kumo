@@ -33,6 +33,10 @@
 > The non-goals list at the foot gains the local sources. Downloads is *not*
 > among them: an offline copy of a server item is a real feature the player
 > can still play.
+>
+> **Checklist reconciled with the code on 2026-11-14.** Items made moot by
+> the scope change or by later decisions (Emby removed 2026-11-01, Drift
+> dropped) are struck through with the reason, rather than ticked.
 
 Cross-platform client for a Jellyfin/Emby media server, with a built-in player.
 
@@ -211,8 +215,8 @@ supersedes the ordering guesses in this phase list where the two disagree.
 - [x] Localisation of every screen that is real — player, Files, Browse, the share sheet,
       casting and all seven settings pages. The sample-data screens are left in English
       on purpose: they are rewritten with Phase 4
-- [ ] Screens 1d-1g, 1i and the active state of 1n still render `core/sample_library.dart`
-      — they are the Jellyfin client's UI and land with Phase 4
+- [x] Screens 1d-1g, 1i and the active state of 1n read the server — wired in Phase 4,
+      Downloads (1i) since 2026-11-02
 
 ### Design build step 2 — playback core (done)
 
@@ -223,7 +227,8 @@ supersedes the ordering guesses in this phase list where the two disagree.
       `media_kit` types stay out of the UI apart from the `Video` surface itself
 - [x] `features/player/player_page.dart` — screen 1h: video surface, transport, scrubber,
       auto-hiding chrome, keyboard transport, inline error
-- [ ] Verify a `content://` handle from the Android picker actually opens in libmpv
+- ~~Verify a `content://` handle from the Android picker actually opens in libmpv~~ —
+      **void**, the picker went with the local sources
 
 **Dependency note**: `file_picker` is unusable here — 8.3.3–11.x pin `win32 ^5.9.0` while
 `flutter_secure_storage_windows` needs `win32 ^6.0.1`. Use `file_selector` (flutter.dev).
@@ -243,8 +248,8 @@ supersedes the ordering guesses in this phase list where the two disagree.
 - [x] Container chapters read from libmpv `chapter-list/*`, so local MKV/MP4 files get
       ticks and a chapter sheet; source chapters take precedence when a server supplies
       them, since only those mark intros reliably
-- [ ] Verify the `chapter-list` read against a real chaptered MKV — no sample file or
-      ffmpeg on this machine, so only the precedence logic is unit-tested
+- [ ] Verify the `chapter-list` read against a real chaptered MKV, now via a direct play
+      from the server — only the precedence logic is unit-tested
 - [x] Casting over **DLNA/UPnP**, hand-written in Dart (`lib/cast/`): SSDP discovery, the
       device description, and AVTransport over SOAP. Works on Android, Windows and Linux
       alike, and a second `MediaProxyServer` bound to the LAN serves the file — a
@@ -260,7 +265,8 @@ supersedes the ordering guesses in this phase list where the two disagree.
       Auto-enters when the user leaves mid-play (API 31+ from the params, 26-30 from
       `onUserLeaveHint`), and the window's own transport buttons run the player's own
       methods
-- [ ] Quality / transcode control — meaningless until a server can transcode (step 5)
+- [x] Quality / transcode control — the quality pill and `servers/stream_preferences.dart`
+      (a bitrate + resolution ladder, Original = no cap)
 
 ### Design build step 4 — filesystem sources (partly done)
 
@@ -288,25 +294,23 @@ supersedes the ordering guesses in this phase list where the two disagree.
       WebDAV cover the same shares on every NAS worth supporting
 - ~~Network scan~~ ("Or scan the local network" on the add tile) — dropped; a share is
       added by address
-- [ ] `data/db/app_database.dart` — Drift schema v1:
-  - [ ] `server_profiles` (type, url, credentials ref, display name, last used)
-  - [ ] `media_items` (metadata cache)
-  - [ ] `watch_history` (item id, position, duration, watched, updated_at)
-  - [ ] `storage_sources` (driver type, root path, credentials ref)
-- [ ] `flutter_secure_storage` wrapper for passwords/tokens — **never** put credentials in Drift
+- ~~`data/db/app_database.dart` — Drift schema v1~~ — **dropped**: profiles live in
+      `shared_preferences` (`ServerRegistry`), metadata and watch state on the server,
+      and `drift` itself was removed with the local sources
+- [x] `flutter_secure_storage` for tokens — the server token and PIN hashes sit in the
+      keychain, never beside the profile
 - [ ] Riverpod provider conventions documented in `docs/CONVENTIONS.md` (hand-written, no codegen)
 - [ ] Global error surface (snackbar + log sink) — errors currently surface per screen
 - [x] Settings pages: Appearance, General, Player, **Audio**, Subtitle, About, plus
       Diagnostics and Privacy below About
 
-**Exit criteria**: navigable app with persisted theme — met, except for the database,
-which nothing needs before Phase 4.
+**Exit criteria**: navigable app with persisted theme — met.
 
 ---
 
 ## Phase 2 — Playback core
 
-Done, apart from the three items marked open. The controller is
+Done. The controller is
 `features/player/playback_controller.dart` (a hand-written `Notifier`, not an
 `AsyncNotifier` — the state is a single value, not a future) and it is the only place
 outside the video surface that imports `media_kit`.
@@ -314,15 +318,16 @@ outside the video surface that imports `media_kit`.
 - [x] `features/player/playback_controller.dart` — position, duration, buffering, tracks
       and state as one `PlaybackState`
 - [x] Player page: video surface, tap-to-toggle chrome, auto-hide
-- [ ] Seek bar: buffered range — `PlaybackState.buffered` is tracked but the scrubber
-      does not draw it
+- [x] Seek bar: buffered range — drawn as the slider's secondary track
+      (`controls_overlay.dart`)
 - ~~Preview thumbnails on the scrubber~~ — dropped
 - [x] Track selection: audio and subtitle. Video quality needs a server that transcodes,
       so the pill hides until one exists
 - [x] Subtitle rendering — ASS/SSA/SRT through libass (`libass: true`), with styling for
       the plain-text formats. See the Subtitles section of `CLAUDE.md` for the PGS
       problem and how the bundled libmpv was replaced to fix it
-- [x] External subtitle loading — "Open subtitle file" in the subtitle sheet, which
+- [x] External subtitle loading — the server's sidecar files. The device file picker
+      ("Open subtitle file") was removed on 2026-11-14 with the last local code. It was:
       loads *and* selects. Sidecar auto-detect needs no code: libmpv's own `sub-auto`
       already finds a file named after the video beside it
 - [x] Playback speed, aspect ratio / zoom modes, rotation, sleep timer, lock
@@ -330,9 +335,10 @@ outside the video surface that imports `media_kit`.
       horizontal drag to scrub. **Long-press speed-up is not implemented**
 - [x] Desktop: keyboard transport and fullscreen through `window_manager`. Always-on-top
       is not implemented
-- [x] Playlist / next-episode queue — the folder the file came from, loaded after
-      playback starts so the first frame never waits on a directory listing
-- [x] Resume — applied **silently** from `ResumeRepository` rather than by prompting.
+- [x] Playlist / next-episode queue — now the series' episodes from the server
+      (`QueueableSource.siblingsOf`), or an explicit music queue; the folder fallback
+      went with the local sources
+- [x] Resume — applied **silently** (now from the server's position) rather than by prompting.
       Deliberate: a dialog between the user and their film is worth more than the two
       seconds it saves when the guess is wrong
 - [x] Wakelock during playback — nothing to write: `media_kit_video`'s `Video` widget
@@ -363,7 +369,7 @@ second interface would only have been a second thing to implement per source.
       1 MiB chunked reads. Also what serves a file to a television when casting
 - [x] Connection test + credential capture UI (`features/files/source_sheet.dart`)
 - [x] Directory browser with breadcrumbs (screen 1b), play straight from it
-- [ ] Filter by media type in the browser
+- ~~Filter by media type in the browser~~ — **void**, the browser is gone
 
 **Exit criteria**: browse an SMB share and a WebDAV mount, play a file from each — the
 code path is complete and unit-tested; neither has been run against a real NAS.
@@ -401,11 +407,13 @@ code path is complete and unit-tested; neither has been run against a real NAS.
       player, the queue, resume points and casting all reach it without knowing what it is
 - [x] Progress reporting — written alongside the local resume point, never instead of it,
       and a stop report closes the session (which is also what tears down a transcode)
-- [ ] Map the domain types onto what the screens draw — the presentation models will
-      need reshaping, since they were written around the sample data
-- [ ] `EmbySource`: same surface; Emby and Jellyfin diverged enough that a shared base plus two subclasses is right — mirror `refs/.../lib/services/media_server_service_base.dart` (837 lines)
+- [x] Map the domain types onto what the screens draw — the screens map `ServerItem`
+      themselves; the data layer never builds the design's strings
+- ~~`EmbySource`~~ — **dropped**: Emby support was removed on 2026-11-01 and the probe
+      refuses an Emby server
 - [x] Quick-connect / device ID handling
-- [ ] Multi-server support with a server switcher
+- [x] Multi-server support with a server switcher — the server list on Home and
+      "Switch server" in the avatar menu and on `CurrentServerCard`
 - [x] Media segments (`/MediaSegments/{id}`, Jellyfin 10.10+) — intro/outro/preview/recap/
       commercial, a per-kind action in Player settings (nothing / offer / skip), the skip
       pill in the player, and `features/player/segment_skipper.dart` as the pure rule
@@ -426,15 +434,16 @@ code path is complete and unit-tested; neither has been run against a real NAS.
 - [x] Server monitoring — session play method and transcode reasons, restart-pending
       banner, disk use, log viewer, activity log paging and filters
 - [x] API keys and task triggers — list / create / revoke keys; each task's schedule
-- [ ] Offline downloads of server items — still parked; see `refs/jellyfin-android`'s
-      `downloads/` for the shape of it
-- [ ] Transcode settings (max bitrate, resolution cap, force direct play) — the quality
-      pill appears now that a source advertises transcoding, but choosing a bitrate is
-      still inert
-- [ ] Image loading with a disk cache
-- [ ] Handle multiple network addresses per server (LAN vs WAN) — see their `multi_address_server_service.dart`
+- [x] Offline downloads of server items — `lib/downloads/`, original file only, with
+      offline playback and pending progress reports (see "Downloads" in `CLAUDE.md`)
+- [x] Transcode settings (max bitrate, resolution cap) — `StreamQuality`'s ladder;
+      Original asks for no cap, which is what direct play needs
+- [x] Image loading with a disk cache — `widgets/remote_art.dart` over `cached_network_image`
+- [x] Handle multiple network addresses per server (LAN vs WAN) — `servers/server_addresses.dart`:
+      the fastest candidate that answers as the same server wins; `LocalAddress` is learned,
+      others are typed in the edit sheet (2026-11-14)
 
-**Exit criteria**: log into a Jellyfin server and an Emby server, browse libraries, play with progress reported back.
+**Exit criteria**: log into a Jellyfin server, browse libraries, play with progress reported back — met in code; not yet run on a real Android device.
 
 ---
 
@@ -463,10 +472,11 @@ Deliberately **without** metadata scraping. Jellyfin and Emby already supply met
 - [x] Continue Watching row, on the Files screen rather than a home screen (there is no
       home until a server exists), with stills grabbed off the player by
       `core/thumbnail_store.dart`
-- [ ] Next Up for series
-- [ ] Two-way progress sync with Jellyfin/Emby (server wins on conflict, configurable)
-- [ ] Mark watched/unwatched, favorites
-- [ ] Export/import of local history
+- [x] Next Up for series — Home and each library's Suggestions tab
+- ~~Two-way progress sync~~ — **void**: there is no local history to sync; the server is
+      the only store, and an offline copy's stop is queued in `pending_reports.json`
+- [x] Mark watched/unwatched, favorites — through the item actions
+- ~~Export/import of local history~~ — **void**, no local history
 
 ---
 
@@ -475,13 +485,12 @@ Deliberately **without** metadata scraping. Jellyfin and Emby already supply met
 - [x] Window size/position persistence — `app/desktop_window.dart`. A minimised or
       fullscreen window is deliberately not saved, and a position on a monitor that has
       since been unplugged is discarded rather than restored off-screen
-- [ ] File association: open a video file with Kumo (Windows registry, Linux `.desktop` MimeType already declared)
-- [x] Command-line argument handling (`Kumo video.mkv`) — the Windows and Linux
-      runners already forward the arguments; `main` feeds them to `incomingMediaProvider`
-- [x] Drag-and-drop a file onto the window — `desktop_drop`, wrapping the navigator so a
-      drop anywhere plays, not only on the Files tab
+- ~~File association~~ — **void**: Kumo no longer opens a local file
+- ~~Command-line argument handling (`Kumo video.mkv`)~~ — built, then removed with
+      `incoming_media.dart`
+- ~~Drag-and-drop a file onto the window~~ — built, then removed with `desktop_drop`
 - [x] Single-instance enforcement — binding a fixed loopback port *is* the lock: exactly
-      one process gets it, and a second launch hands its file over that socket and exits
+      one process gets it, and a second launch raises the running window and exits
 - ~~Global media key handling~~ — **dropped for now.** Android already has it through the
       `MediaSession` the playback service owns. On desktop the only route is
       `hotkey_manager`, whose Linux implementation needs `keybinder-3.0` **at run time as
@@ -502,7 +511,8 @@ Deliberately **without** metadata scraping. Jellyfin and Emby already supply met
 - [x] Screen orientation control per-context
 - [x] Handle audio focus / interruptions — pauses on focus loss and on
       `ACTION_AUDIO_BECOMING_NOISY`; ducking is deliberately not offered
-- [ ] Android storage permissions (scoped storage, `MANAGE_EXTERNAL_STORAGE` only if truly needed)
+- ~~Android storage permissions~~ — **void**: the media-read permissions were removed;
+      downloads write to app storage, which needs none
 - [ ] Battery-aware behaviour on mobile data
 
 ---
@@ -540,10 +550,13 @@ Explicitly deprioritised. It applies **only** to raw file sources — media serv
 
 ## Phase 11 — Packaging & release
 
-- [x] Android: release signing from repository secrets, one universal APK (per-ABI split until 2026-11-02). No extra R8
+- [x] Android: release signing from repository secrets, one APK per ABI (arm64-v8a,
+      armeabi-v7a; universal only 2026-11-02..08, x86_64 dropped 2026-11-10). No extra R8
       rules were needed for `media_kit`
-- [ ] Windows: MSIX or Inno Setup installer; confirm `libmpv-2.dll` ships
-- [ ] Linux: `.deb` + AppImage (bundle libmpv or declare the dependency), reuse `linux/packaging/`
+- [x] Windows: Inno Setup installer, per-user — `windows/packaging/kumo.iss`, with
+      `prefetch-native.ps1` fetching libmpv
+- [x] Linux: `.deb` — `linux/packaging/build-deb.sh`, `Depends` from `dpkg-shlibdeps`
+- [ ] Linux AppImage (bundle libmpv)
 - [ ] Flatpak manifest (optional)
 - [x] CI: `.github/workflows/release.yml` builds Android, Windows and Linux, publishes a
       GitHub release and posts to Telegram. `main` is the only production branch; every
@@ -566,7 +579,8 @@ Blocked on Mac hardware.
 
 ## Cross-cutting
 
-- [ ] Localization (`flutter_localizations` + ARB) — English and Vietnamese from the start; retrofitting is painful
+- [x] Localization (`flutter_localizations` + ARB) — English and Vietnamese, guarded by
+      `test/l10n_test.dart`; a few English literals remain (see Localisation in `CLAUDE.md`)
 - [ ] Accessibility pass: semantics labels, focus order, contrast
 - [ ] Test strategy: unit tests for parsers/drivers, widget tests for controls, integration test for the playback happy path
 - [ ] `docs/CONVENTIONS.md` — Riverpod patterns, error handling, naming

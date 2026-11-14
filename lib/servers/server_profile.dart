@@ -23,6 +23,7 @@ class ServerProfile {
     this.isAdministrator = false,
     this.pinProtected = false,
     this.nameIsCustom = false,
+    this.addresses = const <String>[],
   });
 
   /// Throws for a profile this build cannot use, which the repository skips.
@@ -44,6 +45,11 @@ class ServerProfile {
       isAdministrator: json['isAdministrator'] as bool? ?? false,
       pinProtected: json['pinProtected'] as bool? ?? false,
       nameIsCustom: json['nameIsCustom'] as bool? ?? false,
+      addresses: <String>[
+        if (json['addresses'] case final List<dynamic> list)
+          for (final Object? a in list)
+            if (a is String && a.isNotEmpty) a,
+      ],
       lastUsed: switch (json['lastUsed']) {
         final int ms => DateTime.fromMillisecondsSinceEpoch(ms),
         _ => null,
@@ -66,6 +72,14 @@ class ServerProfile {
   /// Base URL, normalised: scheme, host, port, and any path prefix the server
   /// sits behind. Never a trailing slash — see [normaliseServerUrl].
   final String uri;
+
+  /// Other addresses the same server answers on — its LAN address beside a
+  /// public one — tried alongside [uri], the fastest to answer winning.
+  /// Normalised like [uri], and never containing it.
+  final List<String> addresses;
+
+  /// [uri] first, then [addresses].
+  List<String> get candidateAddresses => <String>[uri, ...addresses];
 
   /// The authenticated user's id, which most endpoints are scoped by.
   final String userId;
@@ -107,6 +121,7 @@ class ServerProfile {
         'isAdministrator': isAdministrator,
         'pinProtected': pinProtected,
         'nameIsCustom': nameIsCustom,
+        'addresses': addresses,
         'lastUsed': lastUsed?.millisecondsSinceEpoch,
       };
 
@@ -120,6 +135,7 @@ class ServerProfile {
     bool? isAdministrator,
     bool? pinProtected,
     bool? nameIsCustom,
+    List<String>? addresses,
   }) {
     return ServerProfile(
       id: id,
@@ -131,6 +147,7 @@ class ServerProfile {
       isAdministrator: isAdministrator ?? this.isAdministrator,
       pinProtected: pinProtected ?? this.pinProtected,
       nameIsCustom: nameIsCustom ?? this.nameIsCustom,
+      addresses: addresses ?? this.addresses,
       lastUsed: lastUsed ?? this.lastUsed,
     );
   }

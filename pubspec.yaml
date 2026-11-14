@@ -45,8 +45,6 @@ dependencies:
   collection: ^1.19.1
   # Pinned by flutter_localizations, which depends on exactly 0.20.2.
   intl: ^0.20.2
-  # Only the subtitle picker, which loads a local .srt for a server stream.
-  file_selector: ^1.1.0
   screen_brightness: ^2.1.11
   # SOAP, for talking to a DLNA renderer.
   xml: ^7.0.1

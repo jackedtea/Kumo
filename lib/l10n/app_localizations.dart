@@ -4382,12 +4382,6 @@ abstract class AppLocalizations {
   /// **'Audio delay'**
   String get audioDelay;
 
-  /// No description provided for @openSubtitleFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Open subtitle file…'**
-  String get openSubtitleFile;
-
   /// No description provided for @playOn.
   ///
   /// In en, this message translates to:
@@ -6265,6 +6259,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recently played'**
   String get recentlyPlayed;
+
+  /// No description provided for @showLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show lyrics'**
+  String get showLyrics;
+
+  /// No description provided for @hideLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide lyrics'**
+  String get hideLyrics;
+
+  /// No description provided for @replayGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume normalisation'**
+  String get replayGain;
+
+  /// No description provided for @replayGainSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Even out loudness with the ReplayGain tags in the file'**
+  String get replayGainSub;
+
+  /// No description provided for @replayGainOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get replayGainOff;
+
+  /// No description provided for @replayGainOffSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Play every file at its own level'**
+  String get replayGainOffSub;
+
+  /// No description provided for @replayGainTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Per song'**
+  String get replayGainTrack;
+
+  /// No description provided for @replayGainTrackSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Every song equally loud, best for shuffle'**
+  String get replayGainTrackSub;
+
+  /// No description provided for @replayGainAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Per album'**
+  String get replayGainAlbum;
+
+  /// No description provided for @replayGainAlbumSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps an album\'s quiet and loud songs as mastered'**
+  String get replayGainAlbumSub;
+
+  /// No description provided for @endOfThisSong.
+  ///
+  /// In en, this message translates to:
+  /// **'End of this song'**
+  String get endOfThisSong;
+
+  /// No description provided for @pausesAfterThisSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauses after this song'**
+  String get pausesAfterThisSong;
+
+  /// No description provided for @pausesAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauses at {time}'**
+  String pausesAt(String time);
+
+  /// No description provided for @otherAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Other addresses'**
+  String get otherAddresses;
+
+  /// No description provided for @otherAddressesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'One per line. Kumo uses whichever answers first, so the server works both at home and away.'**
+  String get otherAddressesSub;
 }
 
 class _AppLocalizationsDelegate

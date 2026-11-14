@@ -62,8 +62,10 @@ Three consequences worth knowing:
    *headers* (they do not travel with a URL) and a loopback host, each with a
    sentence.
 
-The one local file still opened is a **subtitle**:
-`features/player/subtitle_picker.dart`, for a `.srt` the server does not have.
+**Nothing local is opened at all** since 2026-11-14: the last holdout, the
+subtitle picker (`subtitle_picker.dart`, "Open subtitle file…" in the
+audio-and-subtitle dialog) went, and `file_selector` with it, as did the
+Phase 0 `/smoke` page. Subtitles come from the container or the server.
 
 The server screens were then reworked for **one-handed use** — Settings moved
 into the bottom bar, the detail screens pin Play to the foot of the scaffold
@@ -71,11 +73,9 @@ on a phone, and Search became a FAB. See "One-handed use, and what it moved".
 
 ### Verified
 
-- `flutter analyze` clean; `flutter test` **492 passing, 1 failing**.
-- The failure is `test/workflow_test.dart`, "the jq program contains no
-  apostrophes" — **pre-existing**, reproduced on a clean HEAD checkout, and
-  nothing to do with this change. The "317 passing" this section used to
-  claim was already stale.
+- `flutter analyze` clean; `flutter test` **1115 passing, none failing**
+  (2026-11-14). The `workflow_test.dart` failure once listed here no longer
+  occurs.
 - Windows debug build links and runs.
 - `test/screens_test.dart` still pumps **every route at all three
   breakpoints** and fails on any overflow. Do not weaken it.
@@ -433,8 +433,7 @@ from `AppLocalizations`.
 
 What is left is deliberate: the **server, search and downloads screens still render
 sample data** and will be rewritten with the Jellyfin client, so translating them now is
-work thrown away twice. `features/playback/smoke_test_page.dart` is a developer tool and
-is not translated either.
+work thrown away twice.
 
 Two enums lost their `label` field on the way (`RotationMode`, `AspectMode`,
 `GaplessAudio`): an enum constant is built once, before there is a locale to build it in,
@@ -1117,6 +1116,20 @@ it. Three rules it keeps:
 - **Errors are sentences.** A 401 is flagged `isUnauthorised`, because it is the one
   failure with an answer nothing else has: ask for the password again.
 
+**One server, several addresses** (2026-11-14, `servers/server_addresses.dart`).
+`ServerProfile.addresses` holds the server's others beside `uri` (LAN and public).
+`ServerRegistry.activate` asks every candidate at once (`firstReachable`, 3 s) and the
+fastest to answer *as that server* wins — `JellyfinAuth.answers` checks the server id, so a
+LAN address that is someone else's machine on another network never gets the token. The
+profile keeps its id and main address; only the client (and `admin()`) is pointed at the
+winner, remembered for the launch in `_reachable` (`addressFor`). With no other addresses
+nothing is probed. The server's own `LocalAddress` (public info) is added on sign-in and
+learned in the background after activation; the edit sheet's "Other addresses" field (one per
+line) is taken as typed, so a deleted address stays deleted. A network change
+(`downloadNetworkProvider`) re-checks the address in use and re-activates only if it stopped
+answering — rebuilding the client mid-film costs the play session. Background probing is off
+under `flutter test` (`serverAddressLearningProvider`). Unverified on a real network.
+
 Four things that are easy to get wrong and are already handled:
 
 1. **Ticks.** Jellyfin counts in 100-nanosecond units — ten thousand to the millisecond.
@@ -1213,6 +1226,36 @@ album and artist screens.
   `MiniPlayerHost`, beside the navigator in `app.dart`, draws it everywhere else, because
   `/library` and its album and artist pages sit above the shell. It has no tooltips: beside the
   navigator there is no overlay for one to open in.
+
+### M3 (2026-11-14)
+
+- **Lyrics** (`features/music/lyrics_view.dart`): `/Audio/{id}/Lyrics`, 10.9+, through
+  `MediaLibrarySource.lyrics` — null for no words *and* for a 404, never an error, like
+  `segments`. The Lyrics button on Now playing appears only when a song has some, and swaps
+  the cover for them (kept on from song to song). Timed lines (`Lyrics.synced`: every line has
+  a `Start`) follow the song — `currentLyricLine` is pure and the view rebuilds only when it
+  changes — and tapping one seeks; plain lyrics just scroll. An empty timed line is drawn ♪.
+- **True gapless** (`features/player/gapless.dart` + `PlaybackController._prepareGapless`):
+  mpv's `gapless-audio` only joins files that are both in *its* playlist, so once a song has
+  opened the next is resolved and appended with `player.add`. `gaplessNext` is the rule —
+  music queues only, not with gapless off, repeat-one or stop-after, wrapping only on
+  repeat-all. mpv moving on is heard on `stream.playlist` (`_mpvIndex` vs the prepared
+  `mpvIndex`), and `_onGaplessAdvance` does what a step would: new state, the old song's
+  stop report (`_reportStoppedFor`, at its duration) and the next one prepared. Any queue
+  change (`_queueChanged`) keeps the prepared song if it is still next and swaps it
+  otherwise; any `open` replaces mpv's playlist, so `openResolved` simply forgets it. A song
+  with headers or a start position is not appended (`loadfile append` carries neither). If
+  mpv stops at the end anyway, a 3 s fallback steps the ordinary way.
+- **ReplayGain** (`PlayerSettings.replayGain`, Audio settings): off (default) / per song /
+  per album → mpv `replaygain`. Direct play hands the file over untouched, so the tags are
+  there.
+- **Sleep timer and "End of this song"** live on the controller now (`setSleepTimer`,
+  `setStopAfterCurrent`; `PlaybackState.sleepAt` / `stopAfterCurrent`), so they run with no
+  `/player` route; Now playing has the button under the transport, labelled with what it
+  will do. Stop-after pauses at the end instead of rolling on and is cleared by the next
+  open. The video player's More-sheet timer is still its own (`PlayerUiState.sleepTimer`).
+- Unverified on a device, all of it: gapless across a real album, lyrics against a 10.9+
+  server.
 
 ## Sorting and filtering the library grid
 
@@ -1473,8 +1516,7 @@ WebView around a native player rather than anything to port, but it is the **ref
 what a Jellyfin client is expected to do**: media segments, trickplay, the device profile,
 the quality ladder. Media segments and trickplay above follow its behaviour deliberately,
 including its defaults — read `player/mediasegments/` and `player/ui/TrickplayHelper.kt`.
-Still missing from Kumo next to it: offline downloads, a server switcher, and the
-Android Auto media-browse tree.
+Still missing from Kumo next to it: the Android Auto media-browse tree.
 
 `../refs/plezy` (see its LICENSE) — a shipping Flutter client for Plex, Jellyfin and Emby
 on the same Flutter version. The best reference for anything Jellyfin: points 2 and 3

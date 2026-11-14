@@ -2419,9 +2419,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioDelay => 'Audio delay';
 
   @override
-  String get openSubtitleFile => 'Open subtitle file…';
-
-  @override
   String get playOn => 'Play on';
 
   @override
@@ -3469,4 +3466,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recentlyPlayed => 'Recently played';
+
+  @override
+  String get showLyrics => 'Show lyrics';
+
+  @override
+  String get hideLyrics => 'Hide lyrics';
+
+  @override
+  String get replayGain => 'Volume normalisation';
+
+  @override
+  String get replayGainSub =>
+      'Even out loudness with the ReplayGain tags in the file';
+
+  @override
+  String get replayGainOff => 'Off';
+
+  @override
+  String get replayGainOffSub => 'Play every file at its own level';
+
+  @override
+  String get replayGainTrack => 'Per song';
+
+  @override
+  String get replayGainTrackSub => 'Every song equally loud, best for shuffle';
+
+  @override
+  String get replayGainAlbum => 'Per album';
+
+  @override
+  String get replayGainAlbumSub =>
+      'Keeps an album\'s quiet and loud songs as mastered';
+
+  @override
+  String get endOfThisSong => 'End of this song';
+
+  @override
+  String get pausesAfterThisSong => 'Pauses after this song';
+
+  @override
+  String pausesAt(String time) {
+    return 'Pauses at $time';
+  }
+
+  @override
+  String get otherAddresses => 'Other addresses';
+
+  @override
+  String get otherAddressesSub =>
+      'One per line. Kumo uses whichever answers first, so the server works both at home and away.';
 }

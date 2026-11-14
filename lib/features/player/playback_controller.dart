@@ -19,6 +19,7 @@ import '../../servers/server_registry.dart';
 import '../settings/player_settings.dart';
 import '../../sources/media_source.dart';
 import 'device_volume.dart';
+import 'gapless.dart';
 import 'playback_state.dart';
 import 'remembered_tracks.dart';
 import 'segment_skipper.dart';
@@ -110,6 +111,26 @@ class PlaybackController extends Notifier<PlaybackState> {
   /// applied. [openResolved] waits on it so the first file already benefits.
   Future<void>? _nativeReady;
 
+  /// The next song, resolved early and appended to mpv's own playlist so it
+  /// starts without a gap ([gaplessNext] says when). `mpvIndex` is where it
+  /// sits in that playlist; mpv moving there is the song changing.
+  ({PlayableMedia media, int mpvIndex})? _gapless;
+
+  /// Where the playing file sits in mpv's playlist. An `open` resets it to 0.
+  int _mpvIndex = 0;
+
+  /// Bumped whenever a prepared song stops being wanted, so a resolve still
+  /// in flight for it is dropped when it lands.
+  int _gaplessGeneration = 0;
+
+  /// Falls back to a plain step when mpv was handed the next song and still
+  /// stopped at the end — the appended file failed to load, say.
+  Timer? _gaplessFallback;
+
+  /// Pauses playback at [PlaybackState.sleepAt]. Here rather than on a
+  /// screen, so it runs with music playing behind any screen at all.
+  Timer? _sleepTimer;
+
   @override
   PlaybackState build() {
     ref.onDispose(_teardown);
@@ -167,6 +188,11 @@ class PlaybackController extends Notifier<PlaybackState> {
     _silentEnd?.cancel();
     _pausedByUser = false;
     _endHandled = false;
+    // `open` replaces mpv's playlist, the prepared song with it.
+    _gaplessGeneration++;
+    _gapless = null;
+    _mpvIndex = 0;
+    _gaplessFallback?.cancel();
     // The next file may well decode differently from this one — the setting
     // is the same, the codec is not — so the reading is dropped rather than
     // carried over and shown against the wrong video.
@@ -181,6 +207,8 @@ class PlaybackController extends Notifier<PlaybackState> {
       buffering: true,
       containerChapters: const <MediaChapter>[],
       queue: queue,
+      // "Stop after this song" meant the one that was playing.
+      stopAfterCurrent: false,
       clearError: true,
     );
 
@@ -203,6 +231,128 @@ class PlaybackController extends Notifier<PlaybackState> {
     // loaded, so appending first would attach this file's subtitles to
     // whatever was already playing.
     await _loadServerSubtitles(media.externalSubtitles);
+
+    unawaited(_prepareGapless());
+  }
+
+  /// Resolves the song after this one and appends it to mpv's playlist, so
+  /// mpv runs straight into it. Silent on any failure: the cost is a gap.
+  Future<void> _prepareGapless() async {
+    final generation = ++_gaplessGeneration;
+    final media = state.media;
+    final player = _player;
+    if (media == null || player == null || !media.isAudio) return;
+
+    final next = gaplessNext(
+      state.queue,
+      loop: state.loop,
+      gapless: ref.read(playerSettingsProvider).gapless,
+      stopAfterCurrent: state.stopAfterCurrent,
+    );
+    final nextRef = next?.current;
+    if (nextRef == null) return;
+
+    final source = ref.read(mediaSourcesProvider)[nextRef.sourceId];
+    if (source == null) return;
+
+    final PlayableMedia resolved;
+    try {
+      resolved = await source.resolve(nextRef);
+    } catch (e) {
+      debugPrint('Could not prepare ${nextRef.itemId} gaplessly: $e');
+      return;
+    }
+
+    // Something changed while it resolved: another song, a reordered queue,
+    // a stop. Whoever changed it has prepared again if it was wanted.
+    if (generation != _gaplessGeneration ||
+        !identical(state.media, media) ||
+        !identical(_player, player)) {
+      return;
+    }
+    // `loadfile … append` carries a URL and nothing else: no headers and no
+    // start position. A song needing either opens the ordinary way.
+    if (!resolved.isAudio ||
+        resolved.headers.isNotEmpty ||
+        resolved.startPosition != Duration.zero) {
+      return;
+    }
+
+    try {
+      await player.add(Media(resolved.uri.toString()));
+    } catch (e) {
+      debugPrint('Could not append ${nextRef.itemId}: $e');
+      return;
+    }
+    if (generation != _gaplessGeneration) return;
+
+    _gapless = (
+      media: resolved,
+      mpvIndex: player.state.playlist.medias.length - 1,
+    );
+  }
+
+  /// Takes the prepared song back out of mpv's playlist and prepares again,
+  /// after anything that may have changed what comes next.
+  void _refreshGapless() {
+    _gaplessGeneration++;
+    final prepared = _gapless;
+    _gapless = null;
+    final player = _player;
+    if (prepared != null && player != null) {
+      unawaited(
+        player.remove(prepared.mpvIndex).catchError((Object e) {
+          debugPrint('Could not drop the prepared song: $e');
+        }),
+      );
+    }
+    unawaited(_prepareGapless());
+  }
+
+  /// mpv moved on to the prepared song by itself: the queue, the state and
+  /// the server catch up here, as a step to the next song would have.
+  void _onGaplessAdvance(PlayableMedia next) {
+    _gaplessFallback?.cancel();
+    _gapless = null;
+
+    final previous = state.media;
+    // The song just finished, so it played to its end.
+    final finishedAt =
+        state.duration > Duration.zero ? state.duration : state.position;
+    final queue = gaplessNext(
+      state.queue,
+      loop: state.loop,
+      gapless: ref.read(playerSettingsProvider).gapless,
+    );
+
+    _chaptersLoaded = false;
+    _startingTracksApplied = false;
+    _pendingServerSubtitle = null;
+    _lastPosition = null;
+    _skipped.clear();
+    _silentEnd?.cancel();
+    _pausedByUser = false;
+    _endHandled = false;
+    _hwdec = null;
+    // The new song is reported on its first tick, not five seconds in.
+    _lastResumeWrite = DateTime.fromMillisecondsSinceEpoch(0);
+
+    state = state.copyWith(
+      media: next,
+      queue: queue != null && queue.current == next.ref ? queue : null,
+      position: Duration.zero,
+      duration: Duration.zero,
+      buffered: Duration.zero,
+      completed: false,
+      containerChapters: const <MediaChapter>[],
+      stopAfterCurrent: false,
+      clearError: true,
+    );
+
+    if (previous != null) {
+      unawaited(_reportStoppedFor(previous, finishedAt));
+    }
+    unawaited(_prepareGapless());
   }
 
   /// Hands libmpv the subtitle files a server keeps beside the video.
@@ -310,23 +460,28 @@ class PlaybackController extends Notifier<PlaybackState> {
   /// [item] straight after what is playing.
   void queueNext(MediaRef item) {
     state = state.copyWith(queue: _queueWithCurrent().playingNext(item));
+    _queueChanged();
   }
 
   /// [item] at the end of the queue.
   void addToQueue(MediaRef item) {
     state = state.copyWith(queue: _queueWithCurrent().appended(item));
+    _queueChanged();
   }
 
   void moveInQueue(int from, int to) {
     state = state.copyWith(queue: state.queue.moved(from, to));
+    _queueChanged();
   }
 
   void removeFromQueue(int at) {
     state = state.copyWith(queue: state.queue.removedAt(at));
+    _queueChanged();
   }
 
   void clearQueue() {
     state = state.copyWith(queue: state.queue.clearedUpcoming());
+    _queueChanged();
   }
 
   /// Turns shuffle on or off without touching what is playing.
@@ -334,6 +489,45 @@ class PlaybackController extends Notifier<PlaybackState> {
     state = state.copyWith(
       queue: on ? state.queue.shuffled() : state.queue.inOriginalOrder(),
     );
+    _queueChanged();
+  }
+
+  /// Keeps the prepared song when it is still the one that comes next, and
+  /// swaps it otherwise.
+  void _queueChanged() {
+    final prepared = _gapless;
+    final next = gaplessNext(
+      state.queue,
+      loop: state.loop,
+      gapless: ref.read(playerSettingsProvider).gapless,
+      stopAfterCurrent: state.stopAfterCurrent,
+    );
+    if (prepared != null && next?.current == prepared.media.ref) return;
+    if (prepared == null && next == null) return;
+    _refreshGapless();
+  }
+
+  /// Pauses at the end of what is playing rather than going on to the next.
+  void setStopAfterCurrent(bool on) {
+    state = state.copyWith(stopAfterCurrent: on);
+    _queueChanged();
+  }
+
+  /// Pauses playback once [after] has passed; null turns the timer off.
+  void setSleepTimer(Duration? after) {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    if (after == null) {
+      state = state.copyWith(clearSleepAt: true);
+      return;
+    }
+
+    state = state.copyWith(sleepAt: DateTime.now().add(after));
+    _sleepTimer = Timer(after, () {
+      _sleepTimer = null;
+      state = state.copyWith(clearSleepAt: true);
+      unawaited(pause());
+    });
   }
 
   /// The queue to add to. A lone song has an empty one, and adding to that
@@ -560,6 +754,7 @@ class PlaybackController extends Notifier<PlaybackState> {
       mode == LoopMode.one ? PlaylistMode.single : PlaylistMode.none,
     );
     state = state.copyWith(loop: mode);
+    _queueChanged();
   }
 
   /// The frame on screen right now, as JPEG bytes, or null.
@@ -639,6 +834,8 @@ class PlaybackController extends Notifier<PlaybackState> {
     await _closeCurrent();
 
     await _teardownAsync();
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
     state = const PlaybackState();
 
     // The server's own shelves are what show a resumable item now, and they
@@ -917,6 +1114,18 @@ class PlaybackController extends Notifier<PlaybackState> {
         }
       }),
       s.buffer.listen((v) => state = state.copyWith(buffered: v)),
+      s.playlist.listen((playlist) {
+        if (playlist.index == _mpvIndex) return;
+        _mpvIndex = playlist.index;
+        final prepared = _gapless;
+        // A step in progress opens its own file; mpv running on underneath it
+        // would report the same song twice.
+        if (prepared != null &&
+            playlist.index == prepared.mpvIndex &&
+            !_stepping) {
+          _onGaplessAdvance(prepared.media);
+        }
+      }),
       s.playing.listen((v) => state = state.copyWith(playing: v)),
       s.buffering.listen((v) => state = state.copyWith(buffering: v)),
       s.completed.listen((v) {
@@ -1075,9 +1284,8 @@ class PlaybackController extends Notifier<PlaybackState> {
   ///
   /// The property does not change on the same turn the option is set — the
   /// video chain is torn down and rebuilt first — so reading it immediately
-  /// gives the previous answer. Polled for the same reason
-  /// [_awaitNewSubtitleTrack] is: there is no event to await, and a second is
-  /// far longer than a reinit takes.
+  /// gives the previous answer. Polled because there is no event to await,
+  /// and a second is far longer than a reinit takes.
   Future<void> _awaitDecoderSwitch() async {
     const step = Duration(milliseconds: 60);
     final before = _hwdec;
@@ -1164,10 +1372,14 @@ class PlaybackController extends Notifier<PlaybackState> {
       await platform.setProperty('audio-spdif', settings.mpvSpdif);
       await platform.setProperty('volume-max', '${settings.volumeBoost}');
       await platform.setProperty('gapless-audio', settings.gapless.mpvValue);
+      await platform.setProperty('replaygain', settings.replayGain.mpvValue);
     } catch (e) {
       // Best-effort: a property mpv does not know must not stop playback.
       debugPrint('Could not apply player settings: $e');
     }
+
+    // Gapless off means no song prepared ahead; on again, one is.
+    _queueChanged();
 
     // `hwdec` was just written, so whatever was last read about the decoder
     // may no longer be true. Here rather than only in [setHardwareDecoding]
@@ -1204,65 +1416,6 @@ class PlaybackController extends Notifier<PlaybackState> {
       await setSubtitleTrack(selection.subtitle);
     }
     return true;
-  }
-
-  /// Loads a subtitle file that is not in the container.
-  ///
-  /// libmpv finds a sidecar beside a local file on its own; this covers the
-  /// rest — a differently named file, one downloaded separately, or a video
-  /// streaming from a share whose directory mpv never sees.
-  ///
-  /// `sub-files-append` rather than `SubtitleTrack.uri`: the latter keys the
-  /// selection by the URI while mpv's own track list numbers it, so the
-  /// picker would show the file twice and tick neither.
-  Future<void> addExternalSubtitle(Uri uri, {String? title}) async {
-    final platform = _player?.platform;
-    if (platform is! NativePlayer) return;
-
-    final before = state.subtitleTracks.map((t) => t.id).toSet();
-
-    try {
-      // `sub-files` is a path list, so a local file goes in as a path — a
-      // file:// URL would reach mpv with its spaces percent-encoded.
-      await platform.setProperty(
-        'sub-files-append',
-        uri.isScheme('file') ? uri.toFilePath() : uri.toString(),
-      );
-    } catch (e) {
-      state = state.copyWith(error: 'Could not load that subtitle file.');
-      debugPrint('sub-files-append failed: $e');
-      return;
-    }
-
-    // Loading without selecting would leave the user to open the picker a
-    // second time to see the file they just chose.
-    final added = await _awaitNewSubtitleTrack(before);
-    if (added != null) {
-      await setSubtitleTrack(added);
-    } else {
-      // mpv rejects a file it cannot parse by simply not adding a track.
-      state = state.copyWith(error: 'That subtitle file could not be read.');
-    }
-  }
-
-  /// Waits for mpv to publish the track [addExternalSubtitle] just appended.
-  ///
-  /// The track list arrives on a stream, so there is nothing to await
-  /// directly. A second is far longer than parsing a subtitle file takes and
-  /// short enough that a rejected file reports promptly.
-  Future<MediaTrack?> _awaitNewSubtitleTrack(Set<String> before) async {
-    const step = Duration(milliseconds: 50);
-
-    for (var waited = Duration.zero;
-        waited < const Duration(seconds: 1);
-        waited += step) {
-      final added = state.subtitleTracks
-          .where((t) => !t.isOff && !before.contains(t.id))
-          .toList();
-      if (added.isNotEmpty) return added.last;
-      await Future<void>.delayed(step);
-    }
-    return null;
   }
 
   /// Reads the container's own chapter list out of libmpv.
@@ -1382,14 +1535,16 @@ class PlaybackController extends Notifier<PlaybackState> {
   Future<void> _reportStopped() async {
     final media = state.media;
     if (media == null) return;
+    await _reportStoppedFor(media, state.position);
+  }
 
+  /// [_reportStopped] for a file that is no longer [PlaybackState.media]:
+  /// the song mpv has just run on from.
+  Future<void> _reportStoppedFor(PlayableMedia media, Duration position) async {
     final source = ref.read(mediaSourcesProvider)[media.ref.sourceId];
     if (source case final ProgressReporting reporter) {
       try {
-        await reporter.reportStopped(
-          media.ref.itemId,
-          position: state.position,
-        );
+        await reporter.reportStopped(media.ref.itemId, position: position);
       } finally {
         // After the report, so a detail screen asking again reads the
         // position this stop just wrote.
@@ -1407,6 +1562,29 @@ class PlaybackController extends Notifier<PlaybackState> {
     _silentEnd?.cancel();
     if (_endHandled) return;
     _endHandled = true;
+
+    if (state.stopAfterCurrent) {
+      // Done as asked; the next file is the user's to start.
+      state = state.copyWith(stopAfterCurrent: false);
+      return;
+    }
+
+    if (_gapless != null) {
+      // mpv was handed the next song and moves on by itself. If it has not
+      // within a few seconds the file failed to load, and a plain step does.
+      final media = state.media;
+      _gaplessFallback?.cancel();
+      _gaplessFallback = Timer(const Duration(seconds: 3), () {
+        if (!identical(state.media, media)) return;
+        _gapless = null;
+        unawaited(
+          state.loop == LoopMode.all && !state.queue.hasNext
+              ? _restartQueue()
+              : playNext(),
+        );
+      });
+      return;
+    }
 
     if (state.queue.rollsOn(autoPlay: autoPlayNext)) {
       unawaited(playNext());
@@ -1451,6 +1629,10 @@ class PlaybackController extends Notifier<PlaybackState> {
 
   Future<void> _teardownAsync() async {
     _silentEnd?.cancel();
+    _gaplessFallback?.cancel();
+    _gaplessGeneration++;
+    _gapless = null;
+    _mpvIndex = 0;
     for (final sub in _subs) {
       await sub.cancel();
     }

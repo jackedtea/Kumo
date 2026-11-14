@@ -33,7 +33,6 @@ import 'now_playing.dart';
 import 'stable_insets.dart';
 import 'pip_controller.dart';
 import 'playback_controller.dart';
-import 'subtitle_picker.dart';
 import 'playback_state.dart';
 import 'player_ui_state.dart';
 import 'screenshot.dart';
@@ -564,21 +563,7 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
       context,
       onAudio: controller.chooseAudioTrack,
       onSubtitle: controller.chooseSubtitleTrack,
-      onOpenSubtitleFile: () => _openSubtitleFile(controller),
     );
-  }
-
-  /// Picks a subtitle off the device and loads it into the running file.
-  ///
-  /// Always offered, including for a share or a stream: the file being
-  /// played does not have to be the one the subtitle sits beside.
-  Future<void> _openSubtitleFile(PlaybackController controller) async {
-    _restartHideTimer();
-
-    final file = await pickSubtitleFile();
-    if (file == null) return;
-
-    await controller.addExternalSubtitle(Uri.file(file.path), title: file.name);
   }
 
   Future<void> _pickSpeed(

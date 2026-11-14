@@ -339,6 +339,29 @@ List<MediaSegment> mediaSegmentsFromJson(Map<String, dynamic> json) {
   return segments;
 }
 
+/// The `/Audio/{id}/Lyrics` answer: `Lyrics` is a list of `{Text, Start}`,
+/// `Start` in ticks and absent on plain lyrics. Null when there are no words.
+Lyrics? lyricsFromJson(Map<String, dynamic> json) {
+  final entries = json['Lyrics'];
+  if (entries is! List) return null;
+
+  final lines = <LyricLine>[
+    for (final Object? entry in entries)
+      if (entry is Map)
+        LyricLine(
+          (entry['Text'] as String? ?? '').trimRight(),
+          start: ticksToPosition(entry['Start']),
+        ),
+  ];
+
+  final lyrics = Lyrics(lines);
+  if (lyrics.isEmpty) return null;
+  if (lyrics.synced) {
+    // Sorted by time, so the current line is a walk from the top.
+    lines.sort((a, b) => a.start!.compareTo(b.start!));
+  }
+  return lyrics;
+}
 
 /// The `/Movies/Recommendations` answer — a bare array of titled rows.
 ///

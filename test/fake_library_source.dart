@@ -98,6 +98,9 @@ class FakeLibrarySource implements MediaLibrarySource {
       const <MediaSegment>[];
 
   @override
+  Future<Lyrics?> lyrics(String itemId) async => null;
+
+  @override
   Future<List<ServerItem>> search(
     String query, {
     int limit = 40,

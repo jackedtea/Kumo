@@ -212,6 +212,18 @@ class JellyfinSource implements MediaLibrarySource {
   }
 
   @override
+  Future<Lyrics?> lyrics(String itemId) async {
+    // 10.9 and later; an older server, or a song with no words, answers 404.
+    // Like segments, no lyrics is the ordinary answer and never an error.
+    try {
+      return lyricsFromJson(await _get('/Audio/$itemId/Lyrics', const {}));
+    } catch (e) {
+      debugPrint('No lyrics for $itemId: $e');
+      return null;
+    }
+  }
+
+  @override
   Future<List<ServerItem>> episodes(String seriesId, {String? seasonId}) async {
     final json = await _get('/Shows/$seriesId/Episodes', <String, String>{
       'userId': _profile.userId,
@@ -1223,7 +1235,30 @@ class JellyfinAuth {
       name: data['ServerName'] as String? ?? url,
       version: data['Version'] as String? ?? '',
       serverId: data['Id'] as String? ?? '',
+      localAddress: switch (data['LocalAddress']) {
+        final String a when a.isNotEmpty => normaliseServerUrl(a),
+        _ => null,
+      },
     );
+  }
+
+  /// Whether the server [serverId] answers at [url] within [timeout].
+  ///
+  /// The id is checked as well as the answer: a LAN address at home can be a
+  /// different machine entirely on someone else's network, and signing the
+  /// stored token in there would hand it to a stranger.
+  Future<ServerInfo?> answers(
+    String url, {
+    required String serverId,
+    Duration timeout = const Duration(seconds: 3),
+  }) async {
+    try {
+      final info = await probe(url).timeout(timeout);
+      if (serverId.isNotEmpty && info.serverId != serverId) return null;
+      return info;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Exchanges a password for a token.
@@ -1510,12 +1545,18 @@ class ServerInfo {
     required this.name,
     required this.version,
     required this.serverId,
+    this.localAddress,
   });
 
   final String uri;
   final String name;
   final String version;
   final String serverId;
+
+  /// The address the server gives itself on its own network
+  /// (`LocalAddress`), normalised. Kept beside the address typed, so the
+  /// app can reach the server both at home and away.
+  final String? localAddress;
 }
 
 @immutable

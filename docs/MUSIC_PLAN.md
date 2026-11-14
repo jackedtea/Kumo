@@ -1,7 +1,10 @@
 # Music — Implementation Plan
 
 > Status: **M1 and M2 are built** (2026-11-07), not yet tried on a device or
-> against a real server. Windows SMTC and Linux MPRIS were looked at and
+> against a real server. **M3, 2026-11-14:** gapless, lyrics, ReplayGain, and
+> the sleep timer plus "stop after this song" on Now playing are built (see
+> `CLAUDE.md` › Music libraries › M3); music downloads and Android Auto are
+> not. Windows SMTC and Linux MPRIS were looked at and
 > deferred (see M2). A cast song does not follow the queue on to the next. The section
 > "Where the app stands today" describes the app before step 1. `../CLAUDE.md`
 > stays the description of the code as it is.

@@ -401,7 +401,16 @@ class PlaybackState {
     this.logLines = const <String>[],
     this.queue = const PlaybackQueue(),
     this.loop = LoopMode.off,
+    this.stopAfterCurrent = false,
+    this.sleepAt,
   });
+
+  /// Pause when the current file ends instead of rolling on. Cleared by the
+  /// next file, whoever opens it.
+  final bool stopAfterCurrent;
+
+  /// When the sleep timer pauses playback. Null while it is off.
+  final DateTime? sleepAt;
 
   /// Null until something has been opened.
   final PlayableMedia? media;
@@ -604,6 +613,9 @@ class PlaybackState {
     List<String>? logLines,
     PlaybackQueue? queue,
     LoopMode? loop,
+    bool? stopAfterCurrent,
+    DateTime? sleepAt,
+    bool clearSleepAt = false,
     bool clearError = false,
     bool clearMedia = false,
   }) {
@@ -629,6 +641,8 @@ class PlaybackState {
       logLines: logLines ?? this.logLines,
       queue: queue ?? this.queue,
       loop: loop ?? this.loop,
+      stopAfterCurrent: stopAfterCurrent ?? this.stopAfterCurrent,
+      sleepAt: clearSleepAt ? null : (sleepAt ?? this.sleepAt),
     );
   }
 }

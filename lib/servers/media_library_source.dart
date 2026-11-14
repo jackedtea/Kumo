@@ -548,6 +548,53 @@ class MediaSegment {
   int get hashCode => Object.hash(kind, start, end);
 }
 
+/// One line of a song's words.
+@immutable
+class LyricLine {
+  const LyricLine(this.text, {this.start});
+
+  final String text;
+
+  /// When the line is sung. Null for plain lyrics, which have no timing.
+  final Duration? start;
+
+  @override
+  bool operator ==(Object other) =>
+      other is LyricLine && other.text == text && other.start == start;
+
+  @override
+  int get hashCode => Object.hash(text, start);
+}
+
+/// A song's words, as `/Audio/{id}/Lyrics` (Jellyfin 10.9+) has them.
+@immutable
+class Lyrics {
+  const Lyrics(this.lines);
+
+  /// In the order sung. Timed lines are sorted by [LyricLine.start].
+  final List<LyricLine> lines;
+
+  /// True when every line carries a time, so the screen can follow the song.
+  /// A file that times some lines and not others is shown as plain text:
+  /// following it would jump past the untimed ones.
+  bool get synced =>
+      lines.isNotEmpty && lines.every((l) => l.start != null);
+
+  bool get isEmpty => lines.every((l) => l.text.trim().isEmpty);
+}
+
+/// The line being sung at [position]: the last one started by then, or null
+/// before the first. Lines are assumed sorted, as [Lyrics] keeps them.
+int? currentLyricLine(List<LyricLine> lines, Duration position) {
+  int? current;
+  for (var i = 0; i < lines.length; i++) {
+    final start = lines[i].start;
+    if (start == null || start > position) break;
+    current = i;
+  }
+  return current;
+}
+
 /// A chapter as the *server* holds it, with the artwork it generated for it.
 ///
 /// One picture of an item, as `/Items/{id}/Images` lists it.
@@ -1087,6 +1134,12 @@ abstract class MediaLibrarySource {
   /// detection plugin over has none either. Neither is a failure worth
   /// showing anyone.
   Future<List<MediaSegment>> segments(String itemId);
+
+  /// The words of the song [itemId], or null when it has none.
+  ///
+  /// Null too for a server before 10.9, which has no such route: no lyrics is
+  /// the usual answer and never a failure worth showing.
+  Future<Lyrics?> lyrics(String itemId);
 
   Future<void> setPlayed(String itemId, {required bool played});
 

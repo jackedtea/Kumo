@@ -2404,9 +2404,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get audioDelay => 'Độ trễ âm thanh';
 
   @override
-  String get openSubtitleFile => 'Mở tệp phụ đề…';
-
-  @override
   String get playOn => 'Phát trên';
 
   @override
@@ -3447,4 +3444,54 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get recentlyPlayed => 'Nghe gần đây';
+
+  @override
+  String get showLyrics => 'Hiện lời bài hát';
+
+  @override
+  String get hideLyrics => 'Ẩn lời bài hát';
+
+  @override
+  String get replayGain => 'Chuẩn hoá âm lượng';
+
+  @override
+  String get replayGainSub => 'Cân bằng độ to theo thẻ ReplayGain trong tệp';
+
+  @override
+  String get replayGainOff => 'Tắt';
+
+  @override
+  String get replayGainOffSub => 'Phát mỗi tệp ở mức âm lượng gốc';
+
+  @override
+  String get replayGainTrack => 'Theo bài';
+
+  @override
+  String get replayGainTrackSub =>
+      'Mọi bài to như nhau, hợp khi phát ngẫu nhiên';
+
+  @override
+  String get replayGainAlbum => 'Theo album';
+
+  @override
+  String get replayGainAlbumSub =>
+      'Giữ bài to, bài nhỏ trong album như bản gốc';
+
+  @override
+  String get endOfThisSong => 'Hết bài này';
+
+  @override
+  String get pausesAfterThisSong => 'Tạm dừng sau bài này';
+
+  @override
+  String pausesAt(String time) {
+    return 'Tạm dừng lúc $time';
+  }
+
+  @override
+  String get otherAddresses => 'Địa chỉ khác';
+
+  @override
+  String get otherAddressesSub =>
+      'Mỗi dòng một địa chỉ. Kumo dùng địa chỉ nào trả lời trước, nên server dùng được cả ở nhà lẫn bên ngoài.';
 }

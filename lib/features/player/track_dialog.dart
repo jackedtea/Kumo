@@ -24,14 +24,12 @@ Future<void> showAudioSubtitleDialog(
   BuildContext context, {
   required ValueChanged<MediaTrack> onAudio,
   required ValueChanged<MediaTrack?> onSubtitle,
-  required VoidCallback onOpenSubtitleFile,
 }) {
   return showDialog<void>(
     context: context,
     builder: (_) => AudioSubtitleDialog(
       onAudio: onAudio,
       onSubtitle: onSubtitle,
-      onOpenSubtitleFile: onOpenSubtitleFile,
     ),
   );
 }
@@ -41,12 +39,10 @@ class AudioSubtitleDialog extends ConsumerWidget {
     super.key,
     required this.onAudio,
     required this.onSubtitle,
-    required this.onOpenSubtitleFile,
   });
 
   final ValueChanged<MediaTrack> onAudio;
   final ValueChanged<MediaTrack?> onSubtitle;
-  final VoidCallback onOpenSubtitleFile;
 
   /// The player's dark surface; the app's light theme flashing over a film
   /// is worse than a dialog that looks slightly unlike the rest of the app.
@@ -134,26 +130,6 @@ class AudioSubtitleDialog extends ConsumerWidget {
                         ],
                         selectedId: state.activeSubtitle?.id,
                         onSelected: (o) => onSubtitle(o.track),
-                        footer: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: spacing.xl,
-                          ),
-                          leading: const Icon(
-                            Icons.file_open_outlined,
-                            color: Colors.white70,
-                          ),
-                          title: Text(
-                            l10n.openSubtitleFile,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          // Closes first: the file picker is a window of its
-                          // own, and coming back to this dialog under it
-                          // would be a second thing to dismiss.
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            onOpenSubtitleFile();
-                          },
-                        ),
                       ),
                     ),
                   ),
@@ -167,7 +143,7 @@ class AudioSubtitleDialog extends ConsumerWidget {
   }
 }
 
-/// One side of the dialog: a heading, its tracks, and anything under them.
+/// One side of the dialog: a heading and its tracks.
 class _Column extends StatelessWidget {
   const _Column({
     required this.icon,
@@ -175,7 +151,6 @@ class _Column extends StatelessWidget {
     required this.options,
     required this.selectedId,
     required this.onSelected,
-    this.footer,
   });
 
   final IconData icon;
@@ -183,7 +158,6 @@ class _Column extends StatelessWidget {
   final List<TrackOption> options;
   final String? selectedId;
   final ValueChanged<TrackOption> onSelected;
-  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -246,10 +220,6 @@ class _Column extends StatelessWidget {
                   ],
                 ),
         ),
-        if (footer != null) ...<Widget>[
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
-          footer!,
-        ],
       ],
     );
   }

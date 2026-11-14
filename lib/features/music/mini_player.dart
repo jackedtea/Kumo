@@ -176,7 +176,7 @@ class MiniPlayerHost extends ConsumerWidget {
 
   /// Screens that are the player. The video player has one decoder to itself,
   /// and Now playing is already showing all of this.
-  static const _playerRoutes = <String>{'player', 'now-playing', 'smoke'};
+  static const _playerRoutes = <String>{'player', 'now-playing'};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

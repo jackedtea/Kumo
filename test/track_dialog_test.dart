@@ -87,7 +87,6 @@ Future<List<String>> _open(WidgetTester tester, Size size) async {
                       calls.add('subtitle ${t?.id}');
                       player.setSubtitleTrack(t);
                     },
-                    onOpenSubtitleFile: () => calls.add('file'),
                   );
                 },
                 child: const Text('open'),
@@ -145,17 +144,6 @@ void main() {
     expect(_tickOn('Japanese'), findsOneWidget);
     expect(_tickOn('English 5.1'), findsNothing);
     expect(_tickOn('English SDH'), findsOneWidget);
-  });
-
-  testWidgets('opening a subtitle file closes the dialog first',
-      (tester) async {
-    final calls = await _open(tester, const Size(844, 390));
-
-    await tester.tap(find.text('Open subtitle file…'));
-    await tester.pumpAndSettle();
-
-    expect(calls, <String>['file']);
-    expect(find.byType(AudioSubtitleDialog), findsNothing);
   });
 
   testWidgets('each track says its language', (tester) async {

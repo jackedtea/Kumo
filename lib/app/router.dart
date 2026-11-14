@@ -27,7 +27,6 @@ import '../features/downloads/downloads_page.dart';
 import '../features/home/favorites_page.dart';
 import '../features/home/home_page.dart';
 import '../features/libraries/libraries_page.dart';
-import '../features/playback/smoke_test_page.dart';
 import '../features/player/playback_controller.dart';
 import '../features/player/playback_state.dart';
 import '../features/player/player_page.dart';
@@ -377,13 +376,6 @@ GoRouter buildRouter() {
         path: '/remote',
         parentNavigatorKey: _rootKey,
         builder: (context, state) => const RemotePage(),
-      ),
-      // Kept from Phase 0 — proves the media_kit pipeline end to end on each
-      // platform. Superseded by the real player screen in build step 2.
-      GoRoute(
-        path: '/smoke',
-        parentNavigatorKey: _rootKey,
-        builder: (context, state) => const SmokeTestPage(),
       ),
     ],
   );

@@ -17,10 +17,12 @@ import 'jellyfin_admin.dart';
 import 'jellyfin_source.dart';
 import 'media_library_source.dart';
 import 'jellyfin_media_source.dart';
+import 'server_addresses.dart';
 import 'server_admin.dart';
 import 'server_pin.dart';
 import 'server_profile.dart';
 import 'stream_preferences.dart';
+import '../downloads/download_settings.dart';
 import '../downloads/downloads_controller.dart';
 import '../downloads/offline_media_source.dart';
 import '../sources/media_source.dart';
@@ -213,6 +215,14 @@ class ServerRegistryState {
 final serverRegistryProvider =
     NotifierProvider<ServerRegistry, ServerRegistryState>(ServerRegistry.new);
 
+/// Whether the registry may ask servers about their addresses on its own —
+/// in the background on activation, and again when the network changes.
+/// Off under `flutter test`, whose widget tests pump the whole app and must
+/// not reach for the network or leave a probe's timer pending.
+final serverAddressLearningProvider = Provider<bool>(
+  (ref) => !kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST'),
+);
+
 /// The live server as something the player can open, or null while nothing
 /// is signed in.
 ///
@@ -274,11 +284,35 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
   /// reads this field instead, the way `PlaybackController` keeps `_player`.
   MediaLibrarySource? _live;
 
+  /// The address each profile was last reached at this launch, when it is
+  /// not the profile's main one. Memory only: which network the device is on
+  /// next launch is anyone's guess.
+  final Map<String, String> _reachable = <String, String>{};
+
+  /// Where [profile] is being reached now: one of its candidate addresses.
+  String addressFor(ServerProfile profile) =>
+      _reachable[profile.id] ?? profile.uri;
+
   @override
   ServerRegistryState build() {
     // Loads behind the first frame: the Server tab renders its empty state
     // instantly and fills in, the way Storage does with shares.
     Future<void>.microtask(reload);
+
+    // Home Wi-Fi to mobile data and back: the address in use may have
+    // stopped answering, and another of the server's may answer instead.
+    if (ref.read(serverAddressLearningProvider)) {
+      ref.listen<AsyncValue<DownloadNetwork>>(downloadNetworkProvider, (
+        previous,
+        next,
+      ) {
+        final before = previous?.value;
+        final now = next.value;
+        if (before != null && now != null && before != now) {
+          unawaited(_recheckAddress());
+        }
+      });
+    }
 
     ref.onDispose(() {
       final live = _live;
@@ -326,7 +360,16 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
       return;
     }
 
-    final client = await _clientFor(profile, token);
+    final address = await _pickAddress(profile);
+    if (address == profile.uri) {
+      _reachable.remove(profile.id);
+    } else {
+      _reachable[profile.id] = address;
+    }
+
+    // The profile keeps its own id and main address; only the client is
+    // pointed at the address that answered.
+    final client = await _clientFor(profile.copyWith(uri: address), token);
     await _setLive(client);
 
     state = state.copyWith(
@@ -336,6 +379,77 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     );
 
     await _touch(profile);
+
+    if (ref.read(serverAddressLearningProvider)) {
+      unawaited(_learnLocalAddress(profile.id, address));
+    }
+  }
+
+  /// The fastest of [profile]'s addresses to answer as that server, or its
+  /// main one when it has no other or none answers — an unreachable server
+  /// then fails on its own screens, with their retry.
+  Future<String> _pickAddress(ServerProfile profile) async {
+    if (profile.addresses.isEmpty) return profile.uri;
+
+    final auth = await this.auth();
+    try {
+      final winner = await firstReachable(
+        profile.candidateAddresses,
+        (address) async =>
+            await auth.answers(address, serverId: profile.serverId) != null,
+      );
+      return winner ?? profile.uri;
+    } finally {
+      unawaited(auth.dispose());
+    }
+  }
+
+  /// Keeps the address the server says it has on its own network, so a
+  /// server added from outside can be reached directly once home, and the
+  /// other way round. Asked of the address already in use, after activation,
+  /// so it never delays the library.
+  Future<void> _learnLocalAddress(String profileId, String address) async {
+    final auth = await this.auth();
+    try {
+      final profile =
+          state.profiles.where((p) => p.id == profileId).firstOrNull;
+      if (profile == null) return;
+
+      final info = await auth.answers(address, serverId: profile.serverId);
+      final local = info?.localAddress;
+      if (local == null || profile.candidateAddresses.contains(local)) return;
+
+      await _replace(
+        profile.copyWith(
+          addresses: mergeAddresses(
+            profile.uri,
+            profile.addresses,
+            discovered: local,
+          ),
+        ),
+      );
+    } finally {
+      unawaited(auth.dispose());
+    }
+  }
+
+  /// After a network change: stays where it is while that still answers,
+  /// and moves to another of the server's addresses otherwise.
+  Future<void> _recheckAddress() async {
+    final profile = state.active;
+    if (profile == null || state.source == null) return;
+    if (profile.addresses.isEmpty) return;
+
+    final auth = await this.auth();
+    try {
+      final current = addressFor(profile);
+      if (await auth.answers(current, serverId: profile.serverId) != null) {
+        return;
+      }
+    } finally {
+      unawaited(auth.dispose());
+    }
+    await activate(profile.id);
   }
 
   /// Stores a freshly signed-in server and switches to it.
@@ -355,6 +469,11 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
       serverId: auth.serverId,
       isAdministrator: auth.isAdministrator,
       lastUsed: DateTime.now(),
+      addresses: mergeAddresses(
+        info.uri,
+        const <String>[],
+        discovered: info.localAddress,
+      ),
     );
 
     await _repository.writeToken(profile, auth.token);
@@ -391,11 +510,17 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
   /// [name] is what the user typed for it in the same sheet. Empty, or the
   /// server's own name, hands the name back to the server; anything else is
   /// kept on this device. Null leaves the name as it was.
+  ///
+  /// [addresses] are the server's other addresses as the user left them in
+  /// the sheet. Null keeps the stored ones and adds the server's own LAN
+  /// address if it is new; a list given is taken as it is, so an address the
+  /// user deleted stays deleted.
   Future<void> updateProfile(
     String profileId, {
     required ServerInfo info,
     required AuthResult auth,
     String? name,
+    List<String>? addresses,
   }) async {
     final profile = state.profiles.where((p) => p.id == profileId).firstOrNull;
     if (profile == null) return;
@@ -410,6 +535,13 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
       name: !custom ? info.name : (typed ?? profile.name),
       nameIsCustom: custom,
       uri: info.uri,
+      addresses: addresses != null
+          ? mergeAddresses(info.uri, addresses)
+          : mergeAddresses(
+              info.uri,
+              profile.addresses,
+              discovered: info.localAddress,
+            ),
       userId: auth.userId,
       username: auth.username,
       serverId: auth.serverId,
@@ -546,7 +678,9 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     if (token == null || token.isEmpty) return null;
 
     return JellyfinAdmin(
-      profile: profile,
+      // The address the library is being reached at, not necessarily the
+      // main one: away from home only the public address answers.
+      profile: profile.copyWith(uri: addressFor(profile)),
       token: token,
       identity: await identity(),
     );

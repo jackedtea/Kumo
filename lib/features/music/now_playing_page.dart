@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
-import 'dart:math' show min;
+import 'dart:math' show max, min;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/tokens.dart';
 import '../../cast/cast_device.dart';
 import '../../l10n/app_localizations.dart';
+import '../../servers/media_library_source.dart';
 import '../../sources/media_source.dart';
 import '../../widgets/gradient_art.dart';
 import '../../widgets/remote_art.dart';
@@ -24,19 +25,31 @@ import '../player/playback_state.dart';
 import '../servers/item_actions.dart';
 import '../servers/server_library.dart';
 import 'audio_session.dart';
+import 'lyrics_view.dart';
 import 'music_widgets.dart';
 
 /// The second face of the player: large art, a seek bar and the transport.
 ///
 /// On a phone the queue is a sheet behind a button; where there is room it
 /// stands beside the art. Leaving the screen leaves the music playing.
-class NowPlayingPage extends ConsumerWidget {
+///
+/// A song with words gets a Lyrics button, which swaps the cover for them.
+class NowPlayingPage extends ConsumerStatefulWidget {
   const NowPlayingPage({super.key});
+
+  @override
+  ConsumerState<NowPlayingPage> createState() => _NowPlayingPageState();
+}
+
+class _NowPlayingPageState extends ConsumerState<NowPlayingPage> {
+  /// Stays on from one song to the next, as a reader of lyrics would want;
+  /// a song without words simply shows its cover.
+  bool _showLyrics = false;
 
   /// Media keys, and Escape to leave. Arrows are left to focus traversal, so a
   /// remote can walk the buttons; the video player can take them for seeking
   /// because its chrome hides, and this screen is nothing but buttons.
-  KeyEventResult _onKey(BuildContext context, WidgetRef ref, KeyEvent event) {
+  KeyEventResult _onKey(BuildContext context, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
 
     final session = ref.read(audioSessionProvider.notifier);
@@ -59,7 +72,7 @@ class NowPlayingPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final media = ref.watch(playbackControllerProvider.select((s) => s.media));
     final compact = context.windowSize == WindowSize.compact;
@@ -92,18 +105,29 @@ class NowPlayingPage extends ConsumerWidget {
       );
     }
 
+    final lyrics = ref.watch(songLyricsProvider(media.ref.itemId)).value;
+    final shownLyrics = _showLyrics ? lyrics : null;
+
     return Focus(
-      onKeyEvent: (_, event) => _onKey(context, ref, event),
+      onKeyEvent: (_, event) => _onKey(context, event),
       child: Scaffold(
         appBar: AppBar(
           leading: back,
           title: Text(l10n.nowPlaying),
           actions: <Widget>[
+            if (lyrics != null)
+              IconButton(
+                tooltip: _showLyrics ? l10n.hideLyrics : l10n.showLyrics,
+                isSelected: _showLyrics,
+                icon: const Icon(Icons.lyrics_outlined),
+                selectedIcon: const Icon(Icons.lyrics_rounded),
+                onPressed: () => setState(() => _showLyrics = !_showLyrics),
+              ),
             _FavouriteButton(itemId: media.ref.itemId),
             IconButton(
               icon: const Icon(Icons.cast_rounded),
               tooltip: l10n.playOn,
-              onPressed: () => _pickCastDevice(context, ref, media),
+              onPressed: () => _pickCastDevice(context, media),
             ),
             if (compact)
               IconButton(
@@ -114,10 +138,12 @@ class NowPlayingPage extends ConsumerWidget {
           ],
         ),
         body: compact
-            ? _ArtAndControls(media: media)
+            ? _ArtAndControls(media: media, lyrics: shownLyrics)
             : Row(
                 children: <Widget>[
-                  Expanded(child: _ArtAndControls(media: media)),
+                  Expanded(
+                    child: _ArtAndControls(media: media, lyrics: shownLyrics),
+                  ),
                   VerticalDivider(width: 1, color: context.semantic.divider),
                   const SizedBox(width: 360, child: _QueueList()),
                 ],
@@ -128,11 +154,7 @@ class NowPlayingPage extends ConsumerWidget {
 
   /// Hands the song to a device on the network. Paused here rather than
   /// stopped, so coming back carries on where the room left off.
-  Future<void> _pickCastDevice(
-    BuildContext context,
-    WidgetRef ref,
-    PlayableMedia media,
-  ) {
+  Future<void> _pickCastDevice(BuildContext context, PlayableMedia media) {
     return CastSheet.show(
       context,
       onSelected: (CastDevice device) async {
@@ -168,19 +190,25 @@ class NowPlayingPage extends ConsumerWidget {
   }
 }
 
-/// The cover, as large as the controls leave room for.
+/// The cover, as large as the controls leave room for — or the song's words
+/// in its place, when [lyrics] is given.
 class _ArtAndControls extends ConsumerWidget {
-  const _ArtAndControls({required this.media});
+  const _ArtAndControls({required this.media, this.lyrics});
 
   final PlayableMedia media;
+  final Lyrics? lyrics;
 
   /// What the controls under the art need. Asked for rather than measured, so
   /// the art is a fixed size while a title of one line or two comes and goes.
-  static const _controlsHeight = 300.0;
+  static const _controlsHeight = 348.0;
 
   /// Under this a cover says nothing, and the window is better spent on the
   /// controls: a phone on its side.
   static const _smallestArt = 120.0;
+
+  /// Lyrics are given at least this much, even on a phone on its side where
+  /// a cover would be dropped: a few lines are still worth reading.
+  static const _smallestLyrics = 160.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -201,7 +229,14 @@ class _ArtAndControls extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                if (side >= _smallestArt) ...<Widget>[
+                if (lyrics != null) ...<Widget>[
+                  SizedBox(
+                    width: min(box.maxWidth - gutter * 2, 560.0),
+                    height: max(side, _smallestLyrics),
+                    child: LyricsView(lyrics: lyrics!),
+                  ),
+                  SizedBox(height: spacing.lg),
+                ] else if (side >= _smallestArt) ...<Widget>[
                   ClipRRect(
                     borderRadius: context.radii.cardAll,
                     child: SizedBox.square(
@@ -385,8 +420,91 @@ class _ControlsState extends ConsumerState<_Controls> {
             ),
           ],
         ),
+        SizedBox(height: spacing.xs),
+        _SleepButton(state: state),
       ],
     );
+  }
+}
+
+/// The sleep timer, and "stop after this song" beside its minutes. Labelled
+/// with what it will do once set, so the screen says why the music stopped.
+class _SleepButton extends ConsumerWidget {
+  const _SleepButton({required this.state});
+
+  final PlaybackState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final sleepAt = state.sleepAt;
+    final active = state.stopAfterCurrent || sleepAt != null;
+
+    final label = state.stopAfterCurrent
+        ? l10n.pausesAfterThisSong
+        : sleepAt != null
+            ? l10n.pausesAt(
+                MaterialLocalizations.of(context).formatTimeOfDay(
+                  TimeOfDay.fromDateTime(sleepAt),
+                  alwaysUse24HourFormat:
+                      MediaQuery.alwaysUse24HourFormatOf(context),
+                ),
+              )
+            : l10n.sleepTimer;
+
+    return TextButton.icon(
+      style: active
+          ? null
+          : TextButton.styleFrom(
+              foregroundColor: context.colors.onSurfaceVariant,
+            ),
+      icon: Icon(active ? Icons.bedtime_rounded : Icons.bedtime_outlined),
+      label: Text(label),
+      onPressed: () => _pick(context, ref),
+    );
+  }
+
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final playback = ref.read(playbackControllerProvider.notifier);
+
+    // Null minutes with `end` false is Off; `end` is "End of this song".
+    final choices = <(String, Duration?, bool)>[
+      (l10n.off, null, false),
+      for (final int m in const <int>[15, 30, 45, 60])
+        (l10n.minutes(m), Duration(minutes: m), false),
+      (l10n.endOfThisSong, null, true),
+    ];
+    final selected = state.stopAfterCurrent
+        ? choices.length - 1
+        : state.sleepAt == null
+            ? 0
+            : -1;
+
+    final chosen = await showModalBottomSheet<(String, Duration?, bool)>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            for (var i = 0; i < choices.length; i++)
+              ListTile(
+                title: Text(choices[i].$1),
+                trailing:
+                    i == selected ? const Icon(Icons.check_rounded) : null,
+                onTap: () => Navigator.of(sheetContext).pop(choices[i]),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen == null) return;
+
+    final (_, after, end) = chosen;
+    playback.setSleepTimer(after);
+    playback.setStopAfterCurrent(end);
   }
 }
 

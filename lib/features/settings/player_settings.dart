@@ -79,6 +79,21 @@ enum GaplessAudio {
   final String mpvValue;
 }
 
+/// Whether mpv evens out loudness from the ReplayGain tags in a file.
+///
+/// Off by default: a file without tags is left alone either way, but one with
+/// them changes level, and nobody asked for that until they choose it. Album
+/// keeps an album's quiet and loud songs apart; track evens out a shuffle.
+enum ReplayGain {
+  off('no'),
+  track('track'),
+  album('album');
+
+  const ReplayGain(this.mpvValue);
+
+  final String mpvValue;
+}
+
 /// What to do when playback reaches a stretch the server has labelled.
 ///
 /// Three states rather than a switch because skipping silently and offering
@@ -150,6 +165,7 @@ class PlayerSettings {
     this.volumeBoost = 100,
     this.syncDeviceVolume = false,
     this.gapless = GaplessAudio.automatic,
+    this.replayGain = ReplayGain.off,
   });
 
   factory PlayerSettings.fromJson(Map<String, dynamic> json) {
@@ -184,6 +200,10 @@ class PlayerSettings {
       gapless: GaplessAudio.values.firstWhere(
         (g) => g.name == json['gapless'],
         orElse: () => GaplessAudio.automatic,
+      ),
+      replayGain: ReplayGain.values.firstWhere(
+        (g) => g.name == json['replayGain'],
+        orElse: () => ReplayGain.off,
       ),
     );
   }
@@ -267,6 +287,8 @@ class PlayerSettings {
 
   final GaplessAudio gapless;
 
+  final ReplayGain replayGain;
+
   /// mpv's default subtitle size, which the scale multiplies.
   static const _baseSubtitleSize = 55;
 
@@ -318,6 +340,7 @@ class PlayerSettings {
         'volumeBoost': volumeBoost,
         'syncDeviceVolume': syncDeviceVolume,
         'gapless': gapless.name,
+        'replayGain': replayGain.name,
       };
 
   PlayerSettings copyWith({
@@ -341,6 +364,7 @@ class PlayerSettings {
     int? volumeBoost,
     bool? syncDeviceVolume,
     GaplessAudio? gapless,
+    ReplayGain? replayGain,
   }) {
     return PlayerSettings(
       hardwareDecoding: hardwareDecoding ?? this.hardwareDecoding,
@@ -367,6 +391,7 @@ class PlayerSettings {
       volumeBoost: volumeBoost ?? this.volumeBoost,
       syncDeviceVolume: syncDeviceVolume ?? this.syncDeviceVolume,
       gapless: gapless ?? this.gapless,
+      replayGain: replayGain ?? this.replayGain,
     );
   }
 }

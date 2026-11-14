@@ -28,7 +28,11 @@ class CurrentServerCard extends ConsumerWidget {
     final spacing = context.spacing;
     final scheme = context.colors;
     final l10n = AppLocalizations.of(context);
-    final profile = ref.watch(serverRegistryProvider).active;
+    final registry = ref.watch(serverRegistryProvider);
+    final profile = registry.active;
+    // The address the library is reached at now, which away from home may
+    // be one of the server's others.
+    final address = registry.source?.profile.uri ?? profile?.uri;
     final connected = ref.watch(connectedServerProvider) != null;
 
     return Padding(
@@ -49,7 +53,11 @@ class CurrentServerCard extends ConsumerWidget {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  _ServerSummary(profile: profile, connected: connected),
+                  _ServerSummary(
+                    profile: profile,
+                    address: address ?? profile.uri,
+                    connected: connected,
+                  ),
                   SizedBox(height: spacing.lg),
                   // Wraps rather than overflowing: two labelled buttons do not
                   // share a narrow phone in Vietnamese at large text.
@@ -84,9 +92,17 @@ class CurrentServerCard extends ConsumerWidget {
 }
 
 class _ServerSummary extends StatelessWidget {
-  const _ServerSummary({required this.profile, required this.connected});
+  const _ServerSummary({
+    required this.profile,
+    required this.address,
+    required this.connected,
+  });
 
   final ServerProfile profile;
+
+  /// Where the server is being reached: [ServerProfile.uri] or another of
+  /// its addresses.
+  final String address;
 
   /// Whether Home has gone into this server, rather than only remembering it.
   final bool connected;
@@ -96,7 +112,7 @@ class _ServerSummary extends StatelessWidget {
     final spacing = context.spacing;
     final scheme = context.colors;
     final l10n = AppLocalizations.of(context);
-    final host = Uri.tryParse(profile.uri)?.authority ?? profile.uri;
+    final host = Uri.tryParse(address)?.authority ?? address;
 
     return Row(
       children: <Widget>[

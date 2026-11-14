@@ -13,6 +13,7 @@ import '../../app/tokens.dart';
 import '../../servers/jellyfin_source.dart';
 import '../../servers/media_library_source.dart';
 import '../../l10n/app_localizations.dart';
+import '../../servers/server_addresses.dart';
 import '../../servers/server_profile.dart';
 import '../../servers/auto_connect.dart';
 import '../../servers/server_registry.dart';
@@ -70,6 +71,9 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
   /// The name this device shows for the server being edited. Absent when
   /// adding: a server not yet found has no name to start from.
   final _name = TextEditingController();
+
+  /// The server's other addresses, one per line. Edit only.
+  final _otherAddresses = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
 
@@ -127,6 +131,7 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
     // by typing a character is busywork.
     _address.text = editing.uri;
     _name.text = editing.name;
+    _otherAddresses.text = editing.addresses.join('\n');
     _username.text = editing.username;
     WidgetsBinding.instance.addPostFrameCallback((_) => _onAddressChanged());
   }
@@ -139,6 +144,7 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
     unawaited(_auth?.dispose());
     _address.dispose();
     _name.dispose();
+    _otherAddresses.dispose();
     _username.dispose();
     _password.dispose();
     super.dispose();
@@ -379,6 +385,7 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
         info: server,
         auth: result,
         name: _name.text,
+        addresses: parseAddressList(_otherAddresses.text),
       );
     }
 
@@ -479,6 +486,37 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
                   // surprises someone who expected the web app to change too.
                   child: Text(
                     l10n.renameServerLocal,
+                    style: context.texts.bodySmall?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing.md),
+                TextField(
+                  controller: _otherAddresses,
+                  enabled: !busy,
+                  keyboardType: TextInputType.multiline,
+                  autocorrect: false,
+                  minLines: 1,
+                  maxLines: 4,
+                  decoration: _fieldDecoration(
+                    context,
+                    label: l10n.otherAddresses,
+                    icon: Icons.alt_route_rounded,
+                    // What the server says its own LAN address is: the one
+                    // most worth adding beside a public address.
+                    hint: _server?.localAddress ?? 'https://jellyfin.example.com',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    spacing.lg,
+                    spacing.xs,
+                    spacing.lg,
+                    0,
+                  ),
+                  child: Text(
+                    l10n.otherAddressesSub,
                     style: context.texts.bodySmall?.copyWith(
                       color: context.colors.onSurfaceVariant,
                     ),

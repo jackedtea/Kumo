@@ -73,6 +73,12 @@ class AudioSettingsPage extends ConsumerWidget {
           subtitle: l10n.gaplessSub,
           onTap: () => _pickGapless(context, settings, save),
         ),
+        SettingsValueRow(
+          title: l10n.replayGain,
+          value: _replayGainLabel(context, settings.replayGain),
+          subtitle: l10n.replayGainSub,
+          onTap: () => _pickReplayGain(context, settings, save),
+        ),
         SettingsSection(title: l10n.tracks),
         SettingsValueRow(
           title: l10n.preferredLanguage,
@@ -115,6 +121,54 @@ class AudioSettingsPage extends ConsumerWidget {
 
     if (chosen == null) return;
     await save(settings.copyWith(gapless: chosen));
+  }
+
+  Future<void> _pickReplayGain(
+    BuildContext context,
+    PlayerSettings settings,
+    Future<void> Function(PlayerSettings) save,
+  ) async {
+    final chosen = await showModalBottomSheet<ReplayGain>(
+      context: context,
+      useSafeArea: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (final ReplayGain mode in ReplayGain.values)
+              ListTile(
+                title: Text(_replayGainLabel(sheetContext, mode)),
+                subtitle: Text(_replayGainDescription(sheetContext, mode)),
+                trailing: mode == settings.replayGain
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                onTap: () => Navigator.of(sheetContext).pop(mode),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null) return;
+    await save(settings.copyWith(replayGain: chosen));
+  }
+
+  static String _replayGainLabel(BuildContext context, ReplayGain mode) {
+    final l10n = AppLocalizations.of(context);
+    return switch (mode) {
+      ReplayGain.off => l10n.replayGainOff,
+      ReplayGain.track => l10n.replayGainTrack,
+      ReplayGain.album => l10n.replayGainAlbum,
+    };
+  }
+
+  static String _replayGainDescription(BuildContext context, ReplayGain mode) {
+    final l10n = AppLocalizations.of(context);
+    return switch (mode) {
+      ReplayGain.off => l10n.replayGainOffSub,
+      ReplayGain.track => l10n.replayGainTrackSub,
+      ReplayGain.album => l10n.replayGainAlbumSub,
+    };
   }
 
   /// The mode's own name, and the sentence under it. Both live here
