@@ -299,11 +299,12 @@ jobs:
       - name: Select signing material
         id: keystore
         env:
-          MAIN_KEYSTORE: ${{ secrets.KEYSTORE }}
-          MAIN_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          # KEY is the base64 keystore. One password per keystore: a PKCS12
+          # store (keytool's default) cannot give its key a password of its
+          # own, so KEY_PASSWORD opens both the store and the key.
+          MAIN_KEY: ${{ secrets.KEY }}
           MAIN_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          DEV_KEYSTORE: ${{ secrets.KEYSTORE_DEV }}
-          DEV_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD_DEV }}
+          DEV_KEY: ${{ secrets.KEY_DEV }}
           DEV_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD_DEV }}
           # One alias for both keystores: it only names the key inside each
           # file, so sharing it shares nothing else.
@@ -315,12 +316,10 @@ jobs:
           set -euo pipefail
 
           if [ "$BRANCH" = "main" ]; then
-            B64="${MAIN_KEYSTORE:-}"
-            STORE_PASSWORD="${MAIN_KEYSTORE_PASSWORD:-}"
+            B64="${MAIN_KEY:-}"
             KEY_PASSWORD="${MAIN_KEY_PASSWORD:-}"
           else
-            B64="${DEV_KEYSTORE:-}"
-            STORE_PASSWORD="${DEV_KEYSTORE_PASSWORD:-}"
+            B64="${DEV_KEY:-}"
             KEY_PASSWORD="${DEV_KEY_PASSWORD:-}"
           fi
 
@@ -347,7 +346,7 @@ jobs:
           # Gradle reads these from the environment; they stay masked in logs.
           {
             echo "KEYSTORE_PATH=$KEYSTORE_FILE"
-            echo "KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "KEYSTORE_PASSWORD=$KEY_PASSWORD"
             echo "KEY_ALIAS=$ALIAS"
             echo "KEY_PASSWORD=$KEY_PASSWORD"
           } >> "$GITHUB_ENV"

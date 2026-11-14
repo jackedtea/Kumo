@@ -1097,11 +1097,13 @@ clean now; a duplicate-key scan is the way to check after editing it.
   application id gets `.canary` and the app names itself **Kumo (Dev)** (so both
   installs coexist and are told apart in the launcher), version name and artifact name
   get `-dev-<short-sha>`, and the release is marked prerelease.
-- Signing comes from repository secrets: `KEYSTORE` / `KEYSTORE_PASSWORD` /
-  `KEY_PASSWORD` on main, the `*_DEV` set elsewhere. `KEY_ALIAS` is **shared** — both
-  keystores name their key the same, so there is no `KEY_ALIAS_DEV`; an empty one fails
-  the step rather than falling back. The keystore is base64 in the secret,
-  decoded to `android/app/ci-keystore.jks` and deleted afterwards.
+- Signing comes from repository secrets: `KEY` (the keystore, base64) / `KEY_PASSWORD` on
+  main, `KEY_DEV` / `KEY_PASSWORD_DEV` elsewhere. One password per keystore: they are
+  PKCS12, where the store and key password are the same, so it fills both Gradle's
+  `KEYSTORE_PASSWORD` and `KEY_PASSWORD`. `KEY_ALIAS` is **shared** — both keystores name
+  their key the same, so there is no `KEY_ALIAS_DEV`; an empty one fails the step rather
+  than falling back. The keystore is decoded to `android/app/ci-keystore.jks` and deleted
+  afterwards.
 - `android/app/build.gradle.kts` reads `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`,
   `KEY_PASSWORD`, `APP_ID_SUFFIX` and `VERSION_NAME_SUFFIX` **from the environment**. With
   none set it falls back to debug signing, so local release builds still work.
