@@ -346,8 +346,50 @@ class StreamPreferences {
   const StreamPreferences({
     this.quality = const StreamQuality(id: 'original', label: 'Original'),
     this.trackChoice,
+    this.burnInImageSubtitles = true,
   });
 
   final StreamQuality quality;
   final TrackChoice? trackChoice;
+
+  /// See [burnInSubtitlesProvider].
+  final bool burnInImageSubtitles;
 }
+
+/// Whether a transcode may burn an image-based subtitle into the picture.
+///
+/// Only image subtitles are in question: text ones (SRT, WebVTT, ASS) are
+/// asked for beside the stream and drawn by libmpv, transcode or not. PGS and
+/// VobSub cannot travel that way, so a transcode either paints them into the
+/// video — on the server's CPU, re-encoding the whole picture — or plays
+/// without them. Off is the second answer.
+class BurnInSubtitlesController extends Notifier<bool> {
+  static const _key = 'burn_in_image_subtitles_v1';
+
+  @override
+  bool build() {
+    Future<void>.microtask(_restore);
+    return true;
+  }
+
+  Future<void> _restore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getBool(_key);
+      if (saved != null) state = saved;
+    } catch (e) {
+      debugPrint('Unreadable burn-in preference, using the default: $e');
+    }
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, value);
+  }
+}
+
+final burnInSubtitlesProvider =
+    NotifierProvider<BurnInSubtitlesController, bool>(
+  BurnInSubtitlesController.new,
+);

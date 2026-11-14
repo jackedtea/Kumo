@@ -746,6 +746,29 @@ ServerPlayback? playbackFromJson(
   );
 }
 
+/// Subtitle formats a transcode can hand over as a file of their own.
+const textSubtitleFormats = <String>['srt', 'subrip', 'vtt', 'webvtt', 'ass', 'ssa'];
+
+/// Every subtitle format libmpv draws from inside a file.
+const embeddedSubtitleFormats = <String>[
+  ...textSubtitleFormats,
+  'mov_text',
+  'pgssub',
+  'dvdsub',
+  'dvbsub',
+  'vobsub',
+];
+
+/// True when the server's stream has a subtitle painted into the picture.
+///
+/// The transcode URL says so itself, `SubtitleMethod=Encode`; with the
+/// profile above that only happens to an image-based subtitle.
+bool burnsInSubtitles(Uri uri) => uri.queryParameters.entries.any(
+      (e) =>
+          e.key.toLowerCase() == 'subtitlemethod' &&
+          e.value.toLowerCase() == 'encode',
+    );
+
 /// The body of a `PlaybackInfo` request.
 ///
 /// A device profile is how a Jellyfin client says what it can and cannot
@@ -819,6 +842,20 @@ Map<String, dynamic> deviceProfileFor(PlaybackCapabilities caps) {
           'MinSegments': 1,
           'BreakOnNonKeyFrames': true,
         },
+      ],
+      // Without these the server has been told this client renders no
+      // subtitles at all: picking one rules out direct play, and a transcode
+      // burns even plain SRT into the picture. Embed keeps a file whole with
+      // its subtitles inside — libmpv draws every one of these. External is
+      // for a transcode: text subtitles come as a file beside the stream, the
+      // way `externalSubtitles` already fetches them. Image formats have no
+      // External entry, so a transcode can only burn them in; whether it may
+      // is the resolve's call.
+      'SubtitleProfiles': <Map<String, dynamic>>[
+        for (final String format in embeddedSubtitleFormats)
+          <String, dynamic>{'Format': format, 'Method': 'Embed'},
+        for (final String format in textSubtitleFormats)
+          <String, dynamic>{'Format': format, 'Method': 'External'},
       ],
       'CodecProfiles': <Map<String, dynamic>>[
         <String, dynamic>{

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../core/models/media_models.dart';
 import '../sources/media_source.dart';
+import 'jellyfin_dto.dart' show burnsInSubtitles;
 import 'media_library_source.dart';
 import 'stream_preferences.dart';
 
@@ -30,6 +31,9 @@ class JellyfinMediaSource
   final StreamPreferences Function() _preferences;
 
   static StreamPreferences _none() => const StreamPreferences();
+
+  /// Jellyfin's "no subtitles" stream index.
+  static const _subtitlesOff = -1;
 
   /// The session the server handed out for each item, kept so progress
   /// reports can quote it.
@@ -84,16 +88,33 @@ class JellyfinMediaSource
       // for it in series would add a round trip to every press of Play.
       final segmentsFuture = library.segments(ref.itemId);
 
-      final playback = await library.playback(
+      final caps = PlaybackCapabilities(
+        maxBitrate: quality.maxBitrate,
+        maxHeight: quality.maxHeight,
+      );
+      var playback = await library.playback(
         ref.itemId,
-        PlaybackCapabilities(
-          maxBitrate: quality.maxBitrate,
-          maxHeight: quality.maxHeight,
-        ),
+        caps,
         audioStreamIndex: choice?.audioStreamIndex,
         subtitleStreamIndex: choice?.subtitleStreamIndex,
         mediaSourceId: choice?.mediaSourceId,
       );
+
+      // A transcode that would paint an image subtitle into the picture,
+      // when the user said not to: asked again with subtitles off. Only the
+      // answer can tell — the server decides whether to transcode, and
+      // which subtitle it picked when none was asked for.
+      if (!preferences.burnInImageSubtitles &&
+          !playback.isDirectPlay &&
+          burnsInSubtitles(playback.uri)) {
+        playback = await library.playback(
+          ref.itemId,
+          caps,
+          audioStreamIndex: choice?.audioStreamIndex,
+          subtitleStreamIndex: _subtitlesOff,
+          mediaSourceId: choice?.mediaSourceId ?? playback.mediaSourceId,
+        );
+      }
 
       final segments = await segmentsFuture;
 

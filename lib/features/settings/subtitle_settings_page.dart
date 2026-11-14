@@ -12,6 +12,7 @@ import '../../app/tokens.dart';
 import '../../core/languages.dart';
 import '../player/playback_controller.dart';
 import '../player/subtitle_fonts.dart';
+import '../../servers/stream_preferences.dart' show burnInSubtitlesProvider;
 import 'player_settings.dart';
 import '../../l10n/app_localizations.dart';
 import 'settings_widgets.dart';
@@ -37,8 +38,6 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
     Color(0xFF82CFFF),
     Color(0xFFFFAB91),
   ];
-
-  bool _burnIn = true;
 
   /// Writes through and applies to libmpv straight away, so the live preview
   /// and the actual subtitles cannot disagree.
@@ -272,8 +271,8 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
         SettingsSwitchRow(
           title: l10n.burnInWhenTranscoding,
           subtitle: l10n.imageBasedOnly,
-          value: _burnIn,
-          onChanged: (v) => setState(() => _burnIn = v),
+          value: ref.watch(burnInSubtitlesProvider),
+          onChanged: (v) => ref.read(burnInSubtitlesProvider.notifier).set(v),
         ),
         SettingsValueRow(
           title: l10n.syncOffset,

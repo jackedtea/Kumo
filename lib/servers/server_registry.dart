@@ -241,6 +241,7 @@ final onlineMediaSourceProvider = Provider<JellyfinMediaSource?>((ref) {
     preferences: () => StreamPreferences(
       quality: ref.read(streamQualityProvider),
       trackChoice: ref.read(trackChoiceProvider),
+      burnInImageSubtitles: ref.read(burnInSubtitlesProvider),
     ),
   );
 });

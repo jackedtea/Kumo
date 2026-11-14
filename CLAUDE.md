@@ -73,7 +73,7 @@ on a phone, and Search became a FAB. See "One-handed use, and what it moved".
 
 ### Verified
 
-- `flutter analyze` clean; `flutter test` **1115 passing, none failing**
+- `flutter analyze` clean; `flutter test` **1131 passing, none failing**
   (2026-11-14). The `workflow_test.dart` failure once listed here no longer
   occurs.
 - Windows debug build links and runs.
@@ -526,8 +526,8 @@ Two kinds, and they take completely different paths:
 
 `MediaTrack.isImageBased` detects them from the demuxer codec so the picker labels them
 instead of failing silently. That is a mitigation, not a fix. Real options, in rising
-order of cost: server-side burn-in when transcoding (the Subtitle settings switch already
-exists for this, and only helps server sources); patching media_kit's render path;
+order of cost: server-side burn-in when transcoding (done for server sources — see
+"Subtitles under a transcode" below); patching media_kit's render path;
 swapping the backend to `fvp`/libmdk, which `refs/NipaPlay-Reload` vendors.
 
 ### Subtitle font (2026-11-14)
@@ -544,6 +544,18 @@ sees any font. They are also Flutter fonts in `pubspec.yaml`, so the settings pr
 and the picker draw each name in its face, and their OFL notices are registered in
 `main.dart`. On Windows/Linux/macOS the picker also takes the name of any installed
 font ("Installed font…"), which libass finds through the system.
+
+### Subtitles under a transcode (2026-11-14)
+
+A capped `deviceProfileFor` now carries `SubtitleProfiles`: **Embed** for every format
+libmpv draws (so choosing a subtitle no longer rules out direct play) and **External**
+for the text ones (a transcode hands SRT/VTT/ASS over as a sidecar, fetched through
+`externalSubtitles`, instead of burning them in). Image formats (PGS, VobSub, DVB) have
+no External entry, so a transcode can only burn them — `SubtitleMethod=Encode` in the
+transcode URL, read by `burnsInSubtitles`. The Subtitle settings switch
+(`burnInSubtitlesProvider`, key `burn_in_image_subtitles_v1`, default on) lets that
+happen; off, `JellyfinMediaSource.resolve` asks PlaybackInfo again with
+`subtitleStreamIndex=-1` and plays without them. Not yet checked against a live server.
 
 ## Smart subtitles
 
