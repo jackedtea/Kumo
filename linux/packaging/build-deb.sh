@@ -24,6 +24,8 @@ set -euo pipefail
 VERSION="$1"
 CHANNEL="$2"
 OUTPUT="$3"
+# owner/name on GitHub; Actions sets GITHUB_REPOSITORY in every job.
+REPOSITORY="${GITHUB_REPOSITORY:-jackedtea/Komu}"
 
 BUNDLE="build/linux/x64/release/bundle"
 PACKAGING="linux/packaging"
@@ -99,7 +101,7 @@ Architecture: amd64
 Installed-Size: $INSTALLED_SIZE
 Depends: $DEPENDS
 Maintainer: Nam <namicedtea@gmail.com>
-Homepage: https://github.com/jackedtea/mPlayer
+Homepage: https://github.com/$REPOSITORY
 Description: Jellyfin client with a built-in player
  Browse a Jellyfin server's libraries, play them in the app's own player,
  cast them to a television, and administer the server.

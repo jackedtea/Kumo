@@ -15,9 +15,19 @@ library;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-const repositoryUrl = 'https://github.com/jackedtea/mPlayer';
+/// `owner/name` of the GitHub repository whose releases this build follows.
+///
+/// CI passes its own `github.repository` with
+/// `--dart-define=GITHUB_REPOSITORY=...`, so a build always checks the repo
+/// that published it — a moved or renamed repo needs no code change. A local
+/// build without the define falls back to the default.
+const repository = String.fromEnvironment(
+  'GITHUB_REPOSITORY',
+  defaultValue: 'jackedtea/Komu',
+);
+const repositoryUrl = 'https://github.com/$repository';
 const releasesUrl = '$repositoryUrl/releases';
-const _api = 'https://api.github.com/repos/jackedtea/mPlayer/releases';
+const _api = 'https://api.github.com/repos/$repository/releases';
 
 /// Which stream of builds this installation follows.
 ///

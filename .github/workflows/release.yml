@@ -373,7 +373,8 @@ jobs:
           flutter build apk --release --split-per-abi \
             --target-platform android-arm,android-arm64 \
             --build-name "${{ needs.prepare.outputs.version }}" \
-            --build-number "$(( ${{ github.run_number }} + 5000 ))"
+            --build-number "$(( ${{ github.run_number }} + 5000 ))" \
+            --dart-define=GITHUB_REPOSITORY=${{ github.repository }}
 
       # app-<abi>-release.apk -> <base>-android-<abi>.apk, the names the
       # in-app updater matches against the device's ABI list. The ABIs
@@ -459,7 +460,8 @@ jobs:
         run: |
           flutter build windows --release \
             --build-name "${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.version_name_suffix }}" \
-            --build-number "${{ github.run_number }}"
+            --build-number "${{ github.run_number }}" \
+            --dart-define=GITHUB_REPOSITORY=${{ github.repository }}
 
       # An Inno Setup installer around the whole Release folder — the exe
       # alone will not run, media_kit's libmpv-2.dll and Flutter's runtime
@@ -485,7 +487,8 @@ jobs:
             "/DNumericVersion=$env:VERSION",
             "/DSourceDir=$env:GITHUB_WORKSPACE\build\windows\x64\runner\Release",
             "/DOutputDir=$env:GITHUB_WORKSPACE",
-            "/DOutputBase=$env:OUTPUT_BASE"
+            "/DOutputBase=$env:OUTPUT_BASE",
+            "/DRepository=$env:GITHUB_REPOSITORY"
           )
           if ($env:IS_DEV -eq 'true') { $defines += '/DDev' }
           & $iscc @defines windows\packaging\kumo.iss
@@ -547,7 +550,8 @@ jobs:
         run: |
           flutter build linux --release \
             --build-name "${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.version_name_suffix }}" \
-            --build-number "${{ github.run_number }}"
+            --build-number "${{ github.run_number }}" \
+            --dart-define=GITHUB_REPOSITORY=${{ github.repository }}
 
       # A .deb, so apt pulls in libmpv and the rest, and the app gets a
       # launcher entry and icons. What goes where is in the script.

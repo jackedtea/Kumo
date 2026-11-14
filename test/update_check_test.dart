@@ -49,7 +49,9 @@ void main() {
 
   group('links', () {
     test('point at the repository CI publishes to', () {
-      expect(repositoryUrl, 'https://github.com/jackedtea/mPlayer');
+      // Whatever CI defined, it is one `owner/name` on github.com.
+      expect(repository, matches(RegExp(r'^[\w.-]+/[\w.-]+$')));
+      expect(repositoryUrl, 'https://github.com/$repository');
       expect(releasesUrl, startsWith(repositoryUrl));
       expect(releasesUrl, endsWith('/releases'));
     });

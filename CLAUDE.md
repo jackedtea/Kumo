@@ -187,6 +187,10 @@ Also open:
   asks `/releases/latest` and compares numbers; a dev build (`-dev-<sha>`)
   takes the `dev-<sha>` prerelease with the latest `published_at` and
   compares commits, because "latest" never points at a prerelease.
+  The repository is not hard-coded: CI builds pass
+  `--dart-define=GITHUB_REPOSITORY=${{ github.repository }}` (and the same
+  value to the installer and .deb), so a build checks the repo that
+  published it; a local build falls back to `jackedtea/Komu`.
   **Never take the first one listed**: GitHub does not keep `/releases` in
   order, and on 2026-11-09 a dev build was offered an older one that way
   (`newestDevRelease`). The launch check lives in

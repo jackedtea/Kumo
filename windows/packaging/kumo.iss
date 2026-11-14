@@ -27,6 +27,10 @@
 #ifndef OutputBase
   #define OutputBase "Kumo-setup"
 #endif
+; owner/name on GitHub. CI passes its own repository, as it does to the app.
+#ifndef Repository
+  #define Repository "jackedtea/Komu"
+#endif
 
 #ifdef Dev
   #define AppName "Kumo (Dev)"
@@ -48,9 +52,9 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher=dev.icedtea
-AppPublisherURL=https://github.com/jackedtea/mPlayer
-AppSupportURL=https://github.com/jackedtea/mPlayer/issues
-AppUpdatesURL=https://github.com/jackedtea/mPlayer/releases
+AppPublisherURL=https://github.com/{#Repository}
+AppSupportURL=https://github.com/{#Repository}/issues
+AppUpdatesURL=https://github.com/{#Repository}/releases
 VersionInfoVersion={#NumericVersion}
 DefaultDirName={autopf}\{#DirName}
 DisableProgramGroupPage=yes
