@@ -57,8 +57,13 @@ admin Playback page already edits.
   report would mark it read and throw the position away.
   Write the position directly instead: `POST /UserItems/{id}/UserData`
   (`UpdateUserItemDataDto`: `PlaybackPositionTicks`, `Played`,
-  `LastPlayedDate`), which is the plain setter. **Step 0 verifies this
-  on a real server before anything is built on it.**
+  `LastPlayedDate`), which is the plain setter: in the server source that
+  overload of `SaveUserData` copies each field the body carries and never
+  calls `UpdatePlayState`. **Step 0 verifies this on a real server before
+  anything is built on it** — `dart tool/book_position_spike.dart` (its
+  header says how), which writes 50 %, reads it back, looks for the book in
+  `/UserItems/Resume?mediaTypes=Book`, with `--trap` sends the session
+  report to watch it destroy the position, and puts the book back as it was.
 
 ## Decisions to take up front
 
