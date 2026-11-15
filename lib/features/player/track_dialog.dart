@@ -52,7 +52,20 @@ class AudioSubtitleDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = context.spacing;
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(playbackControllerProvider);
+    // The lists and what is selected in them, not the state: the film plays
+    // on behind the dialog. A list is the same object until the decoder
+    // publishes another, so position ticks compare equal and draw nothing.
+    final (audioTracks, subtitleTracks, activeAudio, activeSubtitle) =
+        ref.watch(
+      playbackControllerProvider.select(
+        (s) => (
+          s.audioTracks,
+          s.subtitleTracks,
+          s.activeAudio?.id,
+          s.activeSubtitle?.id,
+        ),
+      ),
+    );
     final divider = Colors.white.withValues(alpha: 0.12);
 
     return Dialog(
@@ -106,10 +119,10 @@ class AudioSubtitleDialog extends ConsumerWidget {
                       icon: Icons.graphic_eq_rounded,
                       title: l10n.audio,
                       options: <TrackOption>[
-                        for (final MediaTrack t in state.audioTracks)
+                        for (final MediaTrack t in audioTracks)
                           TrackOption.fromTrack(t),
                       ],
-                      selectedId: state.activeAudio?.id,
+                      selectedId: activeAudio,
                       onSelected: (o) {
                         final track = o.track;
                         if (track != null) onAudio(track);
@@ -125,10 +138,10 @@ class AudioSubtitleDialog extends ConsumerWidget {
                         icon: Icons.subtitles_rounded,
                         title: l10n.subtitles,
                         options: <TrackOption>[
-                          for (final MediaTrack t in state.subtitleTracks)
+                          for (final MediaTrack t in subtitleTracks)
                             TrackOption.fromTrack(t),
                         ],
-                        selectedId: state.activeSubtitle?.id,
+                        selectedId: activeSubtitle,
                         onSelected: (o) => onSubtitle(o.track),
                       ),
                     ),

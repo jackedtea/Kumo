@@ -72,9 +72,13 @@ class MoreMenu extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final ui = ref.watch(playerUiProvider);
     final controller = ref.read(playerUiProvider.notifier);
-    final playback = ref.watch(playbackControllerProvider);
+    // The two fields drawn here, not the state: the film plays on behind
+    // the sheet, and every position tick would rebuild all of it.
+    final (speed, loop) = ref.watch(
+      playbackControllerProvider.select((s) => (s.speed, s.loop)),
+    );
     final background = ref.watch(playerSettingsProvider).backgroundAudio;
-    final speedChanged = (playback.speed - 1.0).abs() > 0.01;
+    final speedChanged = (speed - 1.0).abs() > 0.01;
 
     // SafeArea for the navigation bar, which `useSafeArea` deliberately
     // leaves to the sheet itself; the list scrolls rather than clips on a
@@ -116,7 +120,7 @@ class MoreMenu extends ConsumerWidget {
                     label: l10n.quickSpeed,
                     // Anything but normal is easy to forget and hard to
                     // notice; the tint is the reminder.
-                    value: '${playback.speed.toStringAsFixed(2)}×',
+                    value: '${speed.toStringAsFixed(2)}×',
                     active: speedChanged,
                     onTap: () {
                       Navigator.of(context).pop();
@@ -124,10 +128,10 @@ class MoreMenu extends ConsumerWidget {
                     },
                   ),
                 _QuickAction(
-                  icon: _loopIcon(playback.loop),
+                  icon: _loopIcon(loop),
                   label: l10n.loop,
-                  value: loopLabel(l10n, playback.loop),
-                  active: playback.loop != LoopMode.off,
+                  value: loopLabel(l10n, loop),
+                  active: loop != LoopMode.off,
                   onTap: () => ref
                       .read(playbackControllerProvider.notifier)
                       .cycleLoop(),

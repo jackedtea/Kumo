@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
+import '../core/redact.dart';
 import 'download_models.dart';
 import 'download_store.dart';
 
@@ -112,17 +113,21 @@ class DownloadEngine {
           : length;
       onProgress(received, total);
 
-      final sink = part.openWrite(
+      // Each chunk is on disk before the next is asked for. An `IOSink` takes
+      // chunks as fast as the network hands them over and queues what the
+      // disk has not written yet, so a fast LAN into slow storage would hold
+      // much of a film in memory; awaiting the write pauses the stream.
+      final file = await part.open(
         mode: resuming ? FileMode.append : FileMode.write,
       );
       try {
         await for (final Uint8List chunk in body.stream) {
-          sink.add(chunk);
+          await file.writeFrom(chunk);
           received += chunk.length;
           onProgress(received, total);
         }
       } finally {
-        await sink.close();
+        await file.close();
       }
 
       if (total != null && received < total) {
@@ -145,10 +150,13 @@ class DownloadEngine {
           clearError: true,
         );
       }
-      debugPrint('Download of ${entry.itemId} failed: $e');
+      debugPrint('Download of ${entry.itemId} failed: ${describeError(e)}');
       return _failed(entry, received, total, 'Could not reach the server.');
     } on FileSystemException catch (e) {
-      debugPrint('Download of ${entry.itemId} could not be written: $e');
+      debugPrint(
+        'Download of ${entry.itemId} could not be written: '
+        '${describeError(e)}',
+      );
       return _failed(
         entry,
         received,
@@ -158,7 +166,13 @@ class DownloadEngine {
             : 'Could not write the file to this device.',
       );
     } on SocketException catch (e) {
-      debugPrint('Download of ${entry.itemId} dropped: $e');
+      debugPrint('Download of ${entry.itemId} dropped: ${describeError(e)}');
+      return _failed(entry, received, total, 'The connection dropped.');
+    } on IOException catch (e) {
+      // What the two above do not cover: a body cut off mid-transfer
+      // (`HttpException`) or a TLS failure. "Never throws" has to hold for
+      // them too, or the queue stops at an entry left marked as downloading.
+      debugPrint('Download of ${entry.itemId} dropped: ${describeError(e)}');
       return _failed(entry, received, total, 'The connection dropped.');
     }
   }
@@ -186,7 +200,7 @@ class DownloadEngine {
       await file.writeAsBytes(bytes, flush: true);
       return true;
     } catch (e) {
-      debugPrint('Could not fetch ${url.path}: $e');
+      debugPrint('Could not fetch ${url.path}: ${describeError(e)}');
       return false;
     }
   }

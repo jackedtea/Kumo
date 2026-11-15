@@ -25,7 +25,9 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -270,6 +272,17 @@ enum InstallOutcome {
   failed,
 }
 
+/// A downloaded update that is not the file the release listed, or a release
+/// asset this app will not fetch at all. The file is never handed on.
+class UpdateRejected implements Exception {
+  const UpdateRejected(this.reason);
+
+  final String reason;
+
+  @override
+  String toString() => 'UpdateRejected: $reason';
+}
+
 /// The platform half of an update: download the file, then hand it over.
 class UpdateInstaller {
   UpdateInstaller({Dio? client})
@@ -307,9 +320,17 @@ class UpdateInstaller {
     if (dir.existsSync()) dir.deleteSync(recursive: true);
     dir.createSync(recursive: true);
 
-    final file = File(p.join(dir.path, asset.name));
-    await _dio.download(
-      asset.url,
+    // The name and the address both come out of a JSON answer. Whatever
+    // that answer says, the file lands inside the updates folder and comes
+    // over TLS: this is a file about to be run.
+    final file = File(p.join(dir.path, p.basename(asset.name)));
+    final url = Uri.tryParse(asset.url);
+    if (url == null || url.scheme != 'https' || url.host.isEmpty) {
+      throw const UpdateRejected('The download address is not https.');
+    }
+
+    await _dio.downloadUri(
+      url,
       file.path,
       cancelToken: cancel,
       onReceiveProgress: (received, total) {
@@ -317,7 +338,43 @@ class UpdateInstaller {
         onProgress(size > 0 ? received / size : null);
       },
     );
+
+    try {
+      await verifyDownload(file, asset);
+    } on UpdateRejected {
+      // Not left lying where the installer's FileProvider could serve it.
+      if (file.existsSync()) file.deleteSync();
+      rethrow;
+    }
     return file;
+  }
+
+  /// Checks [file] against what the release said [asset] is: its size, and
+  /// its SHA-256 where GitHub published one.
+  ///
+  /// A download cut short used to go to the installer as it was — a silent
+  /// installer that fails behind a hidden window on Windows, "the package
+  /// appears to be invalid" on Android. Throws [UpdateRejected].
+  @visibleForTesting
+  static Future<void> verifyDownload(File file, ReleaseAsset asset) async {
+    final length = await file.length();
+    if (asset.size > 0 && length != asset.size) {
+      throw UpdateRejected(
+        'Expected ${asset.size} bytes and received $length.',
+      );
+    }
+
+    final expected = asset.sha256;
+    if (expected == null) return;
+
+    // Tens of megabytes through a pure-Dart hash: off the UI isolate.
+    final path = file.path;
+    final actual = await Isolate.run(
+      () async => (await sha256.bind(File(path).openRead()).first).toString(),
+    );
+    if (actual != expected) {
+      throw const UpdateRejected('The file does not match its checksum.');
+    }
   }
 
   /// Hands [file] over. On Windows and Linux a successful hand-over ends this

@@ -342,12 +342,25 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     if (mostRecent != null) await activate(mostRecent.id);
   }
 
+  /// Bumped by every [activate] and by [remove], so an activation still
+  /// waiting — on the keychain, or on up to three seconds of address
+  /// probing — knows it has been overtaken and leaves the state alone.
+  ///
+  /// Without it the last to *finish* won, not the last asked for: the
+  /// launch's sign-in landing after the user had picked another server put
+  /// the first one back, and one landing after a remove revived a server
+  /// that was no longer in the list.
+  int _activation = 0;
+
   /// Builds the client for [profileId] and makes it the one in use.
   Future<void> activate(String profileId) async {
     final profile = state.profiles.where((p) => p.id == profileId).firstOrNull;
     if (profile == null) return;
 
+    final generation = ++_activation;
+
     final token = await _repository.readToken(profile);
+    if (generation != _activation) return;
     if (token == null || token.isEmpty) {
       // The profile is there but its token is not: the keychain was cleared,
       // or the user signed out on the server. Either way it needs a password,
@@ -362,6 +375,7 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     }
 
     final address = await _pickAddress(profile);
+    if (generation != _activation) return;
     if (address == profile.uri) {
       _reachable.remove(profile.id);
     } else {
@@ -371,6 +385,10 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     // The profile keeps its own id and main address; only the client is
     // pointed at the address that answered.
     final client = await _clientFor(profile.copyWith(uri: address), token);
+    if (generation != _activation) {
+      await client.dispose();
+      return;
+    }
     await _setLive(client);
 
     state = state.copyWith(
@@ -379,7 +397,7 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
       clearSignedOut: true,
     );
 
-    await _touch(profile);
+    await _touch(profile.id);
 
     if (ref.read(serverAddressLearningProvider)) {
       unawaited(_learnLocalAddress(profile.id, address));
@@ -605,7 +623,11 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
     await _repository.saveProfiles(profiles);
 
     final wasActive = state.activeId == profileId;
-    if (wasActive) await _setLive(null);
+    if (wasActive) {
+      // Whatever is still signing this server in has nothing to sign in to.
+      _activation++;
+      await _setLive(null);
+    }
 
     state = state.copyWith(
       profiles: profiles,
@@ -709,8 +731,15 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
   }
 
   /// Records that a profile was used, so the next launch opens on it.
-  Future<void> _touch(ServerProfile profile) =>
-      _replace(profile.copyWith(lastUsed: DateTime.now()));
+  ///
+  /// By id, and read again here: the copy [activate] started with is from
+  /// before its awaits, and writing that one back would undo a rename, a
+  /// PIN or a learned address saved while it was probing.
+  Future<void> _touch(String profileId) async {
+    final current = state.profiles.where((p) => p.id == profileId).firstOrNull;
+    if (current == null) return;
+    await _replace(current.copyWith(lastUsed: DateTime.now()));
+  }
 
   static ServerProfile? _mostRecent(List<ServerProfile> profiles) {
     if (profiles.isEmpty) return null;

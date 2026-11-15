@@ -72,6 +72,46 @@ class RemoteServer {
   final Set<_Session> _sessions = <_Session>{};
   _Session? _pairing;
 
+  /// Pairings in a row that ended without the right PIN, and until when no
+  /// new one is offered because of them.
+  ///
+  /// Five tries per connection bounds one connection and nothing else: a
+  /// machine on the LAN could reconnect for a fresh code and five more, for
+  /// as long as it liked, with a PIN flashing over the film the whole time.
+  /// The first failure costs nothing — a mistyped code, a phone put down —
+  /// and each one after it doubles the wait, up to [_maxPairingPause].
+  int _failedPairings = 0;
+  DateTime? _pairingPausedUntil;
+
+  static const _firstPairingPause = Duration(seconds: 10);
+  static const _maxPairingPause = Duration(minutes: 5);
+
+  bool get _pairingPaused {
+    final until = _pairingPausedUntil;
+    return until != null && DateTime.now().isBefore(until);
+  }
+
+  /// How long pairing stays shut after [failures] failed in a row.
+  @visibleForTesting
+  static Duration pairingPauseAfter(int failures) {
+    if (failures < 2) return Duration.zero;
+    // 10 s, 20 s, 40 s … capped; the shift is bounded so it cannot overflow.
+    final doubled = _firstPairingPause * (1 << (failures - 2).clamp(0, 10));
+    return doubled > _maxPairingPause ? _maxPairingPause : doubled;
+  }
+
+  void _pairingFailed() {
+    _failedPairings++;
+    final pause = pairingPauseAfter(_failedPairings);
+    _pairingPausedUntil =
+        pause == Duration.zero ? null : DateTime.now().add(pause);
+  }
+
+  void _pairingSucceeded() {
+    _failedPairings = 0;
+    _pairingPausedUntil = null;
+  }
+
   RemoteSnapshot _snapshot = const RemoteSnapshot();
   RemoteSnapshot? _sent;
   DateTime _sentAt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -131,6 +171,10 @@ class RemoteServer {
   Future<void> _onRequest(HttpRequest request) async {
     if (request.uri.path != RemoteProtocol.path ||
         !WebSocketTransformer.isUpgradeRequest(request) ||
+        // A browser always names the page a WebSocket was opened from, and
+        // this app's own client never does. Refusing it keeps a web page the
+        // user happens to have open from reaching a receiver on their LAN.
+        request.headers.value('origin') != null ||
         _sessions.length >= _maxSessions) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
@@ -158,7 +202,12 @@ class RemoteServer {
 
   void _closed(_Session session) {
     _sessions.remove(session);
-    if (identical(_pairing, session)) _setPairing(null);
+    if (identical(_pairing, session)) {
+      // Still the pairing in progress when it closed: it never got the PIN
+      // right. A successful one has already cleared [_pairing].
+      _setPairing(null);
+      _pairingFailed();
+    }
     _controllersChanged();
   }
 
@@ -303,7 +352,7 @@ class _Session {
 
     // Anyone else meets the PIN. One at a time: two codes on a television
     // at once would leave the viewer guessing which to read out.
-    if (server._pairing != null) {
+    if (server._pairing != null || server._pairingPaused) {
       await close();
       return;
     }
@@ -341,6 +390,7 @@ class _Session {
     );
     pin = null;
     server._setPairing(null);
+    server._pairingSucceeded();
     _sendType(RemoteProtocol.paired);
     _trust();
   }

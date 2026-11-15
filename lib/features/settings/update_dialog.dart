@@ -113,6 +113,16 @@ class _UpdateDialogState extends ConsumerState<_UpdateDialog> {
         _stage = _Stage.done;
         _message = l10n.updateDownloadFailed;
       });
+    } catch (e) {
+      // A full disk, a cache folder that cannot be written, a file that
+      // failed its check: without this the dialog sat on "Downloading…"
+      // for good, with Cancel the only way out and no word of why.
+      debugPrint('The update could not be downloaded: $e');
+      if (!mounted) return;
+      setState(() {
+        _stage = _Stage.done;
+        _message = l10n.updateDownloadFailed;
+      });
     }
   }
 

@@ -33,9 +33,16 @@ class MiniPlayer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (!ref.watch(audioSessionProvider)) return const SizedBox.shrink();
 
-    final state = ref.watch(playbackControllerProvider);
-    final media = state.media;
+    // Field by field rather than the whole state: the position moves many
+    // times a second, and this sits under every screen while music plays.
+    // Only the progress line follows it, and it rebuilds alone.
+    final media = ref.watch(playbackControllerProvider.select((s) => s.media));
     if (media == null) return const SizedBox.shrink();
+    final (error, playing, hasNext) = ref.watch(
+      playbackControllerProvider.select(
+        (s) => (s.error, s.playing, s.queue.hasNext),
+      ),
+    );
 
     final session = ref.read(audioSessionProvider.notifier);
     final playback = ref.read(playbackControllerProvider.notifier);
@@ -43,21 +50,14 @@ class MiniPlayer extends ConsumerWidget {
     final scheme = context.colors;
     final l10n = AppLocalizations.of(context);
 
-    final duration = state.duration.inMilliseconds;
-    final line = state.error ?? media.artist;
+    final line = error ?? media.artist;
 
     return Material(
       color: scheme.surfaceContainerHigh,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          LinearProgressIndicator(
-            value: duration <= 0
-                ? 0
-                : (state.position.inMilliseconds / duration).clamp(0.0, 1.0),
-            minHeight: 2,
-            backgroundColor: scheme.surfaceContainerHighest,
-          ),
+          const _MiniProgress(),
           InkWell(
             onTap: onOpen,
             child: Padding(
@@ -100,7 +100,7 @@ class MiniPlayer extends ConsumerWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.texts.bodySmall?.copyWith(
-                              color: state.error != null
+                              color: error != null
                                   ? scheme.error
                                   : scheme.onSurfaceVariant,
                             ),
@@ -111,14 +111,14 @@ class MiniPlayer extends ConsumerWidget {
                   IconButton(
                     onPressed: session.togglePlaying,
                     icon: Icon(
-                      state.playing
+                      playing
                           ? Icons.pause_rounded
                           : Icons.play_arrow_rounded,
-                      semanticLabel: state.playing ? l10n.pause : l10n.play,
+                      semanticLabel: playing ? l10n.pause : l10n.play,
                     ),
                   ),
                   IconButton(
-                    onPressed: state.queue.hasNext ? playback.playNext : null,
+                    onPressed: hasNext ? playback.playNext : null,
                     icon: Icon(
                       Icons.skip_next_rounded,
                       semanticLabel: l10n.nextFile,
@@ -137,6 +137,36 @@ class MiniPlayer extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The line along the mini player's top edge: how far through the song.
+///
+/// A widget of its own so that it is the only thing the position rebuilds,
+/// and in steps of a thousandth — finer than a pixel of a two-pixel line on
+/// any window, so a tick that would draw the same line draws nothing.
+class _MiniProgress extends ConsumerWidget {
+  const _MiniProgress();
+
+  static const _steps = 1000;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final step = ref.watch(
+      playbackControllerProvider.select((s) {
+        final duration = s.duration.inMilliseconds;
+        if (duration <= 0) return 0;
+        return (s.position.inMilliseconds * _steps / duration)
+            .round()
+            .clamp(0, _steps);
+      }),
+    );
+
+    return LinearProgressIndicator(
+      value: step / _steps,
+      minHeight: 2,
+      backgroundColor: context.colors.surfaceContainerHighest,
     );
   }
 }

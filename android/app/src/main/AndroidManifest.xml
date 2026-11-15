@@ -57,12 +57,33 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-feature android:name="android.software.leanback" android:required="false"/>
 
+    <!--
+      **Nothing of the app is backed up or copied to a new device.** Three
+      things in its storage do not survive the trip, and each breaks quietly:
+
+      - The keychain entries (server tokens, PIN hashes, remote pairings) are
+        encrypted with a key in the Android Keystore, which never leaves the
+        device. Restored, they are ciphertext nothing can read.
+      - The profile list would arrive without them: a server marked as
+        PIN-guarded whose hash is gone stays locked until it is removed.
+      - The device id would be the same on both phones. Jellyfin files a
+        session and a token under it, so the two would share one session and
+        each would report the other's playback.
+
+      A new device signs in again, which takes a password or a Quick Connect
+      code. allowBackup covers cloud backup; device-to-device transfer on
+      Android 12+ ignores it and reads dataExtractionRules instead, and
+      fullBackupContent is the same answer for Android 11 and earlier.
+    -->
     <application
         android:label="${appName}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/tv_banner"
         android:appCategory="video"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:networkSecurityConfig="@xml/network_security_config">
         <!--
           singleTask rather than Flutter's default singleTop. It was for the

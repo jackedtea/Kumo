@@ -70,6 +70,16 @@ void main() {
       expect(parsed.uri.toString(), 'ws://192.168.1.9:47831/remote');
     });
 
+    test('the pause after failed pairings doubles and is capped', () {
+      expect(RemoteServer.pairingPauseAfter(0), Duration.zero);
+      expect(RemoteServer.pairingPauseAfter(1), Duration.zero);
+      expect(RemoteServer.pairingPauseAfter(2), const Duration(seconds: 10));
+      expect(RemoteServer.pairingPauseAfter(3), const Duration(seconds: 20));
+      expect(RemoteServer.pairingPauseAfter(4), const Duration(seconds: 40));
+      expect(RemoteServer.pairingPauseAfter(12), const Duration(minutes: 5));
+      expect(RemoteServer.pairingPauseAfter(500), const Duration(minutes: 5));
+    });
+
     test('junk and other apps are not beacons', () {
       expect(RemoteDevice.fromBeacon(utf8.encode('not json'), 'h'), isNull);
       expect(
@@ -274,6 +284,55 @@ void main() {
       final back = _next<RemoteWelcomed>(again.events);
       await again.connect();
       await back;
+      expect(receiver.pairing, isNull);
+    });
+
+    test('a web page is refused before any handshake', () async {
+      await start(_Receiver());
+      final url = 'ws://${InternetAddress.loopbackIPv4.address}:${server.port}'
+          '${RemoteProtocol.path}';
+
+      // What a browser sends with every WebSocket and this app never does.
+      await expectLater(
+        WebSocket.connect(
+          url,
+          headers: <String, Object>{'Origin': 'https://example.com'},
+        ),
+        throwsA(isA<WebSocketException>()),
+      );
+      expect(receiver.pairing, isNull);
+
+      // The same address without it is still a receiver.
+      final plain = await WebSocket.connect(url);
+      await plain.close();
+    });
+
+    test('failed pairings in a row close the door for a while', () async {
+      await start(_Receiver());
+
+      Future<void> failOnce() async {
+        final phone = client();
+        final asked = _next<RemotePinRequested>(phone.events);
+        await phone.connect();
+        await asked;
+        final pin = receiver.pairing!.pin;
+        final wrong = pin == '000000' ? '111111' : '000000';
+        final closed = _next<RemoteClosed>(phone.events);
+        for (var i = 0; i < RemoteProtocol.pinTries; i++) {
+          phone.sendPin(wrong);
+        }
+        await closed;
+      }
+
+      // One failure is a mistyped code; the next phone still gets a PIN.
+      await failOnce();
+      await failOnce();
+
+      // Two in a row is somebody guessing: no code for the third.
+      final phone = client();
+      final closed = _next<RemoteClosed>(phone.events);
+      await phone.connect();
+      await closed;
       expect(receiver.pairing, isNull);
     });
 

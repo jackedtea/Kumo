@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:kumo/servers/jellyfin_source.dart';
+import 'package:kumo/servers/server_profile.dart';
 import 'package:kumo/servers/server_registry.dart';
 
 import 'fake_keychain.dart';
@@ -27,6 +29,29 @@ const _auth = AuthResult(
   username: 'nam',
   serverId: 'srv1',
 );
+
+const _otherInfo = ServerInfo(
+  uri: 'https://other.lan',
+  name: 'Other',
+  version: '10.9',
+  serverId: 'srv2',
+);
+
+/// A repository whose keychain is slow for the profiles in [slow] — a
+/// locked keychain, or a server whose addresses are still being probed —
+/// until [release] is completed.
+class _SlowRepository extends ServerRepository {
+  _SlowRepository({super.prefs});
+
+  final Set<String> slow = <String>{};
+  final Completer<void> release = Completer<void>();
+
+  @override
+  Future<String?> readToken(ServerProfile profile) async {
+    if (slow.contains(profile.id)) await release.future;
+    return super.readToken(profile);
+  }
+}
 
 /// A container whose registry reads the mocked preferences and keychain.
 ProviderContainer containerWith(ServerRepository repository) {
@@ -284,6 +309,74 @@ void main() {
 
       expect(container.read(serverRegistryProvider).activeId, first.id);
       expect(container.read(serverRegistryProvider).source, isNotNull);
+    });
+
+    group('activations that overlap', () {
+      test('the last one asked for wins, not the last to finish', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final repository = _SlowRepository(prefs: prefs);
+        final container = containerWith(repository);
+        final registry = await registryOf(container);
+        final first = await registry.add(info: _info, auth: _auth);
+        final second = await registry.add(info: _otherInfo, auth: _auth);
+
+        // The launch signing the first one back in, still waiting…
+        repository.slow.add(first.id);
+        final slow = registry.activate(first.id);
+        // …when the user picks the second.
+        await registry.activate(second.id);
+        repository.release.complete();
+        await slow;
+
+        final state = container.read(serverRegistryProvider);
+        expect(state.activeId, second.id);
+        expect(state.source?.profile.id, second.id);
+      });
+
+      test('a removed server is not brought back by one in flight', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final repository = _SlowRepository(prefs: prefs);
+        final container = containerWith(repository);
+        final registry = await registryOf(container);
+        final only = await registry.add(info: _info, auth: _auth);
+
+        repository.slow.add(only.id);
+        final slow = registry.activate(only.id);
+        await registry.remove(only.id);
+        repository.release.complete();
+        await slow;
+
+        final state = container.read(serverRegistryProvider);
+        expect(state.profiles, isEmpty);
+        expect(state.activeId, isNull);
+        expect(state.source, isNull);
+      });
+
+      test('a rename made meanwhile is not written over', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final repository = _SlowRepository(prefs: prefs);
+        final container = containerWith(repository);
+        final registry = await registryOf(container);
+        final profile = await registry.add(info: _info, auth: _auth);
+
+        repository.slow.add(profile.id);
+        final slow = registry.activate(profile.id);
+        await registry.rename(profile.id, 'Living room');
+        repository.release.complete();
+        await slow;
+
+        // Activation records "last used" on the profile; it used to do so
+        // on the copy it had read before waiting, name and all.
+        expect(
+          container.read(serverRegistryProvider).profiles.single.name,
+          'Living room',
+        );
+        final stored = prefs.getStringList('configured_servers_v1')!.single;
+        expect(
+          (jsonDecode(stored) as Map<String, dynamic>)['name'],
+          'Living room',
+        );
+      });
     });
 
     test('renaming keeps the id, so the token is not orphaned', () async {

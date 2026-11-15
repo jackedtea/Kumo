@@ -59,6 +59,7 @@ class ReleaseAsset {
     required this.name,
     required this.url,
     required this.size,
+    this.sha256,
   });
 
   final String name;
@@ -68,6 +69,19 @@ class ReleaseAsset {
 
   /// Bytes, or 0 when GitHub did not say.
   final int size;
+
+  /// The file's SHA-256 as lowercase hex, where GitHub published one
+  /// (`digest`, on assets uploaded since mid-2025); null otherwise.
+  final String? sha256;
+}
+
+/// `sha256:<64 hex>` as GitHub writes an asset's digest, down to the hex.
+/// Null for anything else — another algorithm, or nothing at all.
+String? _sha256Of(Object? digest) {
+  if (digest is! String) return null;
+  final match = RegExp(r'^sha256:([0-9a-f]{64})$', caseSensitive: false)
+      .firstMatch(digest.trim());
+  return match?.group(1)?.toLowerCase();
 }
 
 @immutable
@@ -204,6 +218,7 @@ ReleaseInfo? releaseFromJson(Object? json) {
             name: a['name'] as String,
             url: a['browser_download_url'] as String,
             size: (a['size'] as num?)?.toInt() ?? 0,
+            sha256: _sha256Of(a['digest']),
           ),
     ],
   );

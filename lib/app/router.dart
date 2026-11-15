@@ -395,7 +395,9 @@ class _PlayerFromController extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final media = ref.watch(playbackControllerProvider).media;
+    // The media alone: watching the whole state would rebuild this, and the
+    // player under it, on every position tick.
+    final media = ref.watch(playbackControllerProvider.select((s) => s.media));
     if (media == null) return const _MissingMediaPage();
 
     return PlayerPage(media: media);

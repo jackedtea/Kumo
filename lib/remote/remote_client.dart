@@ -194,7 +194,15 @@ class RemoteClient {
       await close();
       return;
     }
-    final receiverNonce = base64Decode(rawNonce);
+    final List<int> receiverNonce;
+    try {
+      receiverNonce = base64Decode(rawNonce);
+    } on FormatException {
+      // Not a receiver of ours, whatever answered; the server's end hangs
+      // up on a bad nonce the same way.
+      await close();
+      return;
+    }
     _receiverNonce = receiverNonce;
     final name = message['name'];
     _receiverName = name is String ? name : device.name;

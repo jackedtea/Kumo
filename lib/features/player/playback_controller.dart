@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
+import '../../core/redact.dart';
 import '../../servers/media_library_source.dart';
 import '../../servers/server_registry.dart';
 import '../settings/player_settings.dart';
@@ -164,7 +165,7 @@ class PlaybackController extends Notifier<PlaybackState> {
     } on MediaSourceException catch (e) {
       state = state.copyWith(buffering: false, error: e.message);
     } catch (e) {
-      state = state.copyWith(buffering: false, error: 'Could not open: $e');
+      state = state.copyWith(buffering: false, error: 'Could not open: ${describeError(e)}');
     }
   }
 
@@ -224,7 +225,7 @@ class PlaybackController extends Notifier<PlaybackState> {
         ),
       );
     } catch (e) {
-      state = state.copyWith(buffering: false, error: 'Playback failed: $e');
+      state = state.copyWith(buffering: false, error: 'Playback failed: ${describeError(e)}');
       return;
     }
 
@@ -260,7 +261,9 @@ class PlaybackController extends Notifier<PlaybackState> {
     try {
       resolved = await source.resolve(nextRef);
     } catch (e) {
-      debugPrint('Could not prepare ${nextRef.itemId} gaplessly: $e');
+      debugPrint(
+        'Could not prepare ${nextRef.itemId} gaplessly: ${describeError(e)}',
+      );
       return;
     }
 
@@ -282,7 +285,7 @@ class PlaybackController extends Notifier<PlaybackState> {
     try {
       await player.add(Media(resolved.uri.toString()));
     } catch (e) {
-      debugPrint('Could not append ${nextRef.itemId}: $e');
+      debugPrint('Could not append ${nextRef.itemId}: ${describeError(e)}');
       return;
     }
     if (generation != _gaplessGeneration) return;
@@ -373,7 +376,7 @@ class PlaybackController extends Notifier<PlaybackState> {
       } catch (e) {
         // One unreadable subtitle must not cost the user the other five, and
         // it costs them nothing they can see: the track simply is not listed.
-        debugPrint('Could not attach ${subtitle.label}: $e');
+        debugPrint('Could not attach ${subtitle.label}: ${describeError(e)}');
       }
     }
   }
@@ -623,7 +626,7 @@ class PlaybackController extends Notifier<PlaybackState> {
     } on MediaSourceException catch (e) {
       state = state.copyWith(buffering: false, error: e.message);
     } catch (e) {
-      state = state.copyWith(buffering: false, error: 'Could not open: $e');
+      state = state.copyWith(buffering: false, error: 'Could not open: ${describeError(e)}');
     }
   }
 
@@ -1168,10 +1171,17 @@ class PlaybackController extends Notifier<PlaybackState> {
       s.width.listen((_) => state = state.copyWith(stats: _statsFrom(player))),
       s.height.listen((_) => state = state.copyWith(stats: _statsFrom(player))),
       s.error.listen(
-        (e) => state = state.copyWith(buffering: false, error: e),
+        // mpv names the stream it could not open, token and all; this line
+        // goes on screen and out to a phone remote.
+        (e) => state = state.copyWith(
+          buffering: false,
+          error: redactSecrets(e),
+        ),
       ),
       s.log.listen((entry) {
-        final line = '[${entry.level}] ${entry.prefix}: ${entry.text.trim()}';
+        final line = redactSecrets(
+          '[${entry.level}] ${entry.prefix}: ${entry.text.trim()}',
+        );
         state = state.copyWith(
           logLines: <String>[
             // Oldest first, capped — an unbounded list on a long film would

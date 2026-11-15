@@ -361,14 +361,7 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
         },
         child: Theme(
           // The player is always dark, whatever the app theme is.
-          data: ThemeData.dark(useMaterial3: true).copyWith(
-            colorScheme: ThemeData.dark(useMaterial3: true).colorScheme
-                .copyWith(
-                  primaryContainer: const Color(0xFF004C6D),
-                  onPrimaryContainer: const Color(0xFFC7E7FF),
-                ),
-            extensions: Theme.of(context).extensions.values,
-          ),
+          data: _playerThemeFor(context),
           // Every overlay on this screen, not just the controls.
           //
           // Sticky immersion makes the navigation bar come and go on its own,
@@ -552,6 +545,34 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
           ),
         ),
       ),
+    );
+  }
+
+  ThemeData? _playerTheme;
+  Map<Object, ThemeExtension<dynamic>>? _playerThemeExtensions;
+
+  /// The player's dark theme, carrying the app theme's extensions.
+  ///
+  /// Kept between builds: this screen rebuilds on every position tick, and
+  /// `ThemeData.dark()` assembles a whole component theme each time it is
+  /// called — twice a tick, as this used to be written, several times a
+  /// second for the length of a film. Built again only when the app theme
+  /// hands over a different set of extensions.
+  ThemeData _playerThemeFor(BuildContext context) {
+    final extensions = Theme.of(context).extensions;
+    final cached = _playerTheme;
+    if (cached != null && identical(extensions, _playerThemeExtensions)) {
+      return cached;
+    }
+
+    final dark = ThemeData.dark(useMaterial3: true);
+    _playerThemeExtensions = extensions;
+    return _playerTheme = dark.copyWith(
+      colorScheme: dark.colorScheme.copyWith(
+        primaryContainer: const Color(0xFF004C6D),
+        onPrimaryContainer: const Color(0xFFC7E7FF),
+      ),
+      extensions: extensions.values,
     );
   }
 
