@@ -9,4 +9,5 @@
     <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
     <exclude domain="file" path="downloads" />
     <exclude domain="file" path="subtitle-fonts" />
+    <exclude domain="file" path="install" />
 </full-backup-content>

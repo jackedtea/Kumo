@@ -3,7 +3,7 @@
   Android 12+: what cloud backup and device-to-device transfer leave behind.
   Everything else — the preferences — travels. AndroidManifest.xml says why
   each of these does not; backup_rules.xml is the same list for Android 11
-  and earlier, and the three must be kept in step.
+  and earlier, and the two must be kept in step.
 -->
 <data-extraction-rules>
     <cloud-backup>
@@ -11,11 +11,13 @@
         <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
         <exclude domain="file" path="downloads" />
         <exclude domain="file" path="subtitle-fonts" />
+        <exclude domain="file" path="install" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
         <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
         <exclude domain="file" path="downloads" />
         <exclude domain="file" path="subtitle-fonts" />
+        <exclude domain="file" path="install" />
     </device-transfer>
 </data-extraction-rules>

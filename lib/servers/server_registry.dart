@@ -5,12 +5,14 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 import 'dart:math' show Random;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'jellyfin_admin.dart';
@@ -35,21 +37,27 @@ import '../sources/media_source.dart';
 /// into preferences.
 class ServerRepository {
   /// [prefs] and [secure] are injectable so tests need no platform channel.
+  ///
+  /// [deviceIdFile] says where the device id is kept apart from the
+  /// preferences, or answers null to keep it in them; see [deviceId].
   ServerRepository({
     SharedPreferences? prefs,
     FlutterSecureStorage? secure,
+    Future<File?> Function()? deviceIdFile,
   })  :
         // A private field cannot be an initializing formal: Dart forbids
         // named parameters starting with an underscore.
         // ignore: prefer_initializing_formals
         _prefs = prefs,
-        _secure = secure ?? const FlutterSecureStorage();
+        _secure = secure ?? const FlutterSecureStorage(),
+        _deviceIdFile = deviceIdFile ?? _defaultDeviceIdFile;
 
   static const _prefsKey = 'configured_servers_v1';
   static const _deviceIdKey = 'client_device_id_v1';
 
   SharedPreferences? _prefs;
   final FlutterSecureStorage _secure;
+  final Future<File?> Function() _deviceIdFile;
 
   Future<SharedPreferences> get _store async =>
       _prefs ??= await SharedPreferences.getInstance();
@@ -147,17 +155,122 @@ class ServerRepository {
   ///
   /// Jellyfin files sessions, playback history and tokens under it, so a new
   /// one every launch litters the server's dashboard with dead devices and
-  /// orphans the token that was issued to the last one. In preferences rather
-  /// than the keychain: it is an identifier, not a secret, and losing it to a
-  /// locked keychain would be worse than exposing it.
-  Future<String> deviceId() async {
-    final store = await _store;
-    final existing = store.getString(_deviceIdKey);
-    if (existing != null && existing.isNotEmpty) return existing;
+  /// orphans the token that was issued to the last one. Not in the keychain:
+  /// it is an identifier, not a secret, and losing it to a locked keychain
+  /// would be worse than exposing it.
+  ///
+  /// **On Android it is in a file of its own, outside the backup**
+  /// (`files/install/device_id`, excluded by the rules the manifest names).
+  /// It used to sit in the preferences, which a backup carries to the next
+  /// phone — and two phones with one id are one device to the server: one
+  /// session, one token, each reporting the other's playback. Elsewhere
+  /// nothing copies an installation, and it stays in the preferences.
+  ///
+  /// One answer per repository however many ask at once: the first launch
+  /// has several callers before anything is stored, and each generating its
+  /// own would sign the first request with an id nothing kept.
+  Future<String> deviceId() => _deviceId ??= _resolveDeviceId();
 
-    final generated = _generateDeviceId();
-    await store.setString(_deviceIdKey, generated);
-    return generated;
+  Future<String>? _deviceId;
+
+  Future<String> _resolveDeviceId() async {
+    final store = await _store;
+    final inPrefs = store.getString(_deviceIdKey);
+
+    final file = await _deviceIdFile();
+    if (file == null) {
+      if (_isDeviceId(inPrefs)) return inPrefs!;
+      final generated = _generateDeviceId();
+      await store.setString(_deviceIdKey, generated);
+      return generated;
+    }
+
+    final kept = await _readDeviceId(file);
+    if (kept != null) {
+      // A copy still in the preferences would ride along in the next backup.
+      if (inPrefs != null) await store.remove(_deviceIdKey);
+      return kept;
+    }
+
+    // No file yet. An id in the preferences is either this installation's
+    // from before the file existed, to be moved, or another phone's that
+    // arrived with a backup, to be left behind.
+    final id = _isDeviceId(inPrefs) && !await _restoredFromBackup()
+        ? inPrefs!
+        : _generateDeviceId();
+
+    if (await _writeDeviceId(file, id)) {
+      if (inPrefs != null) await store.remove(_deviceIdKey);
+    } else if (inPrefs != id) {
+      // Nowhere else to put it: an id that travels with a backup is still
+      // better than a new one on every launch. It is kept from then on by
+      // the keychain having something in it, which a sign-in sees to.
+      await store.setString(_deviceIdKey, id);
+    }
+    return id;
+  }
+
+  /// Whether what is on this device came out of a backup rather than being
+  /// made here: preferences, and a keychain that answers and is empty.
+  ///
+  /// A backup never carries the keychain, and an installation that has ever
+  /// signed in or paired a remote has something in it. An empty one that
+  /// was simply never used loses nothing by being called a restore — no
+  /// token and no pairing was ever filed under its id. A keychain that
+  /// cannot be read says nothing either way, and the id is kept.
+  Future<bool> _restoredFromBackup() async {
+    try {
+      return (await _secure.readAll()).isEmpty;
+    } catch (e) {
+      debugPrint('Could not ask the keychain whether this is a restore: $e');
+      return false;
+    }
+  }
+
+  static bool _isDeviceId(String? value) =>
+      value != null && RegExp(r'^[A-Za-z0-9_-]{8,64}$').hasMatch(value);
+
+  static Future<String?> _readDeviceId(File file) async {
+    try {
+      if (!await file.exists()) return null;
+      final id = (await file.readAsString()).trim();
+      return _isDeviceId(id) ? id : null;
+    } catch (e) {
+      debugPrint('Could not read the device id: $e');
+      return null;
+    }
+  }
+
+  /// Written beside and renamed over, so a kill mid-write leaves no file
+  /// rather than half an id. False when it could not be written.
+  static Future<bool> _writeDeviceId(File file, String id) async {
+    try {
+      await file.parent.create(recursive: true);
+      final tmp = File('${file.path}.tmp');
+      await tmp.writeAsString(id, flush: true);
+      await tmp.rename(file.path);
+      return true;
+    } catch (e) {
+      debugPrint('Could not store the device id: $e');
+      return false;
+    }
+  }
+
+  /// Android alone: the one platform that copies an app's storage to
+  /// another device. Null anywhere else, and where the folder cannot be
+  /// found — under `flutter test`, which has no path provider.
+  static Future<File?> _defaultDeviceIdFile() async {
+    if (kIsWeb || !Platform.isAndroid) return null;
+    try {
+      final support = await getApplicationSupportDirectory();
+      // `install`, not a name of the id's own: the backup rules exclude the
+      // folder, and anything else that must stay with this installation
+      // can go beside it without the three rule files changing again.
+      return File(p.join(support.path, 'install', 'device_id'));
+    } catch (e) {
+      debugPrint('No folder for the device id: $e');
+      return null;
+    }
   }
 
   /// 32 hex characters from the platform's secure random.
@@ -525,7 +638,7 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
       // Ours, and stable: the token is filed under it, so it must not be the
       // server's own id — the same server reached by two addresses would then
       // share one token entry.
-      id: 'server-${DateTime.now().microsecondsSinceEpoch}',
+      id: _newProfileId(),
       name: info.name,
       uri: info.uri,
       userId: auth.userId,
@@ -548,6 +661,19 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
 
     await activate(profile.id);
     return profile;
+  }
+
+  /// An id no profile here has yet.
+  ///
+  /// From the clock, and then checked: two servers added inside one tick of
+  /// it — a coarse clock on Windows, a test — used to be handed the same
+  /// id, and with it one token entry, one PIN and one remove between them.
+  String _newProfileId() {
+    var stamp = DateTime.now().microsecondsSinceEpoch;
+    while (state.profiles.any((p) => p.id == 'server-$stamp')) {
+      stamp++;
+    }
+    return 'server-$stamp';
   }
 
   /// The stored token for a profile, or null when there is none.

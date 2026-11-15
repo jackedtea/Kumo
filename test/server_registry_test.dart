@@ -5,6 +5,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -329,6 +330,123 @@ void main() {
       expect(await ServerRepository(prefs: prefs).deviceId(), first);
     });
 
+    group('kept in a file outside the backup', () {
+      late Directory dir;
+      late File file;
+
+      setUp(() {
+        dir = Directory.systemTemp.createTempSync('kumo-install-');
+        file = File('${dir.path}/install/device_id');
+      });
+
+      tearDown(() => dir.deleteSync(recursive: true));
+
+      ServerRepository repository(SharedPreferences prefs) => ServerRepository(
+            prefs: prefs,
+            deviceIdFile: () async => file,
+          );
+
+      test('is written there and never to the preferences', () async {
+        final prefs = await SharedPreferences.getInstance();
+
+        final id = await repository(prefs).deviceId();
+
+        expect(id, hasLength(32));
+        expect(file.readAsStringSync(), id);
+        expect(prefs.getString('client_device_id_v1'), isNull);
+        // The next launch reads the same one back.
+        expect(await repository(prefs).deviceId(), id);
+      });
+
+      test('everyone asking at once on a first launch gets one id', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final one = repository(prefs);
+
+        final ids = await Future.wait(<Future<String>>[
+          one.deviceId(),
+          one.deviceId(),
+          one.deviceId(),
+        ]);
+
+        expect(ids.toSet(), hasLength(1));
+        expect(file.readAsStringSync(), ids.first);
+      });
+
+      test("an update moves this installation's id across", () async {
+        // Signed in before the update: the keychain has the token, and the
+        // server has that token filed under this id.
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'client_device_id_v1': 'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+        });
+        keychain['server_token_server-1'] = 'tok123';
+        final prefs = await SharedPreferences.getInstance();
+
+        final id = await repository(prefs).deviceId();
+
+        expect(id, 'a1b2c3d4e5f60718293a4b5c6d7e8f90');
+        expect(file.readAsStringSync(), id);
+        expect(prefs.getString('client_device_id_v1'), isNull);
+      });
+
+      test("a restore does not bring the other phone's id", () async {
+        // What a backup made before this change carries: the id in the
+        // preferences, and nothing of the keychain.
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'client_device_id_v1': 'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+        });
+        final prefs = await SharedPreferences.getInstance();
+
+        final id = await repository(prefs).deviceId();
+
+        expect(id, isNot('a1b2c3d4e5f60718293a4b5c6d7e8f90'));
+        expect(id, hasLength(32));
+        expect(file.readAsStringSync(), id);
+        expect(prefs.getString('client_device_id_v1'), isNull);
+      });
+
+      test('a keychain that cannot be read is not taken for a restore',
+          () async {
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'client_device_id_v1': 'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+        });
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (call) async => throw PlatformException(code: 'locked'),
+        );
+        final prefs = await SharedPreferences.getInstance();
+
+        expect(
+          await repository(prefs).deviceId(),
+          'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+        );
+      });
+
+      test('with nowhere to write the file, the id is still kept', () async {
+        // A file where the folder should be: nothing can be created in it.
+        File('${dir.path}/install').writeAsStringSync('in the way');
+        final prefs = await SharedPreferences.getInstance();
+
+        final id = await repository(prefs).deviceId();
+        expect(prefs.getString('client_device_id_v1'), id);
+
+        // Signed in under it, which is when it has to stay the same.
+        keychain['server_token_server-1'] = 'tok123';
+        expect(await repository(prefs).deviceId(), id);
+      });
+
+      test('a damaged file is replaced rather than used', () async {
+        file.parent.createSync(recursive: true);
+        file.writeAsStringSync('not an id\n');
+        final prefs = await SharedPreferences.getInstance();
+
+        final id = await repository(prefs).deviceId();
+
+        expect(id, hasLength(32));
+        expect(file.readAsStringSync(), id);
+      });
+    });
+
     test('differs between installations', () async {
       final a = await ServerRepository(
         prefs: await SharedPreferences.getInstance(),
@@ -449,6 +567,21 @@ void main() {
           'Living room',
         );
       });
+    });
+
+    test('two servers added in the same instant get ids of their own',
+        () async {
+      final prefs = await SharedPreferences.getInstance();
+      final container = containerWith(ServerRepository(prefs: prefs));
+      final registry = await registryOf(container);
+
+      final added = <ServerProfile>[
+        for (var i = 0; i < 20; i++)
+          await registry.add(info: _info, auth: _auth),
+      ];
+
+      expect(added.map((p) => p.id).toSet(), hasLength(20));
+      expect(container.read(serverRegistryProvider).profiles, hasLength(20));
     });
 
     test('renaming keeps the id, so the token is not orphaned', () async {

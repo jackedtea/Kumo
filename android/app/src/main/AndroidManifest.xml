@@ -58,10 +58,10 @@
     <uses-feature android:name="android.software.leanback" android:required="false"/>
 
     <!--
-      **Settings and the server list are backed up; secrets and downloads
-      are not.** What travels is ordinary preferences: the servers and their
-      addresses, the player and appearance settings, the device id. Left
-      behind, by the three rule files named below:
+      **Settings and the server list are backed up; secrets, the device id
+      and downloads are not.** What travels is ordinary preferences: the
+      servers and their addresses, the player and appearance settings. Left
+      behind, by the two rule files named below:
 
       - The keychain (FlutterSecureStorage and its wrapped key): server
         tokens, PIN hashes, remote pairings. It is encrypted with a key in
@@ -71,6 +71,10 @@
         fails the whole backup rather than skipping the file — and the
         server still has every one of them.
       - `subtitle-fonts/`, copied out of the app's own assets at launch.
+      - `install/`, which holds the device id (`ServerRepository.deviceId`).
+        Jellyfin files a session and a token under it, so two phones with
+        one id would be one device to the server; the new phone makes its
+        own.
 
       So a restored server asks for its password again, and **comes back
       without its PIN**: `ServerRegistry.reload` drops the "guarded" flag
