@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -227,6 +228,77 @@ void main() {
         container.read(serverRegistryProvider).active!.pinProtected,
         isFalse,
       );
+    });
+
+    group('after a restore from backup', () {
+      // What Android's backup carries: the preferences, and none of the
+      // keychain.
+      Future<ServerProfile> guardedServer(SharedPreferences prefs) async {
+        final container = containerWith(ServerRepository(prefs: prefs));
+        final registry = await registryOf(container);
+        final profile = await registry.add(info: _info, auth: _auth);
+        await registry.setPin(profile.id, '2468');
+        return profile;
+      }
+
+      test('a server comes back without its PIN, asking to sign in', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final profile = await guardedServer(prefs);
+
+        keychain.clear();
+        final restored = containerWith(ServerRepository(prefs: prefs));
+        await registryOf(restored);
+
+        final state = restored.read(serverRegistryProvider);
+        expect(state.profiles.single.id, profile.id);
+        expect(state.profiles.single.pinProtected, isFalse);
+        // Not open, either: the password is the way in now.
+        expect(state.signedOutId, profile.id);
+        expect(state.source, isNull);
+
+        // And it stays that way on the launch after.
+        final stored = prefs.getStringList('configured_servers_v1')!.single;
+        expect(
+          (jsonDecode(stored) as Map<String, dynamic>)['pinProtected'],
+          isNot(true),
+        );
+      });
+
+      test('a PIN whose token survived is still a lock', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final profile = await guardedServer(prefs);
+
+        // Only the hash went: nothing a restore does, and not a reason to
+        // open a server that can still be signed in to.
+        keychain.remove(profile.pinKey);
+        final next = containerWith(ServerRepository(prefs: prefs));
+        final registry = await registryOf(next);
+
+        expect(
+          next.read(serverRegistryProvider).profiles.single.pinProtected,
+          isTrue,
+        );
+        expect(await registry.verifyPinFor(profile.id, '2468'), isFalse);
+      });
+
+      test('a keychain that cannot be read keeps the lock', () async {
+        final prefs = await SharedPreferences.getInstance();
+        await guardedServer(prefs);
+
+        // Locked for the moment, not empty: the PIN is still in there.
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (call) async => throw PlatformException(code: 'locked'),
+        );
+        final next = containerWith(ServerRepository(prefs: prefs));
+        await registryOf(next);
+
+        expect(
+          next.read(serverRegistryProvider).profiles.single.pinProtected,
+          isTrue,
+        );
+      });
     });
 
     test('removing the server leaves no PIN behind', () async {

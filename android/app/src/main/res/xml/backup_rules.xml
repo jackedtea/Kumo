@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 11 and earlier: what Auto Backup leaves behind. The same list as
+  data_extraction_rules.xml, which Android 12+ reads instead; see
+  AndroidManifest.xml for why each entry is here.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    <exclude domain="file" path="downloads" />
+    <exclude domain="file" path="subtitle-fonts" />
+</full-backup-content>

@@ -125,6 +125,24 @@ class ServerRepository {
     }
   }
 
+  /// Whether the keychain answered, and holds neither a token nor a PIN
+  /// for [profile] — what a restore from backup, or a keychain wiped under
+  /// the app, leaves behind.
+  ///
+  /// False when the keychain could not be read at all. [readToken] calls
+  /// that "signed out", which is right for a sign-in prompt and wrong here:
+  /// a keychain that is only locked for the moment still holds the PIN, and
+  /// taking its silence for an empty one would unlock the server for good.
+  Future<bool> secretsAreGone(ServerProfile profile) async {
+    try {
+      return await _secure.read(key: profile.credentialKey) == null &&
+          await _secure.read(key: profile.pinKey) == null;
+    } catch (e) {
+      debugPrint('Could not ask the keychain about ${profile.id}: $e');
+      return false;
+    }
+  }
+
   /// This installation's device id, generated once and kept.
   ///
   /// Jellyfin files sessions, playback history and tokens under it, so a new
@@ -333,7 +351,7 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
   ServerRepository get _repository => ref.read(serverRepositoryProvider);
 
   Future<void> reload() async {
-    final profiles = await _repository.loadProfiles();
+    final profiles = await _withoutLostPins(await _repository.loadProfiles());
     state = state.copyWith(profiles: profiles, loading: false);
 
     // Most recently used first, so a single-server user always lands on
@@ -351,6 +369,33 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
   /// the first one back, and one landing after a remove revived a server
   /// that was no longer in the list.
   int _activation = 0;
+
+  /// [profiles] with the PIN flag dropped wherever the PIN itself is gone
+  /// along with the token — a profile restored from a backup, which carries
+  /// the list of servers and none of the keychain.
+  ///
+  /// The flag alone used to be enough to lock a server, and with no hash
+  /// to check a PIN against it stayed locked until the server was removed
+  /// and added again. Nothing is given away by opening it instead: with the
+  /// token gone too, the way in is the server's password, which is more
+  /// than the PIN ever asked for. A profile that still has its token keeps
+  /// its lock, hash or no hash.
+  Future<List<ServerProfile>> _withoutLostPins(
+    List<ServerProfile> profiles,
+  ) async {
+    var changed = false;
+    final kept = <ServerProfile>[];
+    for (final ServerProfile p in profiles) {
+      if (p.pinProtected && await _repository.secretsAreGone(p)) {
+        kept.add(p.copyWith(pinProtected: false));
+        changed = true;
+      } else {
+        kept.add(p);
+      }
+    }
+    if (changed) await _repository.saveProfiles(kept);
+    return kept;
+  }
 
   /// Builds the client for [profileId] and makes it the one in use.
   Future<void> activate(String profileId) async {
@@ -662,9 +707,10 @@ class ServerRegistry extends Notifier<ServerRegistryState> {
 
   /// Whether [pin] opens [profileId].
   ///
-  /// A profile flagged as guarded whose hash is missing — a keychain wiped
-  /// under it — answers false: it stays locked, and removing and re-adding
-  /// the server is the way back in, which needs its password anyway.
+  /// A profile flagged as guarded whose hash is missing while its token is
+  /// still there answers false and stays locked. One that lost both — a
+  /// restore from backup — has had the flag dropped by [reload] before
+  /// anything asks this.
   Future<bool> verifyPinFor(String profileId, String pin) async {
     final profile = state.profiles.where((p) => p.id == profileId).firstOrNull;
     if (profile == null) return false;

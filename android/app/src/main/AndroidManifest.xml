@@ -58,22 +58,27 @@
     <uses-feature android:name="android.software.leanback" android:required="false"/>
 
     <!--
-      **Nothing of the app is backed up or copied to a new device.** Three
-      things in its storage do not survive the trip, and each breaks quietly:
+      **Settings and the server list are backed up; secrets and downloads
+      are not.** What travels is ordinary preferences: the servers and their
+      addresses, the player and appearance settings, the device id. Left
+      behind, by the three rule files named below:
 
-      - The keychain entries (server tokens, PIN hashes, remote pairings) are
-        encrypted with a key in the Android Keystore, which never leaves the
-        device. Restored, they are ciphertext nothing can read.
-      - The profile list would arrive without them: a server marked as
-        PIN-guarded whose hash is gone stays locked until it is removed.
-      - The device id would be the same on both phones. Jellyfin files a
-        session and a token under it, so the two would share one session and
-        each would report the other's playback.
+      - The keychain (FlutterSecureStorage and its wrapped key): server
+        tokens, PIN hashes, remote pairings. It is encrypted with a key in
+        the Android Keystore, which never leaves the device, so a restored
+        copy would be ciphertext nothing can read.
+      - `downloads/`: gigabytes of film against a 25 MB cloud quota, which
+        fails the whole backup rather than skipping the file — and the
+        server still has every one of them.
+      - `subtitle-fonts/`, copied out of the app's own assets at launch.
 
-      A new device signs in again, which takes a password or a Quick Connect
-      code. allowBackup covers cloud backup; device-to-device transfer on
-      Android 12+ ignores it and reads dataExtractionRules instead, and
-      fullBackupContent is the same answer for Android 11 and earlier.
+      So a restored server asks for its password again, and **comes back
+      without its PIN**: `ServerRegistry.reload` drops the "guarded" flag
+      from a profile whose token and PIN hash are both gone, which would
+      otherwise leave it locked behind a PIN nothing can check.
+
+      fullBackupContent is read up to Android 11, dataExtractionRules from
+      Android 12 (cloud backup and device-to-device transfer separately).
     -->
     <application
         android:label="${appName}"
@@ -81,8 +86,8 @@
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/tv_banner"
         android:appCategory="video"
-        android:allowBackup="false"
-        android:fullBackupContent="false"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:networkSecurityConfig="@xml/network_security_config">
         <!--
