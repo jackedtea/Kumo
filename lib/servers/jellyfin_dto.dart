@@ -130,6 +130,12 @@ ServerItem serverItemFromJson(
     overview: json['Overview'] as String?,
     runtime: ticksToDuration(json['RunTimeTicks']),
     position: ticksToDuration(userData?['PlaybackPositionTicks']),
+    positionTicks: switch (userData?['PlaybackPositionTicks']) {
+      final num n when n > 0 => n.toInt(),
+      _ => null,
+    },
+    path: json['Path'] as String?,
+    parentId: json['ParentId'] as String?,
     played: userData?['Played'] as bool? ?? false,
     playedPercentage: (userData?['PlayedPercentage'] as num?)?.toDouble(),
     favourite: userData?['IsFavorite'] as bool? ?? false,
@@ -524,6 +530,8 @@ ServerItemKind _kindFrom(String? type) {
     'MusicAlbum' => ServerItemKind.musicAlbum,
     'MusicArtist' => ServerItemKind.musicArtist,
     'Audio' => ServerItemKind.audio,
+    'Book' => ServerItemKind.book,
+    'AudioBook' => ServerItemKind.audioBook,
     _ => ServerItemKind.unknown,
   };
 }

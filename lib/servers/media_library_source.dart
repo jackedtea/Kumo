@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import 'books.dart';
 import 'server_profile.dart';
 
 /// A top-level library: Movies, Shows, Music.
@@ -82,6 +83,9 @@ class ServerItem {
     this.albumId,
     this.artists = const <ServerArtistRef>[],
     this.albumArtists = const <ServerArtistRef>[],
+    this.positionTicks,
+    this.path,
+    this.parentId,
   });
 
   final String id;
@@ -225,6 +229,46 @@ class ServerItem {
   /// [artists] do not.
   final List<ServerArtistRef> albumArtists;
 
+  /// [position] as the server holds it, to the tick.
+  ///
+  /// A book's position is not a time: it is a fraction or a page number
+  /// packed into this field (see `BookPosition`), and [position] rounds it
+  /// to the millisecond on the way in.
+  final int? positionTicks;
+
+  /// Where the file is on the server. Only the detail fetch asks for it, and
+  /// only its extension is read: it is what says an item is an EPUB.
+  final String? path;
+
+  /// The folder this sits in. Books of one series are neighbours in it.
+  final String? parentId;
+
+  /// Who wrote a book: the people the server files as authors, or for an
+  /// audiobook whoever its tags credit.
+  List<String> get authors {
+    final written = <String>[
+      for (final ServerPerson p in people)
+        if (p.role == 'Author' && p.name.isNotEmpty) p.name,
+    ];
+    if (written.isNotEmpty) return written;
+    final named = albumArtists.isNotEmpty ? albumArtists : artists;
+    return <String>[for (final ServerArtistRef a in named) a.name];
+  }
+
+  /// "Author A, Author B", or null with nobody credited.
+  String? get authorLine => authors.isEmpty ? null : authors.join(', ');
+
+  /// What kind of file a book is, from [path].
+  BookFormat get bookFormat => BookFormat.fromPath(path);
+
+  /// Where the reader stopped, or null for a book not started. The page
+  /// count is the reader's to add: the server does not know it.
+  BookPosition? get bookPosition =>
+      BookPosition.fromTicks(positionTicks, bookFormat.family);
+
+  /// Which volume of [seriesTitle] a book is, from `IndexNumber`.
+  int? get volumeNumber => episodeNumber;
+
   /// The number on the sleeve. Jellyfin carries it in `IndexNumber`, the
   /// field an episode numbers itself with, so it lives in [episodeNumber].
   int? get trackNumber => episodeNumber;
@@ -264,6 +308,12 @@ enum ServerItemKind {
 
   /// One track. Named for what the server calls it, `Audio`.
   audio,
+
+  /// Something read: an EPUB, a PDF, a comic.
+  book,
+
+  /// A book that is listened to. Audio with a place to come back to.
+  audioBook,
   unknown;
 
   /// Whether tapping this opens a grid of its children rather than a detail.
@@ -271,6 +321,9 @@ enum ServerItemKind {
 
   /// Whether this belongs to a music library rather than a video one.
   bool get isMusic => this == musicAlbum || this == musicArtist || this == audio;
+
+  /// Whether this belongs to a books library, read or listened to.
+  bool get isBook => this == book || this == audioBook;
 }
 
 /// An artist as a track or an album credits them: a name, and the item that
@@ -895,6 +948,31 @@ abstract class MediaLibrarySource {
 
   /// The next unwatched episode of each series in progress.
   Future<List<ServerItem>> nextUp({int limit = 12, String? viewId});
+
+  /// The books part-way through, read or listened to, most recent first.
+  ///
+  /// Apart from [resumable] because the two never share a shelf: that one is
+  /// "Continue watching", and a half-read novel beside a half-watched film
+  /// would open a reader from a row of play buttons.
+  Future<List<ServerItem>> resumableBooks({int limit = 12, String? viewId});
+
+  /// The other volumes of [seriesName] in the folder [parentId], in order.
+  ///
+  /// The server has no item for a book series — only a name on each book —
+  /// so the folder is the listing and the name is the filter.
+  Future<List<ServerItem>> bookSeries(String parentId, String seriesName);
+
+  /// Stores where the reader stopped in the book [itemId].
+  ///
+  /// Not [reportProgress]: a book has no runtime, and the server answers a
+  /// play-session report on such an item by marking it finished and
+  /// forgetting the position. This writes the user data directly.
+  /// [finished] also marks it read; null leaves that as it is.
+  Future<void> setBookPosition(
+    String itemId,
+    BookPosition position, {
+    bool? finished,
+  });
 
   /// What the user has starred inside [viewId].
   ///

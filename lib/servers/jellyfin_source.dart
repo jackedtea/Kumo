@@ -6,6 +6,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import 'books.dart';
 import 'jellyfin_dto.dart';
 import 'media_library_source.dart';
 import 'server_profile.dart';
@@ -115,7 +116,7 @@ class JellyfinSource implements MediaLibrarySource {
       // BoxSet is here for the Collections library, whose entries are box
       // sets rather than films. Jellyfin happens to return them anyway; asking
       // keeps that from depending on a server quirk.
-      'includeItemTypes': 'Movie,Series,Video,BoxSet',
+      'includeItemTypes': _gridTypes,
       // Said either way: left out, the answer follows an admin's server-wide
       // setting, and the switch on the grid would not mean what it says.
       'collapseBoxSetItems': '$groupCollections',
@@ -161,7 +162,7 @@ class JellyfinSource implements MediaLibrarySource {
       'recursive': 'true',
       // The same filter the listing uses, or the count would describe a
       // different set of things from the grid it labels.
-      'includeItemTypes': 'Movie,Series,Video,BoxSet',
+      'includeItemTypes': _gridTypes,
       'collapseBoxSetItems': '$groupCollections',
       // Nothing is sent back but the tally.
       'limit': '0',
@@ -250,6 +251,72 @@ class JellyfinSource implements MediaLibrarySource {
   }
 
   @override
+  Future<List<ServerItem>> resumableBooks({
+    int limit = 12,
+    String? viewId,
+  }) async {
+    final json = await _get('/UserItems/Resume', <String, String>{
+      'userId': _profile.userId,
+      'limit': '$limit',
+      // An audiobook's media type is Audio, and so is a song's; the item
+      // types are what keep an album track off this shelf.
+      'mediaTypes': 'Book,Audio',
+      'includeItemTypes': 'Book,AudioBook',
+      'parentId': ?viewId,
+      'fields': _fields,
+    });
+
+    return _itemsOf(json).map(serverItemFromJson).toList();
+  }
+
+  @override
+  Future<List<ServerItem>> bookSeries(
+    String parentId,
+    String seriesName,
+  ) async {
+    final json = await _get('/Items', <String, String>{
+      'userId': _profile.userId,
+      'parentId': parentId,
+      'includeItemTypes': 'Book,AudioBook',
+      // Volume order where the files say, else the names: "Vol 2" sorts
+      // before "Vol 10" by `SortName`, which pads its numbers.
+      'sortBy': 'IndexNumber,SortName',
+      'sortOrder': 'Ascending',
+      'fields': _fields,
+      'imageTypeLimit': '1',
+      'enableImageTypes': 'Primary',
+    });
+
+    // The server cannot filter by series name, and a folder may hold more
+    // than one series — an author's, say.
+    return <ServerItem>[
+      for (final ServerItem item in _itemsOf(json).map(serverItemFromJson))
+        if (item.seriesTitle == seriesName) item,
+    ];
+  }
+
+  @override
+  Future<void> setBookPosition(
+    String itemId,
+    BookPosition position, {
+    bool? finished,
+  }) async {
+    // The plain setter. `/Sessions/Playing/Progress` runs the server's
+    // resume rules, and on an item with no runtime those mark it played and
+    // zero the position — on the first report.
+    await _post(
+      '/UserItems/$itemId/UserData',
+      <String, dynamic>{
+        // A finished book starts again from the top, as a finished film does.
+        'PlaybackPositionTicks': finished == true ? 0 : position.ticks,
+        'Played': ?finished,
+        'LastPlayedDate': DateTime.now().toUtc().toIso8601String(),
+      },
+      <String, String>{'userId': _profile.userId},
+    );
+  }
+
+  @override
   Future<List<ServerItem>> nextUp({int limit = 12, String? viewId}) async {
     final json = await _get('/Shows/NextUp', <String, String>{
       'userId': _profile.userId,
@@ -270,7 +337,7 @@ class JellyfinSource implements MediaLibrarySource {
       // The same types the grid lists. A favourited episode is real and is
       // deliberately not here: every tile opens a detail screen, and there
       // is none an episode on its own belongs on.
-      'includeItemTypes': 'Movie,Series,Video,BoxSet',
+      'includeItemTypes': _gridTypes,
       'isFavorite': 'true',
       'sortBy': 'SortName',
       'sortOrder': 'Ascending',
@@ -419,6 +486,8 @@ class JellyfinSource implements MediaLibrarySource {
         if (kinds.contains(ServerItemKind.episode)) 'Episode',
         if (kinds.contains(ServerItemKind.audio)) 'Audio',
         if (kinds.contains(ServerItemKind.musicAlbum)) 'MusicAlbum',
+        if (kinds.contains(ServerItemKind.book)) 'Book',
+        if (kinds.contains(ServerItemKind.audioBook)) 'AudioBook',
       ].join(',');
 
   @override
@@ -1034,7 +1103,14 @@ class JellyfinSource implements MediaLibrarySource {
   /// something only the player ever reads.
   static const _detailFields =
       '$_fields,Chapters,Trickplay,OriginalTitle,ExternalUrls,'
-      'ProductionLocations';
+      // `Path` for a book alone: its extension is the only thing that says
+      // an item is an EPUB rather than a PDF.
+      'ProductionLocations,Path';
+
+  /// What a library's grid lists. Books ride along: a film library holds
+  /// none, and a books library holds nothing else, so one list serves both
+  /// without the request having to know which it is talking to.
+  static const _gridTypes = 'Movie,Series,Video,BoxSet,Book,AudioBook';
 
   /// [_fields] for music listings, without what only a film or a series
   /// carries. `People` above all: on a track it is every composer and

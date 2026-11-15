@@ -12,6 +12,7 @@
 /// test says only what it is about.
 library;
 
+import 'package:kumo/servers/books.dart';
 import 'package:kumo/servers/media_library_source.dart';
 import 'package:kumo/servers/server_profile.dart';
 
@@ -80,6 +81,27 @@ class FakeLibrarySource implements MediaLibrarySource {
   @override
   Future<List<ServerItem>> nextUp({int limit = 12, String? viewId}) async =>
       const <ServerItem>[];
+
+  @override
+  Future<List<ServerItem>> resumableBooks({
+    int limit = 12,
+    String? viewId,
+  }) async =>
+      const <ServerItem>[];
+
+  @override
+  Future<List<ServerItem>> bookSeries(
+    String parentId,
+    String seriesName,
+  ) async =>
+      const <ServerItem>[];
+
+  @override
+  Future<void> setBookPosition(
+    String itemId,
+    BookPosition position, {
+    bool? finished,
+  }) async {}
 
   @override
   Future<List<ServerItem>> favourites(String viewId) async =>
