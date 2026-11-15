@@ -1481,19 +1481,79 @@ class _LibrarySwitcher extends ConsumerWidget {
   }
 }
 
+/// The library picker on screen, if any. One at a time: the sheet's barrier
+/// covers the branch but not the navigation bar, so another tap on Libraries
+/// would otherwise stack a second sheet on the first. Held by the sheet's own
+/// state rather than a flag around the call, so a sheet torn down without
+/// ever answering (its navigator gone) cannot leave it set.
+_PickerSheetFrameState? _openPicker;
+
 /// Lists the server's libraries in a sheet; resolves to the one picked, or
-/// null when dismissed.
+/// null when dismissed — and at once to null when one is already open, which
+/// stays the one on screen.
 Future<String?> showLibraryPicker(
   BuildContext context, {
   required String currentId,
-}) {
+}) async {
+  if (_openPicker != null) return null;
   return showModalBottomSheet<String>(
     context: context,
     useSafeArea: true,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (_) => _LibraryPickerSheet(currentId: currentId),
+    builder: (_) =>
+        _PickerSheetFrame(child: _LibraryPickerSheet(currentId: currentId)),
   );
+}
+
+/// Marks the picker as open while mounted, and closes the route it sits in
+/// once its branch stops being shown.
+///
+/// The sheet lives in the Libraries branch's own navigator, which the shell
+/// keeps mounted offstage when another tab is chosen — so without this the
+/// sheet would be waiting there on the way back. The shell turns tickers off
+/// for a hidden branch, and that is the signal. Removed rather than popped:
+/// a pop animates, and an animation with its ticker off does not run.
+class _PickerSheetFrame extends StatefulWidget {
+  const _PickerSheetFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PickerSheetFrame> createState() => _PickerSheetFrameState();
+}
+
+class _PickerSheetFrameState extends State<_PickerSheetFrame> {
+  bool _closing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _openPicker = this;
+  }
+
+  @override
+  void dispose() {
+    if (identical(_openPicker, this)) _openPicker = null;
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (TickerMode.valuesOf(context).enabled || _closing) return;
+
+    final route = ModalRoute.of(context);
+    if (route == null) return;
+    _closing = true;
+    // Not during a build: the navigator is mid-update.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (route.isActive) route.navigator?.removeRoute(route);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _LibraryPickerSheet extends ConsumerWidget {
