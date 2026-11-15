@@ -86,6 +86,7 @@ class PlayerSettingsPage extends ConsumerWidget {
           subtitle: AppLocalizations.of(context).autoPlayNextSub,
           value: settings.autoPlayNext,
           onChanged: (v) => save(settings.copyWith(autoPlayNext: v)),
+          onServer: true,
         ),
         // The server's media segments (Jellyfin 10.10 and later), or chapters
         // titled OP, ED, Preview… where it has none. Shown whatever is
@@ -137,6 +138,7 @@ class PlayerSettingsPage extends ConsumerWidget {
         SettingsNote(AppLocalizations.of(context).qualityCapSub),
         _QualityCapRow(metered: false),
         _QualityCapRow(metered: true),
+        const ServerMarkLegend(),
       ],
     );
   }

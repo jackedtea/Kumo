@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/music/mini_player.dart';
 import '../features/remote/remote_host.dart';
+import '../features/settings/server_player_prefs.dart';
 import '../l10n/app_localizations.dart';
 import 'appearance_settings.dart';
 import 'locale_controller.dart';
@@ -49,6 +50,8 @@ class _KumoAppState extends ConsumerState<KumoApp> {
   @override
   Widget build(BuildContext context) {
     final appearance = ref.watch(appearanceSettingsProvider);
+    // Keeps the player choices a server account holds on that server.
+    ref.watch(serverPlayerPrefsSyncProvider);
 
     // Only the wallpaper palette needs the platform round-trip, so the
     // builder is skipped entirely unless the user asked for it — every other

@@ -750,6 +750,23 @@ class JellyfinSource implements MediaLibrarySource {
     );
   }
 
+  @override
+  Future<ServerPlaybackPreferences?> playbackPreferences() async =>
+      playbackPreferencesFromConfig(await _userConfiguration());
+
+  @override
+  Future<void> setPlaybackPreferences(
+    ServerPlaybackPreferences preferences,
+  ) async {
+    // Read at save time and sent whole, as [setHomeExcludes] does.
+    final config = await _userConfiguration();
+    await _post(
+      '/Users/Configuration',
+      applyPlaybackPreferences(config, preferences),
+      <String, String>{'userId': _profile.userId},
+    );
+  }
+
   /// The user's own preferences, as the server stores them.
   Future<Map<String, dynamic>> _userConfiguration() async {
     final json = await _get('/Users/${_profile.userId}', const <String, String>{});

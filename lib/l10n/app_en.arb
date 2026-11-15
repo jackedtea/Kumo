@@ -1163,5 +1163,7 @@
   "fontInstalled": "Installed on this computer",
   "fontOther": "Installed font…",
   "fontFamilyName": "Font name",
-  "fontFamilyNameHint": "As the system lists it, e.g. Segoe UI"
+  "fontFamilyNameHint": "As the system lists it, e.g. Segoe UI",
+  "savedOnServer": "Saved on the server",
+  "savedOnServerLegend": "Saved on your server account, so every device signed in as you uses the same choice."
 }

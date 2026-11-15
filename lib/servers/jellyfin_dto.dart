@@ -11,6 +11,7 @@
 /// `parsePropfind` lives apart from `WebDavSource`.
 library;
 
+import '../core/languages.dart';
 import 'media_library_source.dart';
 
 /// Jellyfin counts in **ticks**: 100 nanoseconds, so ten thousand to the
@@ -1167,4 +1168,49 @@ Uri _primaryImageUrl(Uri base, String owner, String tag, int? maxWidth) {
       if (maxWidth != null) 'maxWidth': '$maxWidth',
     },
   );
+}
+
+// ------------------------------------------------- playback preferences
+
+/// The playback choices in a user's `Configuration`.
+///
+/// The audio language wins over the subtitle one when both are set, since
+/// the app has one preference and that one is first a question about audio.
+/// Smart subtitles are on exactly when the server's mode is `Smart`, which is
+/// the same rule: subtitles only when the audio is not in that language.
+ServerPlaybackPreferences playbackPreferencesFromConfig(
+  Map<String, dynamic> config,
+) {
+  String? language(Object? raw) =>
+      raw is String && raw.trim().isNotEmpty ? canonicalLanguage(raw) : null;
+
+  return ServerPlaybackPreferences(
+    language: language(config['AudioLanguagePreference']) ??
+        language(config['SubtitleLanguagePreference']),
+    smartSubtitles: config['SubtitleMode'] == 'Smart',
+    autoPlayNext: config['EnableNextEpisodeAutoPlay'] as bool? ?? true,
+  );
+}
+
+/// [config] with [preferences] laid over it, every other field untouched.
+///
+/// Turning smart subtitles off goes back to the server's `Default` mode only
+/// when the mode was `Smart`: a user who chose Always or None in the web
+/// client had already turned smart subtitles off, and that choice stays.
+Map<String, dynamic> applyPlaybackPreferences(
+  Map<String, dynamic> config,
+  ServerPlaybackPreferences preferences,
+) {
+  final code = serverLanguageCode(preferences.language) ?? '';
+  final mode = config['SubtitleMode'];
+
+  return <String, dynamic>{
+    ...config,
+    'AudioLanguagePreference': code,
+    'SubtitleLanguagePreference': code,
+    'SubtitleMode': preferences.smartSubtitles
+        ? 'Smart'
+        : (mode == 'Smart' || mode is! String ? 'Default' : mode),
+    'EnableNextEpisodeAutoPlay': preferences.autoPlayNext,
+  };
 }

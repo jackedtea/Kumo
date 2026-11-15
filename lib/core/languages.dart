@@ -169,3 +169,24 @@ String languageLabel(String? code) {
   }
   return code.toUpperCase();
 }
+
+/// The ISO 639-2 code a Jellyfin server stores a language preference as, for
+/// a canonical two-letter [code]; null for null.
+///
+/// The bibliographic form (`ger`, `fre`, `chi`) where the two differ, because
+/// that is what the server's own culture list — and so the web client's
+/// language picker — names them with. A code with no entry goes back as it
+/// stands rather than being dropped.
+String? serverLanguageCode(String? code) {
+  if (code == null || code.isEmpty) return null;
+  return _serverCodes[code] ?? code;
+}
+
+const _serverCodes = <String, String>{
+  'en': 'eng', 'vi': 'vie', 'ja': 'jpn', 'ko': 'kor', 'zh': 'chi',
+  'th': 'tha', 'id': 'ind', 'fr': 'fre', 'de': 'ger', 'es': 'spa',
+  'pt': 'por', 'ru': 'rus', 'it': 'ita', 'hi': 'hin', 'ar': 'ara',
+  'tr': 'tur', 'pl': 'pol', 'nl': 'dut', 'sv': 'swe', 'no': 'nor',
+  'da': 'dan', 'fi': 'fin', 'cs': 'cze', 'el': 'gre', 'he': 'heb',
+  'hu': 'hun', 'uk': 'ukr', 'ms': 'may', 'tl': 'fil', 'ro': 'rum',
+};

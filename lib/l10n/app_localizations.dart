@@ -6355,6 +6355,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'As the system lists it, e.g. Segoe UI'**
   String get fontFamilyNameHint;
+
+  /// No description provided for @savedOnServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on the server'**
+  String get savedOnServer;
+
+  /// No description provided for @savedOnServerLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on your server account, so every device signed in as you uses the same choice.'**
+  String get savedOnServerLegend;
 }
 
 class _AppLocalizationsDelegate

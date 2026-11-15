@@ -168,6 +168,14 @@ class FakeLibrarySource implements MediaLibrarySource {
       const <ServerPerson>[];
 
   @override
+  Future<ServerPlaybackPreferences?> playbackPreferences() async => null;
+
+  @override
+  Future<void> setPlaybackPreferences(
+    ServerPlaybackPreferences preferences,
+  ) async {}
+
+  @override
   Future<Set<String>> homeExcludes() async => const <String>{};
 
   @override

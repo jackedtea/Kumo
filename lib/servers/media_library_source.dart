@@ -877,6 +877,38 @@ class ServerShelf {
   final List<ServerItem> items;
 }
 
+/// The part of the player's settings a server account holds.
+///
+/// [language] is the canonical two-letter code (`core/languages.dart`), or
+/// null for no preference. It stands for both the audio and the subtitle
+/// language, as the app's one preference does.
+@immutable
+class ServerPlaybackPreferences {
+  const ServerPlaybackPreferences({
+    this.language,
+    this.smartSubtitles = true,
+    this.autoPlayNext = true,
+  });
+
+  final String? language;
+  final bool smartSubtitles;
+  final bool autoPlayNext;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ServerPlaybackPreferences &&
+      other.language == language &&
+      other.smartSubtitles == smartSubtitles &&
+      other.autoPlayNext == autoPlayNext;
+
+  @override
+  int get hashCode => Object.hash(language, smartSubtitles, autoPlayNext);
+
+  @override
+  String toString() => 'ServerPlaybackPreferences($language, '
+      'smart: $smartSubtitles, autoPlayNext: $autoPlayNext)';
+}
+
 /// A catalog-level source: metadata, artwork, playback URLs and watch state,
 /// already assembled by something else.
 ///
@@ -1038,6 +1070,18 @@ abstract class MediaLibrarySource {
 
   /// People whose name matches [query] — actors, directors, writers.
   Future<List<ServerPerson>> searchPeople(String query, {int limit = 24});
+
+  /// The playback choices the user's server account keeps, or null when this
+  /// server keeps none.
+  ///
+  /// On Jellyfin these are fields of the user's configuration — the same ones
+  /// the web client's Playback and Subtitles settings edit — so a choice made
+  /// on one device is the one every other device signed in as the user plays
+  /// with.
+  Future<ServerPlaybackPreferences?> playbackPreferences();
+
+  /// Saves what [playbackPreferences] reads.
+  Future<void> setPlaybackPreferences(ServerPlaybackPreferences preferences);
 
   /// The libraries this user has hidden from Home's "Recently added" rows.
   ///

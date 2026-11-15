@@ -3521,4 +3521,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontFamilyNameHint => 'As the system lists it, e.g. Segoe UI';
+
+  @override
+  String get savedOnServer => 'Saved on the server';
+
+  @override
+  String get savedOnServerLegend =>
+      'Saved on your server account, so every device signed in as you uses the same choice.';
 }

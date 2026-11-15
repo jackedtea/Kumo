@@ -165,6 +165,16 @@ Also open:
   A Quick Connect row approves another device's code
   (`POST /QuickConnect/Authorize`); its 401/403 means the feature is off, so it
   bypasses `_send`, which would read them as an expired session.
+- **Settings the server keeps carry a cloud** (`ServerMark`, `onServer: true` on
+  `SettingsSwitchRow` / `SettingsValueRow`, `ServerMarkLegend` at the page's
+  foot), 2026-11-15. Today: preferred language, smart subtitles and auto-play
+  next, synced by `features/settings/server_player_prefs.dart` with
+  `UserConfiguration` (`Audio/SubtitleLanguagePreference` as ISO 639-2/B,
+  `SubtitleMode` Smart, `EnableNextEpisodeAutoPlay`), whole config read and
+  posted back. Opening a server pulls; a change here pushes; a change with no
+  server (or a failed push) sets `player_server_prefs_pending_v1` and the next
+  server is told instead of asked. The local copy stays as the offline cache.
+  A new server-kept setting gets the mark too.
 - **Quick Connect sign-in** (add-server sheet): `POST /QuickConnect/Initiate`
   first (10.9+ is POST-only; GET only on a 405 for 10.8), then poll
   `/QuickConnect/Connect` until approved. The poll takes a `cancelled`

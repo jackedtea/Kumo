@@ -3499,4 +3499,11 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get fontFamilyNameHint => 'Như tên hệ thống hiển thị, ví dụ Segoe UI';
+
+  @override
+  String get savedOnServer => 'Lưu trên máy chủ';
+
+  @override
+  String get savedOnServerLegend =>
+      'Lưu trong tài khoản trên máy chủ, mọi thiết bị đăng nhập bằng tài khoản này đều dùng chung.';
 }

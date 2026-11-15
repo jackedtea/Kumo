@@ -1119,5 +1119,7 @@
   "fontInstalled": "Đã cài trên máy này",
   "fontOther": "Font đã cài trên máy…",
   "fontFamilyName": "Tên font",
-  "fontFamilyNameHint": "Như tên hệ thống hiển thị, ví dụ Segoe UI"
+  "fontFamilyNameHint": "Như tên hệ thống hiển thị, ví dụ Segoe UI",
+  "savedOnServer": "Lưu trên máy chủ",
+  "savedOnServerLegend": "Lưu trong tài khoản trên máy chủ, mọi thiết bị đăng nhập bằng tài khoản này đều dùng chung."
 }

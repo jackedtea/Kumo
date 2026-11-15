@@ -88,7 +88,9 @@ class AudioSettingsPage extends ConsumerWidget {
           // subtitles for it.
           subtitle: l10n.sharedWithSubtitles,
           onTap: () => context.push('/settings/subtitle'),
+          onServer: true,
         ),
+        const ServerMarkLegend(),
       ],
     );
   }

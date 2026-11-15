@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Scaffold shared by every settings sub-page, so they cannot drift apart.
 class SettingsScaffold extends StatelessWidget {
@@ -103,6 +104,7 @@ class SettingsValueRow extends StatelessWidget {
     required this.value,
     this.subtitle,
     this.onTap,
+    this.onServer = false,
   });
 
   final String title;
@@ -110,11 +112,14 @@ class SettingsValueRow extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
 
+  /// Draws [ServerMark] after the title.
+  final bool onServer;
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: context.spacing.screenPadding(context.windowSize),
-      title: Text(title),
+      title: SettingsTitle(title, onServer: onServer),
       subtitle: subtitle == null ? null : Text(subtitle!),
       // Bounded, and ellipsised inside that bound. A ListTile asserts when
       // its trailing widget claims the whole tile, and a value long enough to
@@ -149,6 +154,7 @@ class SettingsSwitchRow extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.subtitle,
+    this.onServer = false,
   });
 
   final String title;
@@ -157,11 +163,14 @@ class SettingsSwitchRow extends StatelessWidget {
   final ValueChanged<bool>? onChanged;
   final String? subtitle;
 
+  /// Draws [ServerMark] after the title.
+  final bool onServer;
+
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: context.spacing.screenPadding(context.windowSize),
-      title: Text(title),
+      title: SettingsTitle(title, onServer: onServer),
       subtitle: subtitle == null ? null : Text(subtitle!),
       value: value,
       onChanged: onChanged,
@@ -223,3 +232,94 @@ class SettingsSliderRow extends StatelessWidget {
   }
 }
 
+
+/// The cloud drawn after a setting the server account keeps.
+///
+/// Most settings belong to the device — its decoder, its speakers, its
+/// screen — and a few belong to the account and follow it to every device.
+/// Nothing on a row says which, so this does; [ServerMarkLegend] says what it
+/// means once per page.
+class ServerMark extends StatelessWidget {
+  const ServerMark({super.key, this.size = 16});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = AppLocalizations.of(context).savedOnServer;
+
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        label: label,
+        child: Icon(
+          Icons.cloud_outlined,
+          size: size,
+          color: context.colors.primary,
+        ),
+      ),
+    );
+  }
+}
+
+/// A row title, with [ServerMark] after it when [onServer].
+///
+/// The mark is part of the text run, so a title that wraps carries it at the
+/// end of its last line rather than pushing it to a column of its own.
+class SettingsTitle extends StatelessWidget {
+  const SettingsTitle(this.title, {super.key, this.onServer = false});
+
+  final String title;
+  final bool onServer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!onServer) return Text(title);
+
+    return Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
+          TextSpan(text: title),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: context.spacing.sm),
+              child: const ServerMark(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What [ServerMark] means, at the foot of a page that uses it.
+class ServerMarkLegend extends StatelessWidget {
+  const ServerMarkLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.spacing;
+    final horizontal = spacing.screenHorizontal(context.windowSize);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(horizontal, spacing.lg, horizontal, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Excluded: the sentence beside it already says it.
+          const ExcludeSemantics(child: ServerMark()),
+          SizedBox(width: spacing.sm),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).savedOnServerLegend,
+              style: context.texts.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

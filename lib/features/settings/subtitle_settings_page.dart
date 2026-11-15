@@ -261,12 +261,14 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
           value: languageLabel(settings.preferredLanguage),
           subtitle: l10n.preferredLanguageSub,
           onTap: () => _pickLanguage(settings),
+          onServer: true,
         ),
         SettingsSwitchRow(
           title: l10n.smartSubtitles,
           subtitle: l10n.smartSubtitlesSub,
           value: settings.smartSubtitles,
           onChanged: (v) => _save(settings.copyWith(smartSubtitles: v)),
+          onServer: true,
         ),
         SettingsSwitchRow(
           title: l10n.burnInWhenTranscoding,
@@ -280,6 +282,7 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
           subtitle: l10n.syncOffsetSub,
           onTap: () => _pickDelay(settings),
         ),
+        const ServerMarkLegend(),
       ],
     );
   }

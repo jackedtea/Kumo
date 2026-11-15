@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -463,11 +464,24 @@ final playerSettingsProvider =
 class PlayerSettingsController extends Notifier<PlayerSettings> {
   static const _prefsKey = 'player_settings_v1';
 
+  final Completer<void> _restored = Completer<void>();
+
+  /// Completes once the stored settings have been read, so whatever lays the
+  /// server's choices over them (`server_player_prefs.dart`) is not then
+  /// overwritten by a restore landing late.
+  Future<void> get ready => _restored.future;
+
   @override
   PlayerSettings build() {
     // Defaults render immediately; the stored values arrive a frame later
     // rather than blocking the first paint.
-    Future<void>.microtask(_restore);
+    Future<void>.microtask(() async {
+      try {
+        await _restore();
+      } finally {
+        if (!_restored.isCompleted) _restored.complete();
+      }
+    });
     return const PlayerSettings();
   }
 
