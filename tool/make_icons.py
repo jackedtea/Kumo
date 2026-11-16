@@ -34,9 +34,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ICON = ROOT / "assets/icon"
 FONT = ROOT / "assets/fonts/Roboto-Variable.ttf"
 
-# Sky, top-left light to bottom-right deep.
-SKY_LIGHT = "#6CB8FF"
-SKY_DEEP = "#3A62E0"
+# Sky: one flat colour, no gradient, no shading.
+SKY = "#4A8CF7"
 CLOUD_FILL = "#FFFFFF"
 
 # The cloud: a pill for its flat base and three bumps on top. Their union is
@@ -70,15 +69,6 @@ def glyph(scale=1.0, fill=CLOUD_FILL, uid="k"):
     )
 
 
-def sky(uid="k"):
-    return (
-        f'<defs><linearGradient id="{uid}g" x1="0" y1="0" x2="1" y2="1">'
-        f'<stop offset="0" stop-color="{SKY_LIGHT}"/>'
-        f'<stop offset="1" stop-color="{SKY_DEEP}"/>'
-        f"</linearGradient></defs>"
-    )
-
-
 def svg(body, title=None):
     head = f"<title>{title}</title>" if title else ""
     return (
@@ -91,7 +81,7 @@ def svg(body, title=None):
 def rounded_icon():
     """The everyday icon: the mark on the sky, in a rounded square."""
     return svg(
-        sky() + '<rect width="512" height="512" rx="118" fill="url(#kg)"/>'
+        f'<rect width="512" height="512" rx="118" fill="{SKY}"/>'
         + glyph(),
         "Kumo app icon",
     )
@@ -99,12 +89,12 @@ def rounded_icon():
 
 def square_icon():
     """Full bleed and opaque, for iOS, which applies its own mask."""
-    return svg(sky() + '<rect width="512" height="512" fill="url(#kg)"/>' + glyph())
+    return svg(f'<rect width="512" height="512" fill="{SKY}"/>' + glyph())
 
 
 def background():
     """The adaptive icon's back layer: the sky alone."""
-    return svg(sky() + '<rect width="512" height="512" fill="url(#kg)"/>')
+    return svg(f'<rect width="512" height="512" fill="{SKY}"/>')
 
 
 def foreground():

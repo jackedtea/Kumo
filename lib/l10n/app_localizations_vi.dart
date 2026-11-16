@@ -3177,6 +3177,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get filterYears => 'Năm';
 
   @override
+  String get filterSearch => 'Tìm trong thư viện này';
+
+  @override
+  String get filterSearchClear => 'Xoá tìm kiếm';
+
+  @override
   String get filterPlayed => 'Đã xem';
 
   @override
@@ -3317,6 +3323,32 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get downloadRemoveWatchedSub =>
       'Xoá bản tải khi đã xem hết trên thiết bị này';
+
+  @override
+  String get downloadFolder => 'Thư mục tải xuống';
+
+  @override
+  String get downloadFolderNone =>
+      'Chưa chọn. Chưa tải được gì cho đến khi bạn chọn thư mục.';
+
+  @override
+  String get downloadFolderChoose => 'Chọn thư mục tải xuống';
+
+  @override
+  String get downloadFolderDevice => 'Thiết bị này';
+
+  @override
+  String get downloadFolderCard => 'Thẻ nhớ';
+
+  @override
+  String get downloadFolderRequired => 'Hãy chọn thư mục tải xuống trước.';
+
+  @override
+  String get downloadFolderMoving => 'Đang chuyển các bản tải…';
+
+  @override
+  String get downloadFolderFailed =>
+      'Không dùng được thư mục đó. Các bản tải vẫn ở chỗ cũ.';
 
   @override
   String get downloadStorage => 'Dung lượng';

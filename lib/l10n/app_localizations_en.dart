@@ -3192,6 +3192,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterYears => 'Years';
 
   @override
+  String get filterSearch => 'Search this library';
+
+  @override
+  String get filterSearchClear => 'Clear search';
+
+  @override
   String get filterPlayed => 'Watched';
 
   @override
@@ -3333,6 +3339,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get downloadRemoveWatchedSub =>
       'Delete a copy once it has been watched to the end on this device';
+
+  @override
+  String get downloadFolder => 'Download folder';
+
+  @override
+  String get downloadFolderNone =>
+      'Not chosen yet. Nothing downloads until you choose one.';
+
+  @override
+  String get downloadFolderChoose => 'Choose download folder';
+
+  @override
+  String get downloadFolderDevice => 'This device';
+
+  @override
+  String get downloadFolderCard => 'Memory card';
+
+  @override
+  String get downloadFolderRequired => 'Choose a download folder first.';
+
+  @override
+  String get downloadFolderMoving => 'Moving your downloads…';
+
+  @override
+  String get downloadFolderFailed =>
+      'That folder could not be used. Your downloads stay where they were.';
 
   @override
   String get downloadStorage => 'Storage';

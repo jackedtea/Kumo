@@ -631,6 +631,7 @@ Map<String, String> filterParams(LibraryFilter filter) {
     if (filter.tags.isNotEmpty) 'tags': _sorted(filter.tags).join('|'),
     if (filter.years.isNotEmpty)
       'years': (filter.years.toList()..sort()).join(','),
+    if (filter.text.isNotEmpty) 'searchTerm': filter.text,
   };
 }
 

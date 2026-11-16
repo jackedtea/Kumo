@@ -14,6 +14,7 @@ import '../../servers/media_library_source.dart';
 import '../../downloads/download_models.dart';
 import '../../downloads/downloads_controller.dart';
 import '../admin/admin_item_actions.dart';
+import '../downloads/download_folder_picker.dart';
 import '../downloads/download_ui.dart';
 import '../music/music_actions.dart';
 import 'server_library.dart';
@@ -463,6 +464,7 @@ ItemAction _downloadAction(
           messenger.showSnackBar(SnackBar(content: Text(l10n.actionFailed)));
           return;
         }
+        if (!await ensureDownloadFolder(context, ref)) return;
         await ref.read(downloadsProvider.notifier).enqueue(source, item);
         messenger.showSnackBar(SnackBar(content: Text(l10n.addedToDownloads)));
       },
@@ -557,7 +559,8 @@ ItemAction downloadAllAction(
           ],
         ),
       );
-      if (ok != true) return;
+      if (ok != true || !context.mounted) return;
+      if (!await ensureDownloadFolder(context, ref)) return;
 
       for (final ServerItem e in missing) {
         await controller.enqueue(source, e);
