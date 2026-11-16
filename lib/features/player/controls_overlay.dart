@@ -14,6 +14,7 @@ import '../../servers/media_library_source.dart';
 import '../../sources/media_source.dart';
 import 'playback_state.dart';
 import 'player_ui_state.dart';
+import 'segment_skipper.dart';
 
 /// Everything drawn over the video when the chrome is visible.
 ///
@@ -52,6 +53,7 @@ class ControlsOverlay extends StatelessWidget {
     this.skipForward = const Duration(seconds: 30),
     this.skipSegment,
     required this.onSkipSegment,
+    this.onDismissSegment,
     this.chromeVisible = true,
     this.streamControlsBelow = false,
   });
@@ -118,6 +120,11 @@ class ControlsOverlay extends StatelessWidget {
   final MediaSegment? skipSegment;
 
   final ValueChanged<MediaSegment> onSkipSegment;
+
+  /// Hides the pill for [skipSegment] without seeking — for a viewer who
+  /// means to watch this opening and does not want the offer over it. Null
+  /// draws no close button.
+  final ValueChanged<MediaSegment>? onDismissSegment;
 
   /// The amounts from Player settings. The transport buttons used to be fixed
   /// at 10 and 30 seconds, which quietly ignored the setting the gestures
@@ -214,8 +221,14 @@ class ControlsOverlay extends StatelessWidget {
                 _PillSlot(
                   chromeVisible: chromeVisible,
                   child: _SkipPill(
-                    label: _segmentLabel(context, segment.kind),
+                    label: _segmentLabel(
+                      context,
+                      skipLabelFor(segment, state.chapters),
+                    ),
                     onTap: () => onSkipSegment(segment),
+                    onDismiss: onDismissSegment == null
+                        ? null
+                        : () => onDismissSegment!(segment),
                   ),
                 ),
               _CollapsingChrome(
@@ -235,17 +248,16 @@ class ControlsOverlay extends StatelessWidget {
 /// "Skip credits" rather than "Skip outro": nobody watching a film calls the
 /// closing titles an outro, and the wire name is the server's vocabulary,
 /// not the viewer's.
-String _segmentLabel(BuildContext context, MediaSegmentKind kind) {
+String _segmentLabel(BuildContext context, SkipLabel label) {
   final l10n = AppLocalizations.of(context);
-  return switch (kind) {
-    MediaSegmentKind.intro => l10n.skipIntro,
-    MediaSegmentKind.outro => l10n.skipCredits,
-    MediaSegmentKind.recap => l10n.skipRecap,
-    MediaSegmentKind.preview => l10n.skipPreview,
-    MediaSegmentKind.commercial => l10n.skipAdvert,
-    // Never reached: an unknown kind is dropped while parsing rather than
-    // carried this far.
-    MediaSegmentKind.unknown => l10n.skipIntro,
+  return switch (label) {
+    SkipLabel.intro => l10n.skipIntro,
+    SkipLabel.opening => l10n.skipOpening,
+    SkipLabel.ending => l10n.skipEnding,
+    SkipLabel.credits => l10n.skipCredits,
+    SkipLabel.recap => l10n.skipRecap,
+    SkipLabel.preview => l10n.skipPreview,
+    SkipLabel.advert => l10n.skipAdvert,
   };
 }
 
@@ -683,10 +695,18 @@ class _TransportSpinner extends StatelessWidget {
 }
 
 class _SkipPill extends StatelessWidget {
-  const _SkipPill({required this.label, required this.onTap, this.icon});
+  const _SkipPill({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.onDismiss,
+  });
 
   final String label;
   final VoidCallback onTap;
+
+  /// A close button after the label, hiding the pill without acting on it.
+  final VoidCallback? onDismiss;
 
   /// Drawn before the label where the pill offers something other than a way
   /// past a stretch of the file — the arrow is what makes "Next episode" read
@@ -695,7 +715,7 @@ class _SkipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    final pill = Material(
       color: Colors.white.withValues(alpha: 0.94),
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
@@ -730,6 +750,38 @@ class _SkipPill extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    final dismiss = onDismiss;
+    if (dismiss == null) return pill;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        pill,
+        const SizedBox(width: 8),
+        // Its own round button rather than a corner of the pill: a thumb
+        // aiming for "Skip" must not land on "hide" instead.
+        Material(
+          color: Colors.white.withValues(alpha: 0.94),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: dismiss,
+            child: Tooltip(
+              message: MaterialLocalizations.of(context).closeButtonTooltip,
+              child: Padding(
+                padding: const EdgeInsets.all(9),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: context.semantic.onPlayerPill,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

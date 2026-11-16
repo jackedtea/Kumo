@@ -119,23 +119,92 @@ RegExp _titled(String words) => RegExp(
 );
 
 final _chapterPatterns = <(RegExp, MediaSegmentKind)>[
-  (
-    _titled(
-      'op|opening|opening credits|opening theme|opening song|intro|'
-      'title sequence|main titles',
-    ),
-    MediaSegmentKind.intro,
-  ),
-  (
-    _titled(
-      'ed|ending|ending credits|ending theme|ending song|outro|'
-      'credits|end credits|closing credits|closing',
-    ),
-    MediaSegmentKind.outro,
-  ),
+  (_introPattern, MediaSegmentKind.intro),
+  (_openingPattern, MediaSegmentKind.intro),
+  (_creditsPattern, MediaSegmentKind.outro),
+  (_endingPattern, MediaSegmentKind.outro),
   (_titled('recap|previously|previously on'), MediaSegmentKind.recap),
   (
     _titled('preview|next episode preview|next episode|next time|yokoku'),
     MediaSegmentKind.preview,
   ),
 ];
+
+/// A song played over titles — the anime "OP" and "ED".
+final _openingPattern = _titled('op|opening|opening theme|opening song|ncop');
+final _endingPattern = _titled('ed|ending|ending theme|ending song|nced');
+
+/// Titles without a song to name them: a film's or a series' own.
+final _introPattern = _titled(
+  'intro|opening credits|title sequence|main titles',
+);
+final _creditsPattern = _titled(
+  'outro|credits|end credits|ending credits|closing credits|closing',
+);
+
+/// What the skip pill over a segment should call it.
+///
+/// Finer than [MediaSegmentKind], which is the server's vocabulary and has
+/// one word for an anime's opening song and a drama's title card: the pill
+/// says "Skip opening" or "Skip ending" where the chapter the segment sits
+/// in is titled "OP" / "ED" (or "Opening" / "Ending"), and "Skip intro" or
+/// "Skip credits" otherwise.
+enum SkipLabel { intro, opening, ending, credits, recap, preview, advert }
+
+/// The label for [segment], read off the chapter it overlaps most.
+///
+/// Works for the server's own segments as well as for those read off chapter
+/// titles: an Intro segment from a detection plugin over a release whose
+/// chapter there is called "OP" is still an opening.
+SkipLabel skipLabelFor(MediaSegment segment, List<MediaChapter> chapters) {
+  switch (segment.kind) {
+    case MediaSegmentKind.recap:
+      return SkipLabel.recap;
+    case MediaSegmentKind.preview:
+      return SkipLabel.preview;
+    case MediaSegmentKind.commercial:
+      return SkipLabel.advert;
+    case MediaSegmentKind.intro:
+    case MediaSegmentKind.unknown:
+      return _isSong(
+            _chapterOver(segment, chapters),
+            _openingPattern,
+            _introPattern,
+          )
+          ? SkipLabel.opening
+          : SkipLabel.intro;
+    case MediaSegmentKind.outro:
+      return _isSong(
+            _chapterOver(segment, chapters),
+            _endingPattern,
+            _creditsPattern,
+          )
+          ? SkipLabel.ending
+          : SkipLabel.credits;
+  }
+}
+
+/// Whether [chapter] is titled as a song, and not as the plain titles that
+/// share its first word — "Opening credits" and "Ending credits" are credits.
+bool _isSong(MediaChapter? chapter, RegExp song, RegExp plain) {
+  if (chapter == null) return false;
+  final t = chapter.title.trim().toLowerCase();
+  return song.hasMatch(t) && !plain.hasMatch(t);
+}
+
+/// The chapter sharing the longest stretch with [segment], or null where
+/// none overlaps it at all.
+MediaChapter? _chapterOver(MediaSegment segment, List<MediaChapter> chapters) {
+  MediaChapter? best;
+  var bestOverlap = Duration.zero;
+  for (final MediaChapter c in chapters) {
+    final from = c.start > segment.start ? c.start : segment.start;
+    final to = c.end < segment.end ? c.end : segment.end;
+    final overlap = to - from;
+    if (overlap > bestOverlap) {
+      best = c;
+      bestOverlap = overlap;
+    }
+  }
+  return best;
+}

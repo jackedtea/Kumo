@@ -759,7 +759,7 @@ void main() {
         skipSegment: _chapterIntro,
         bottomInset: 56,
       );
-      final shown = tester.getRect(find.text('Skip intro'));
+      final shown = tester.getRect(find.text('Skip opening'));
 
       // Immersion takes it away.
       await pumpControls(
@@ -769,7 +769,7 @@ void main() {
         skipSegment: _chapterIntro,
         bottomInset: 0,
       );
-      final hidden = tester.getRect(find.text('Skip intro'));
+      final hidden = tester.getRect(find.text('Skip opening'));
 
       expect(
         hidden,

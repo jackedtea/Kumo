@@ -706,6 +706,8 @@
   "normal": "Normal",
   "defaultLabel": "Default",
   "skipIntro": "Skip intro",
+  "skipOpening": "Skip opening",
+  "skipEnding": "Skip ending",
   "skipCredits": "Skip credits",
   "skipRecap": "Skip recap",
   "skipPreview": "Skip preview",

@@ -318,4 +318,64 @@ void main() {
       ]);
     });
   });
+
+  group('skipLabelFor', () {
+    MediaChapter ch(String title, int from, int to) => MediaChapter(
+      title: title,
+      start: Duration(seconds: from),
+      end: Duration(seconds: to),
+    );
+    MediaSegment seg(MediaSegmentKind kind, int from, int to) => MediaSegment(
+      kind: kind,
+      start: Duration(seconds: from),
+      end: Duration(seconds: to),
+    );
+
+    test('an intro under a chapter titled OP is an opening', () {
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.intro, 60, 150), [
+          ch('Prologue', 0, 60),
+          ch('OP', 60, 150),
+          ch('Part A', 150, 700),
+        ]),
+        SkipLabel.opening,
+      );
+    });
+
+    test('an outro under a chapter titled ED is an ending', () {
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.outro, 1300, 1390), [
+          ch('Part B', 700, 1300),
+          ch('Ending - Artist', 1300, 1390),
+        ]),
+        SkipLabel.ending,
+      );
+    });
+
+    test('plain titles stay intro and credits', () {
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.intro, 0, 40), [
+          ch('Opening credits', 0, 40),
+        ]),
+        SkipLabel.intro,
+      );
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.outro, 0, 40), [
+          ch('Ending credits', 0, 40),
+        ]),
+        SkipLabel.credits,
+      );
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.intro, 0, 40), const []),
+        SkipLabel.intro,
+      );
+    });
+
+    test('other kinds keep their own label', () {
+      expect(
+        skipLabelFor(seg(MediaSegmentKind.recap, 0, 40), const []),
+        SkipLabel.recap,
+      );
+    });
+  });
 }

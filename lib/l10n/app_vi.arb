@@ -694,6 +694,8 @@
   "normal": "Bình thường",
   "defaultLabel": "Mặc định",
   "skipIntro": "Bỏ qua intro",
+  "skipOpening": "Bỏ qua opening",
+  "skipEnding": "Bỏ qua ending",
   "skipCredits": "Bỏ qua credit",
   "skipRecap": "Bỏ qua tóm tắt",
   "skipPreview": "Bỏ qua giới thiệu",

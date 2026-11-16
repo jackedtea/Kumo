@@ -2153,6 +2153,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skipIntro => 'Skip intro';
 
   @override
+  String get skipOpening => 'Skip opening';
+
+  @override
+  String get skipEnding => 'Skip ending';
+
+  @override
   String get skipCredits => 'Skip credits';
 
   @override

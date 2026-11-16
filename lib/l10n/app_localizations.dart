@@ -3944,6 +3944,18 @@ abstract class AppLocalizations {
   /// **'Skip intro'**
   String get skipIntro;
 
+  /// No description provided for @skipOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip opening'**
+  String get skipOpening;
+
+  /// No description provided for @skipEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip ending'**
+  String get skipEnding;
+
   /// No description provided for @skipCredits.
   ///
   /// In en, this message translates to:

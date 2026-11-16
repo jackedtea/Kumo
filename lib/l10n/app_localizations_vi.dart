@@ -2138,6 +2138,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get skipIntro => 'Bỏ qua intro';
 
   @override
+  String get skipOpening => 'Bỏ qua opening';
+
+  @override
+  String get skipEnding => 'Bỏ qua ending';
+
+  @override
   String get skipCredits => 'Bỏ qua credit';
 
   @override

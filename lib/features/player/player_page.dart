@@ -474,7 +474,9 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
                             return q.isOriginal
                                 ? _originalLabel(
                                     state.media ?? widget.media,
-                                    AppLocalizations.of(context).qualityOriginal,
+                                    AppLocalizations.of(
+                                      context,
+                                    ).qualityOriginal,
                                   )
                                 : q.label;
                           }(),
@@ -534,6 +536,11 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
                           onSkipSegment: (segment) => controller.seek(
                             segment.end + const Duration(milliseconds: 1),
                           ),
+                          onDismissSegment: (segment) => setState(() {
+                            _dismissed
+                              ..media = state.media?.ref
+                              ..segments.add(segment);
+                          }),
                         ),
                       ),
 
@@ -582,9 +589,13 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
   /// in the controller — showing a pill for a stretch that is about to
   /// disappear is a button that flickers and cannot be pressed — and
   /// `nothing` means the viewer said they want to watch it.
+  /// Segments whose pill the viewer closed, for the file they closed it on.
+  final _dismissed = _DismissedSegments();
+
   MediaSegment? _offeredSegment(PlaybackState state, PlayerSettings settings) {
     final segment = state.currentSegment;
     if (segment == null) return null;
+    if (_dismissed.has(state.media?.ref, segment)) return null;
 
     return settings.actionFor(segment.kind) == SegmentAction.askToSkip
         ? segment
@@ -691,8 +702,9 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
       onSelected: (option) async {
         // `TrackOption.value` is a double, for the speed sheet it was written
         // for; the id is what carries a quality.
-        final chosen =
-            option.id == _autoQualityId ? null : qualityById(option.id);
+        final chosen = option.id == _autoQualityId
+            ? null
+            : qualityById(option.id);
         ref.read(streamQualityOverrideProvider.notifier).set(chosen);
         // Auto over a cap equal to the rung that was in force changes
         // nothing the server would see; no reason to interrupt the film.
@@ -1031,7 +1043,6 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
       ),
     );
   }
-
 }
 
 class _VideoSurface extends StatelessWidget {
@@ -1199,5 +1210,23 @@ class _ErrorOverlay extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// The pills closed on one file.
+///
+/// Forgotten as soon as another file plays: the next episode's opening is
+/// offered again, since closing this one said nothing about wanting it.
+class _DismissedSegments {
+  Object? media;
+  final Set<MediaSegment> segments = <MediaSegment>{};
+
+  bool has(Object? currentMedia, MediaSegment segment) {
+    if (currentMedia != media) {
+      media = currentMedia;
+      segments.clear();
+      return false;
+    }
+    return segments.contains(segment);
   }
 }
