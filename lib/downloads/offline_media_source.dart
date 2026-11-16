@@ -137,7 +137,9 @@ class OfflineMediaSource
       defaultSubtitleIndex: meta.defaultSubtitleIndex,
       // Artist and cover wait for music downloads (MUSIC_PLAN M3); what the
       // player needs now is to know a downloaded song is not a film.
-      isAudio: entry.kind == ServerItemKind.audio,
+      isAudio:
+          entry.kind == ServerItemKind.audio ||
+          entry.kind == ServerItemKind.audioBook,
       seriesTitle: entry.seriesTitle,
       seasonNumber: entry.seasonNumber,
       episodeNumber: entry.episodeNumber,

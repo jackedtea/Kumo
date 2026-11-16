@@ -139,7 +139,8 @@ class JellyfinMediaSource
         // The server is the authority on where the user got to: it has been
         // collecting that from every device, not just this one. A song starts
         // at its start: nobody resumes one, and a queue skipping in halfway
-        // through a track reads as a fault.
+        // through a track reads as a fault. An audiobook is the opposite: it
+        // is nothing but a place to come back to, and falls through.
         startPosition: item.kind == ServerItemKind.audio
             ? Duration.zero
             : item.position ?? Duration.zero,
@@ -156,13 +157,23 @@ class JellyfinMediaSource
         defaultAudioIndex: playback.defaultAudioIndex,
         defaultSubtitleIndex: playback.defaultSubtitleIndex,
         tracksChosen: choice != null,
-        isAudio: item.kind == ServerItemKind.audio,
-        artist: item.artistLine,
-        album: item.album,
+        // An audiobook plays in the music player — the notification, the
+        // mini player, on with the screen off — not the video one.
+        isAudio:
+            item.kind == ServerItemKind.audio ||
+            item.kind == ServerItemKind.audioBook,
+        artist: item.kind == ServerItemKind.audioBook
+            ? item.authorLine
+            : item.artistLine,
+        album: item.kind == ServerItemKind.audioBook
+            ? item.seriesTitle
+            : item.album,
         // A track is handed the album's cover when it has none of its own
         // (see `_primaryImageTag`), so this is the album art in practice.
         // Sized for Now playing on a 3x phone; the notification scales down.
-        artworkUri: item.kind == ServerItemKind.audio
+        artworkUri:
+            item.kind == ServerItemKind.audio ||
+                item.kind == ServerItemKind.audioBook
             ? library.imageUrl(item, maxWidth: 1024)
             : null,
         seriesTitle: item.kind == ServerItemKind.episode

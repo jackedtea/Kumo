@@ -413,9 +413,13 @@ class ItemPrimaryActionBar extends StatelessWidget {
     this.onStartOver,
     this.caption,
     this.label,
+    this.icon = Icons.play_arrow_rounded,
   });
 
   final ServerItem item;
+
+  /// The glyph on the button. A book is read, not played.
+  final IconData icon;
 
   /// Resume where the server says the user got to.
   final VoidCallback onPlay;
@@ -475,7 +479,7 @@ class ItemPrimaryActionBar extends StatelessWidget {
                       ),
                     ),
                     onPressed: onPlay,
-                    icon: const Icon(Icons.play_arrow_rounded),
+                    icon: Icon(icon),
                     label: caption == null
                         ? Text(text)
                         : Column(

@@ -1329,6 +1329,63 @@ album and artist screens.
 - Unverified on a device, all of it: gapless across a real album, lyrics against a 10.9+
   server.
 
+## Books (2026-11-16)
+
+`docs/BOOKS_PLAN.md` is the plan; B1, B2 and most of B3 are built, **none of it on a
+device or a real server yet**. `lib/servers/books.dart` (pure) and `lib/features/books/`.
+
+- **A book's position is not a time.** `BookPosition` packs it into
+  `PlaybackPositionTicks` exactly as jellyfin-web does — EPUB `fraction × 10 000 000`,
+  PDF and comics `page × 10 000` (zero-based) — so a book left in a browser opens at
+  the same place here. `ServerItem.positionTicks` keeps the raw ticks; `position`
+  rounds them to the millisecond.
+- **Never report a book as a play session.** A `Book` has no runtime, and
+  `UpdatePlayState` answers any progress or stop report on such an item with
+  Played = true and the position zeroed. `setBookPosition` writes
+  `POST /UserItems/{id}/UserData` instead, the plain setter. `tool/book_position_spike.dart`
+  checks both against a real server (run it before trusting either).
+- **Reading needs `EnableContentDownloading`**: there is no reading endpoint, the web
+  reader fetches `/Items/{id}/Download` too. A 403 is `readerForbidden`.
+- **The file comes first** (`book_files.dart`): a downloaded copy, else
+  `<cache>/books/<profile>/<item>/book.<ext>`, `Range`-resumed, 1 GB budget, least
+  recently opened evicted (never the one opening). Not the downloads engine: its queue
+  is one file at a time, and a novel must not wait behind a film. The extension comes
+  from the item's `Path` (detail fetch only, `_detailFields`), then `Content-Disposition`,
+  then the magic bytes.
+- **Three engines behind one chrome** (`ReaderEngine`, `reader_sheets.dart`):
+  - EPUB / MOBI / AZW3 / FB2 — **foliate-js** (MIT, vendored in `assets/foliate/` at the
+    commit in `VERSION`; only the files EPUB/MOBI/FB2 need) in `webview_flutter`.
+    `kumo.js` is the bridge: one channel, `Kumo.postMessage({name, args})` with `ready`,
+    `relocate`, `tap`, `failed`; Dart calls `kumo.next()` etc. Served by `ReaderServer`, a
+    loopback `HttpServer` with a random token in every path, because Chromium refuses ES
+    modules from `file://`; it serves the bundled `.html`/`.js` by name and the one book.
+    **Android, iOS and macOS only**: `webview_flutter` has no Windows or Linux, so there
+    `webViewReaderAvailableProvider` is false and the reader offers "Open in another app".
+    Not `flutter_inappwebview`: its Android half (1.1.3, the last release) uses
+    `proguard-android.txt`, which AGP 9 refuses at configuration time, and its Windows half
+    needs `nuget.exe` at build time.
+  - PDF — **pdfrx** (PDFium, all five platforms), page index from `onPageChanged`.
+  - CBZ / CBT — `archive` from disk (`ComicArchive`), pages by `naturalCompare`, decoded
+    at screen width, right-to-left and two-page spreads (cover alone, then pairs) past
+    840 dp landscape. CBR / CB7 have no Dart decoder: "Open in another app" on desktop.
+- **Saving** (`BookProgressSaver`): 5 s after the last page turn, and at once on close;
+  closed on the last page is `finished` (Played, position 0). A write that fails, or a
+  downloaded book read with no server signed in, waits in `PendingBookPositions`
+  (`shared_preferences`, newest per book) and is sent the next time a book on that server
+  opens. The reader reads a waiting position before the server's.
+- **The library**: `books` gets Browse · Suggestions (Continue reading + Recently added) ·
+  Genres · Collections; the grid's `_gridTypes` include `Book,AudioBook`, so a films
+  library is unaffected and a books library is no longer empty. Covers caption the
+  author; the filter sheet drops Features. `/library/book` is the detail (series ·
+  volume, format badge, "Continue reading · 42%", More in <series>); `/reader` takes a
+  `BookReaderLaunch`.
+- **Audiobooks** are `isAudio` (music player, notification) but resume, unlike a song,
+  and carry the author as artist. They report as ordinary play sessions: they have a
+  runtime, so the server's audiobook resume rules apply.
+- Home: a Continue reading row (`homeResumeBooksProvider`, only with a books library).
+  Search: Books and Audiobooks sections, only with a books library.
+- `pdfrx` downloads PDFium in its CMake/Gradle step, so a build needs the network.
+
 ## Sorting and filtering the library grid
 
 The chip row over the grid is Unwatched · the sort · a filter button carrying a count, and

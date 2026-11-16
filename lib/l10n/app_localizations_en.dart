@@ -3528,4 +3528,137 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get savedOnServerLegend =>
       'Saved on your server account, so every device signed in as you uses the same choice.';
+
+  @override
+  String get read => 'Read';
+
+  @override
+  String get continueReading => 'Continue reading';
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get continueListening => 'Continue listening';
+
+  @override
+  String get markRead => 'Mark as read';
+
+  @override
+  String get markUnread => 'Mark as unread';
+
+  @override
+  String bookPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String bookPageOf(int page, int total) {
+    return 'Page $page of $total';
+  }
+
+  @override
+  String bookVolume(int number) {
+    return 'Volume $number';
+  }
+
+  @override
+  String moreInSeries(String series) {
+    return 'More in $series';
+  }
+
+  @override
+  String get noBookSuggestions =>
+      'Nothing here yet — start a book and it shows up here.';
+
+  @override
+  String get readerOpening => 'Opening the book…';
+
+  @override
+  String readerFetching(int percent) {
+    return 'Fetching the book… $percent%';
+  }
+
+  @override
+  String get readerForbidden =>
+      'This account may not download from the server, and a book is read from its file. An administrator can allow downloads for it.';
+
+  @override
+  String get readerUnreachable =>
+      'Could not reach the server to fetch the book.';
+
+  @override
+  String get readerFailed => 'This book could not be opened.';
+
+  @override
+  String readerUnsupported(String format) {
+    return 'Kumo cannot open $format files.';
+  }
+
+  @override
+  String get readerNoWebView =>
+      'Kumo cannot draw this kind of book on this device.';
+
+  @override
+  String get openInAnotherApp => 'Open in another app';
+
+  @override
+  String get readerContents => 'Contents';
+
+  @override
+  String get readerNoContents => 'This book has no table of contents.';
+
+  @override
+  String get readerSettings => 'Reading settings';
+
+  @override
+  String get readerTheme => 'Page colour';
+
+  @override
+  String get readerThemeSystem => 'App';
+
+  @override
+  String get readerThemeLight => 'Light';
+
+  @override
+  String get readerThemeSepia => 'Sepia';
+
+  @override
+  String get readerThemeDark => 'Dark';
+
+  @override
+  String get readerThemeBlack => 'Black';
+
+  @override
+  String get readerFontSize => 'Text size';
+
+  @override
+  String get readerSmaller => 'Smaller text';
+
+  @override
+  String get readerLarger => 'Larger text';
+
+  @override
+  String get readerLineHeight => 'Line spacing';
+
+  @override
+  String get readerMargins => 'Margins';
+
+  @override
+  String get readerScrolled => 'Scroll instead of turning pages';
+
+  @override
+  String get readerJustify => 'Justify text';
+
+  @override
+  String get comicRightToLeft => 'Right to left (manga)';
+
+  @override
+  String get comicSpread => 'Two pages side by side on a wide screen';
+
+  @override
+  String get searchBooks => 'Books';
+
+  @override
+  String get searchAudiobooks => 'Audiobooks';
 }

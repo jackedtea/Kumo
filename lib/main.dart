@@ -68,5 +68,10 @@ void _registerBundledFontLicenses() {
         await rootBundle.loadString(asset),
       );
     }
+    // The EPUB reader's engine, vendored under assets/foliate/.
+    yield LicenseEntryWithLineBreaks(
+      <String>['foliate-js'],
+      await rootBundle.loadString('assets/foliate/LICENSE'),
+    );
   });
 }

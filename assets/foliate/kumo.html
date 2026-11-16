@@ -1,0 +1,32 @@
+<!doctype html>
+<!--
+  This file is part of Kumo.
+  Copyright (C) 2026 Nam <namicedtea@gmail.com>
+  SPDX-License-Identifier: GPL-3.0-or-later
+
+  The page the EPUB reader's WebView opens. foliate-js (MIT, LICENSE beside
+  this file) does the reading; kumo.js is the bridge to Dart.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--kumo-bg, #fff);
+    color: var(--kumo-fg, #000);
+  }
+  foliate-view {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+<script type="module" src="kumo.js"></script>
+</body>
+</html>

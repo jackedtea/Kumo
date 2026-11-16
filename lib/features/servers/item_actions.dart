@@ -354,7 +354,9 @@ List<ItemAction> itemActionsFor(
         icon: item.played
             ? Icons.check_circle_rounded
             : Icons.check_circle_outline_rounded,
-        label: item.played ? l10n.markUnwatched : l10n.markWatched,
+        label: item.kind == ServerItemKind.book
+            ? (item.played ? l10n.markUnread : l10n.markRead)
+            : (item.played ? l10n.markUnwatched : l10n.markWatched),
         selected: item.played,
         onSelected: () async => report(
           await setWatched(

@@ -224,6 +224,11 @@ class _Results extends ConsumerWidget {
     AsyncValue<List<ServerItem>> of(ServerItemKind kind) =>
         ref.watch(searchItemsProvider((query: query, kind: kind)));
 
+    // Two more requests per search, so only for a server with books to find.
+    final views = ref.watch(serverViewsProvider).value ?? const <LibraryView>[];
+    final books = views.any((v) => v.kind == 'books');
+    const none = AsyncValue<List<ServerItem>>.data(<ServerItem>[]);
+
     return KindSections(
       movies: of(ServerItemKind.movie),
       shows: of(ServerItemKind.series),
@@ -232,6 +237,8 @@ class _Results extends ConsumerWidget {
       albums: of(ServerItemKind.musicAlbum),
       artists: of(ServerItemKind.musicArtist),
       songs: of(ServerItemKind.audio),
+      books: books ? of(ServerItemKind.book) : none,
+      audiobooks: books ? of(ServerItemKind.audioBook) : none,
       emptyText: AppLocalizations.of(context).noResults,
     );
   }

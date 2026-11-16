@@ -1,8 +1,19 @@
 # Books — Implementation Plan
 
-> Status: **plan only** (2026-11-14). Nothing below is built. "Where the app
-> stands today" describes the app before step 1. `../CLAUDE.md` stays the
-> description of the code as it is.
+> Status (2026-11-16): **B1, B2 and most of B3 are built**, none of it tried
+> on a device or against a real server yet — step 0's script
+> (`tool/book_position_spike.dart`) has only run against a stand-in. Built:
+> the item kinds and position codec, the books library's tabs, the book
+> screen, the file cache, the EPUB (foliate-js), PDF (pdfrx) and CBZ/CBT
+> readers (EPUB in `webview_flutter`, not `flutter_inappwebview`: see
+> CLAUDE.md › Books — so Windows hands EPUBs to the system, like Linux),
+> audiobooks through the music player, Home's Continue reading row,
+> Books and Audiobooks in Search, and downloaded books opening in the reader
+> offline. **Not built:** speed and a chapter list on Now playing for
+> audiobooks, ±30 s skips, a multi-file audiobook queued as one book, the
+> book cache's line in Settings, and everything under "Later". "Where the
+> app stands today" describes the app before step 1; `../CLAUDE.md` › Books
+> describes the code as it is.
 
 ## Where the app stands today
 

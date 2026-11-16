@@ -261,27 +261,29 @@ void main() {
       expect(query['limit'], '5');
     });
 
-    test('a position is written as user data, never as a play report',
-        () async {
-      final (source, adapter) = _source((_) => _json(<String, dynamic>{}));
+    test(
+      'a position is written as user data, never as a play report',
+      () async {
+        final (source, adapter) = _source((_) => _json(<String, dynamic>{}));
 
-      await source.setBookPosition('b1', const BookPosition.fraction(0.5));
+        await source.setBookPosition('b1', const BookPosition.fraction(0.5));
 
-      final request = adapter.requests.single;
-      // The route matters more than anything else in this file: a progress
-      // report on an item with no runtime marks it read and zeroes it.
-      expect(request.method, 'POST');
-      expect(request.uri.path, '/UserItems/b1/UserData');
-      expect(request.uri.path, isNot(contains('Sessions')));
-      expect(request.uri.queryParameters['userId'], 'u1');
+        final request = adapter.requests.single;
+        // The route matters more than anything else in this file: a progress
+        // report on an item with no runtime marks it read and zeroes it.
+        expect(request.method, 'POST');
+        expect(request.uri.path, '/UserItems/b1/UserData');
+        expect(request.uri.path, isNot(contains('Sessions')));
+        expect(request.uri.queryParameters['userId'], 'u1');
 
-      final body = request.data as Map<String, dynamic>;
-      expect(body['PlaybackPositionTicks'], 5000000);
-      // Left alone unless said: reading on must not un-read a finished book,
-      // nor finish one.
-      expect(body.containsKey('Played'), isFalse);
-      expect(DateTime.tryParse(body['LastPlayedDate'] as String), isNotNull);
-    });
+        final body = request.data as Map<String, dynamic>;
+        expect(body['PlaybackPositionTicks'], 5000000);
+        // Left alone unless said: reading on must not un-read a finished book,
+        // nor finish one.
+        expect(body.containsKey('Played'), isFalse);
+        expect(DateTime.tryParse(body['LastPlayedDate'] as String), isNotNull);
+      },
+    );
 
     test('finishing marks it read and starts it over', () async {
       final (source, adapter) = _source((_) => _json(<String, dynamic>{}));

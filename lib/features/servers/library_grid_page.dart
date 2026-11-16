@@ -342,10 +342,12 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
                         viewId,
                         MusicListing.tracks,
                       ),
-                      _LibraryTab.suggestions => _SuggestionsTab(
-                        viewId: viewId,
-                        kind: _collectionKind(),
-                      ),
+                      _LibraryTab.suggestions => _collectionKind() == 'books'
+                          ? _BookSuggestionsTab(viewId: viewId)
+                          : _SuggestionsTab(
+                              viewId: viewId,
+                              kind: _collectionKind(),
+                            ),
                       _LibraryTab.upcoming => _UpcomingTab(viewId: viewId),
                       _LibraryTab.genres => _GenresTab(
                         viewId: viewId,
@@ -682,8 +684,13 @@ enum _LibraryTab {
   /// Music is its own set. The server has no suggestions or box sets for it,
   /// and its first tab cannot be one grid: an album, an artist and a song are
   /// three different things to go looking for.
+  ///
+  /// Books keep the grid, with Suggestions as what is being read and what is
+  /// new. Playlists are gone: a playlist plays, and a novel does not.
   static List<_LibraryTab> forKind(String kind) => kind == 'music'
       ? const <_LibraryTab>[albums, artists, songs, playlists, genres]
+      : kind == 'books'
+      ? const <_LibraryTab>[browse, suggestions, genres, collections]
       : <_LibraryTab>[
           browse,
           suggestions,
@@ -973,6 +980,49 @@ class _SuggestionsTab extends ConsumerWidget {
             items: AsyncValue<List<ServerItem>>.data(shelf.items),
           ),
           SizedBox(height: spacing.sectionGap),
+        ],
+      ],
+    );
+  }
+}
+
+/// A books library's suggestions: what is being read, then what is new.
+/// The server recommends films only, so there is nothing to add under them.
+class _BookSuggestionsTab extends ConsumerWidget {
+  const _BookSuggestionsTab({required this.viewId});
+
+  final String viewId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = context.spacing;
+    final l10n = AppLocalizations.of(context);
+    final reading = ref.watch(resumeBooksInViewProvider(viewId));
+    final latest = ref.watch(latestInViewProvider(viewId));
+
+    final hasAnything =
+        (reading.value?.isNotEmpty ?? false) ||
+        (latest.value?.isNotEmpty ?? false);
+    if (!hasAnything) {
+      return !reading.isLoading && !latest.isLoading
+          ? _EmptyNote(text: l10n.noBookSuggestions)
+          : const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
+      padding: EdgeInsets.only(
+        top: spacing.md,
+        bottom: spacing.xl + context.systemBottomInset,
+      ),
+      children: <Widget>[
+        if (reading.value?.isNotEmpty ?? false) ...<Widget>[
+          SectionHeader(title: l10n.continueReading),
+          ServerPosterShelf(items: reading),
+          SizedBox(height: spacing.sectionGap),
+        ],
+        if (latest.value?.isNotEmpty ?? false) ...<Widget>[
+          SectionHeader(title: l10n.recentlyAdded),
+          ServerPosterShelf(items: latest),
         ],
       ],
     );

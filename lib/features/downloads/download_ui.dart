@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../books/book_reader_page.dart';
 import '../music/audio_session.dart';
 import '../../app/tokens.dart';
 import '../../downloads/download_models.dart';
 import '../../downloads/downloads_controller.dart';
 import '../../l10n/app_localizations.dart';
+import '../../servers/media_library_source.dart';
 import '../../servers/server_registry.dart';
 import '../../sources/media_source.dart';
 import '../servers/server_library.dart';
@@ -68,6 +70,22 @@ Future<void> playDownload(
   WidgetRef ref,
   DownloadEntry entry,
 ) async {
+  // A book is read, not played — and from its file, signed in or not.
+  if (entry.kind == ServerItemKind.book) {
+    openBookReader(
+      context,
+      ServerItem(
+        id: entry.itemId,
+        title: entry.title,
+        kind: ServerItemKind.book,
+        // The file's own name carries the format the reader needs.
+        path: entry.fileName,
+      ),
+      profileId: entry.profileId,
+    );
+    return;
+  }
+
   final source = ref.read(mediaSourcesProvider)[entry.profileId];
   final messenger = ScaffoldMessenger.of(context);
   final router = GoRouter.of(context);

@@ -6367,6 +6367,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved on your server account, so every device signed in as you uses the same choice.'**
   String get savedOnServerLegend;
+
+  /// No description provided for @read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get read;
+
+  /// No description provided for @continueReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get continueReading;
+
+  /// No description provided for @listen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listen;
+
+  /// No description provided for @continueListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue listening'**
+  String get continueListening;
+
+  /// No description provided for @markRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get markRead;
+
+  /// No description provided for @markUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unread'**
+  String get markUnread;
+
+  /// No description provided for @bookPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String bookPage(int page);
+
+  /// No description provided for @bookPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String bookPageOf(int page, int total);
+
+  /// No description provided for @bookVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume {number}'**
+  String bookVolume(int number);
+
+  /// No description provided for @moreInSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'More in {series}'**
+  String moreInSeries(String series);
+
+  /// No description provided for @noBookSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet — start a book and it shows up here.'**
+  String get noBookSuggestions;
+
+  /// No description provided for @readerOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the book…'**
+  String get readerOpening;
+
+  /// No description provided for @readerFetching.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the book… {percent}%'**
+  String readerFetching(int percent);
+
+  /// No description provided for @readerForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This account may not download from the server, and a book is read from its file. An administrator can allow downloads for it.'**
+  String get readerForbidden;
+
+  /// No description provided for @readerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server to fetch the book.'**
+  String get readerUnreachable;
+
+  /// No description provided for @readerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This book could not be opened.'**
+  String get readerFailed;
+
+  /// No description provided for @readerUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Kumo cannot open {format} files.'**
+  String readerUnsupported(String format);
+
+  /// No description provided for @readerNoWebView.
+  ///
+  /// In en, this message translates to:
+  /// **'Kumo cannot draw this kind of book on this device.'**
+  String get readerNoWebView;
+
+  /// No description provided for @openInAnotherApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in another app'**
+  String get openInAnotherApp;
+
+  /// No description provided for @readerContents.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents'**
+  String get readerContents;
+
+  /// No description provided for @readerNoContents.
+  ///
+  /// In en, this message translates to:
+  /// **'This book has no table of contents.'**
+  String get readerNoContents;
+
+  /// No description provided for @readerSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading settings'**
+  String get readerSettings;
+
+  /// No description provided for @readerTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Page colour'**
+  String get readerTheme;
+
+  /// No description provided for @readerThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get readerThemeSystem;
+
+  /// No description provided for @readerThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get readerThemeLight;
+
+  /// No description provided for @readerThemeSepia.
+  ///
+  /// In en, this message translates to:
+  /// **'Sepia'**
+  String get readerThemeSepia;
+
+  /// No description provided for @readerThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get readerThemeDark;
+
+  /// No description provided for @readerThemeBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black'**
+  String get readerThemeBlack;
+
+  /// No description provided for @readerFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get readerFontSize;
+
+  /// No description provided for @readerSmaller.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller text'**
+  String get readerSmaller;
+
+  /// No description provided for @readerLarger.
+  ///
+  /// In en, this message translates to:
+  /// **'Larger text'**
+  String get readerLarger;
+
+  /// No description provided for @readerLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get readerLineHeight;
+
+  /// No description provided for @readerMargins.
+  ///
+  /// In en, this message translates to:
+  /// **'Margins'**
+  String get readerMargins;
+
+  /// No description provided for @readerScrolled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll instead of turning pages'**
+  String get readerScrolled;
+
+  /// No description provided for @readerJustify.
+  ///
+  /// In en, this message translates to:
+  /// **'Justify text'**
+  String get readerJustify;
+
+  /// No description provided for @comicRightToLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Right to left (manga)'**
+  String get comicRightToLeft;
+
+  /// No description provided for @comicSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'Two pages side by side on a wide screen'**
+  String get comicSpread;
+
+  /// No description provided for @searchBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get searchBooks;
+
+  /// No description provided for @searchAudiobooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Audiobooks'**
+  String get searchAudiobooks;
 }
 
 class _AppLocalizationsDelegate

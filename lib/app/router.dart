@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/admin/admin_activity_page.dart';
+import '../features/books/book_detail_page.dart';
+import '../features/books/book_reader_page.dart';
 import '../features/admin/admin_add_library_page.dart';
 import '../features/admin/admin_api_keys_page.dart';
 import '../features/admin/admin_dashboard_page.dart';
@@ -49,6 +51,7 @@ import '../features/settings/general_settings_page.dart';
 import '../features/settings/player_settings_page.dart';
 import '../features/settings/settings_index_page.dart';
 import '../features/settings/subtitle_settings_page.dart';
+import '../servers/media_library_source.dart';
 import '../sources/media_source.dart';
 import 'adaptive_scaffold.dart';
 
@@ -318,6 +321,11 @@ GoRouter buildRouter() {
                 AlbumPage(albumId: state.extra as String?),
           ),
           GoRoute(
+            path: 'book',
+            builder: (context, state) =>
+                BookDetailPage(itemId: state.extra as String?),
+          ),
+          GoRoute(
             path: 'artist',
             // Like a person: the id in `extra`, the name in the query for the
             // header to show before any request lands.
@@ -361,6 +369,18 @@ GoRouter buildRouter() {
           // The controller remembers. If something is open, that is what this
           // route is for.
           return const _PlayerFromController();
+        },
+      ),
+      // A book, full screen. Takes the item as the detail screen had it:
+      // its file name says which engine reads it.
+      GoRoute(
+        path: '/reader',
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          return extra is BookReaderLaunch
+              ? BookReaderPage(item: extra.item, profileId: extra.profileId)
+              : BookReaderPage(item: extra is ServerItem ? extra : null);
         },
       ),
       // The music player's full-screen face. It takes nothing: the session

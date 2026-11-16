@@ -249,6 +249,34 @@ void main() {
       expect(media.startPosition, Duration.zero);
     });
 
+    test('an audiobook is audio that picks up where it was left', () async {
+      final library = _FakeLibrary(
+        item_: const ServerItem(
+          id: 'ab1',
+          title: 'Dune',
+          kind: ServerItemKind.audioBook,
+          position: Duration(hours: 3, minutes: 12),
+          seriesTitle: 'Dune Chronicles',
+          people: <ServerPerson>[
+            ServerPerson(name: 'Frank Herbert', role: 'Author'),
+          ],
+        ),
+        playback_:
+            ServerPlayback(uri: Uri.parse('https://x'), isDirectPlay: true),
+      );
+
+      final media = await JellyfinMediaSource(library).resolve(
+        const MediaRef(sourceId: 'p1', itemId: 'ab1', title: ''),
+      );
+
+      // The music player's, not the video one's.
+      expect(media.isAudio, isTrue);
+      // Unlike a song, the whole point is the place.
+      expect(media.startPosition, const Duration(hours: 3, minutes: 12));
+      expect(media.artist, 'Frank Herbert');
+      expect(media.album, 'Dune Chronicles');
+    });
+
     test('a film is not audio and has no cover art for the player', () async {
       // The player shows the frame; a poster in its place would be wrong.
       final library = _FakeLibrary(

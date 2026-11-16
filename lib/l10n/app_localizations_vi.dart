@@ -3506,4 +3506,136 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get savedOnServerLegend =>
       'Lưu trong tài khoản trên máy chủ, mọi thiết bị đăng nhập bằng tài khoản này đều dùng chung.';
+
+  @override
+  String get read => 'Đọc';
+
+  @override
+  String get continueReading => 'Đọc tiếp';
+
+  @override
+  String get listen => 'Nghe';
+
+  @override
+  String get continueListening => 'Nghe tiếp';
+
+  @override
+  String get markRead => 'Đánh dấu đã đọc';
+
+  @override
+  String get markUnread => 'Đánh dấu chưa đọc';
+
+  @override
+  String bookPage(int page) {
+    return 'Trang $page';
+  }
+
+  @override
+  String bookPageOf(int page, int total) {
+    return 'Trang $page/$total';
+  }
+
+  @override
+  String bookVolume(int number) {
+    return 'Tập $number';
+  }
+
+  @override
+  String moreInSeries(String series) {
+    return 'Cùng bộ $series';
+  }
+
+  @override
+  String get noBookSuggestions =>
+      'Chưa có gì — bắt đầu đọc một cuốn là nó sẽ hiện ở đây.';
+
+  @override
+  String get readerOpening => 'Đang mở sách…';
+
+  @override
+  String readerFetching(int percent) {
+    return 'Đang tải sách… $percent%';
+  }
+
+  @override
+  String get readerForbidden =>
+      'Tài khoản này không được phép tải xuống từ máy chủ, mà sách phải có file mới đọc được. Quản trị viên có thể cho phép tải xuống cho tài khoản này.';
+
+  @override
+  String get readerUnreachable => 'Không kết nối được máy chủ để tải sách.';
+
+  @override
+  String get readerFailed => 'Không mở được cuốn sách này.';
+
+  @override
+  String readerUnsupported(String format) {
+    return 'Kumo không mở được file $format.';
+  }
+
+  @override
+  String get readerNoWebView =>
+      'Kumo không hiển thị được loại sách này trên thiết bị này.';
+
+  @override
+  String get openInAnotherApp => 'Mở bằng ứng dụng khác';
+
+  @override
+  String get readerContents => 'Mục lục';
+
+  @override
+  String get readerNoContents => 'Sách này không có mục lục.';
+
+  @override
+  String get readerSettings => 'Cài đặt đọc';
+
+  @override
+  String get readerTheme => 'Màu trang';
+
+  @override
+  String get readerThemeSystem => 'Theo ứng dụng';
+
+  @override
+  String get readerThemeLight => 'Sáng';
+
+  @override
+  String get readerThemeSepia => 'Giấy cũ';
+
+  @override
+  String get readerThemeDark => 'Tối';
+
+  @override
+  String get readerThemeBlack => 'Đen';
+
+  @override
+  String get readerFontSize => 'Cỡ chữ';
+
+  @override
+  String get readerSmaller => 'Chữ nhỏ hơn';
+
+  @override
+  String get readerLarger => 'Chữ lớn hơn';
+
+  @override
+  String get readerLineHeight => 'Giãn dòng';
+
+  @override
+  String get readerMargins => 'Lề';
+
+  @override
+  String get readerScrolled => 'Cuộn thay vì lật trang';
+
+  @override
+  String get readerJustify => 'Căn đều hai bên';
+
+  @override
+  String get comicRightToLeft => 'Phải sang trái (manga)';
+
+  @override
+  String get comicSpread => 'Hai trang cạnh nhau khi màn hình rộng';
+
+  @override
+  String get searchBooks => 'Sách';
+
+  @override
+  String get searchAudiobooks => 'Sách nói';
 }

@@ -290,7 +290,8 @@ class _OptionsDialogState extends ConsumerState<_OptionsDialog> {
                   ],
                 ),
               ],
-              if (!music) ...<Widget>[
+              // A book has no trailer, theme song or subtitles to have.
+              if (!music && widget.collectionKind != 'books') ...<Widget>[
                 _Heading(text: l10n.filterFeatures),
                 _ChipWrap(
                   children: <Widget>[

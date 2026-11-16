@@ -113,13 +113,13 @@ const _ticksPerMillisecond = 10000;
 class BookPosition {
   /// A place in a reflowable book, 0..1.
   const BookPosition.fraction(double this.fraction)
-      : pageIndex = null,
-        pageCount = null;
+    : pageIndex = null,
+      pageCount = null;
 
   /// A page of a paged book, counted from zero. [pageCount] is what makes a
   /// percentage of it; the server keeps only the index.
   const BookPosition.page(int this.pageIndex, {this.pageCount})
-      : fraction = null;
+    : fraction = null;
 
   final double? fraction;
   final int? pageIndex;
@@ -163,9 +163,7 @@ class BookPosition {
     if (ticks == null || ticks <= 0) return null;
     switch (family) {
       case BookFamily.reflowable:
-        return BookPosition.fraction(
-          (ticks / _ticksPerSecond).clamp(0.0, 1.0),
-        );
+        return BookPosition.fraction((ticks / _ticksPerSecond).clamp(0.0, 1.0));
       case BookFamily.pdf:
       case BookFamily.comic:
         var page = ticks ~/ _ticksPerMillisecond;

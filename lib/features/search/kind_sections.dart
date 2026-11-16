@@ -36,6 +36,8 @@ class KindSections extends ConsumerWidget {
     this.albums = _nothing,
     this.artists = _nothing,
     this.songs = _nothing,
+    this.books = _nothing,
+    this.audiobooks = _nothing,
   });
 
   static const _nothing = AsyncValue<List<ServerItem>>.data(<ServerItem>[]);
@@ -47,6 +49,8 @@ class KindSections extends ConsumerWidget {
   final AsyncValue<List<ServerItem>> albums;
   final AsyncValue<List<ServerItem>> artists;
   final AsyncValue<List<ServerItem>> songs;
+  final AsyncValue<List<ServerItem>> books;
+  final AsyncValue<List<ServerItem>> audiobooks;
   final String emptyText;
 
   static bool _has<T>(AsyncValue<List<T>> v) => v.value?.isNotEmpty ?? false;
@@ -62,7 +66,9 @@ class KindSections extends ConsumerWidget {
         people.isLoading ||
         albums.isLoading ||
         artists.isLoading ||
-        songs.isLoading;
+        songs.isLoading ||
+        books.isLoading ||
+        audiobooks.isLoading;
     final anything =
         _has(movies) ||
         _has(shows) ||
@@ -70,7 +76,9 @@ class KindSections extends ConsumerWidget {
         _has(people) ||
         _has(albums) ||
         _has(artists) ||
-        _has(songs);
+        _has(songs) ||
+        _has(books) ||
+        _has(audiobooks);
 
     if (!anything) {
       return loading
@@ -134,6 +142,10 @@ class KindSections extends ConsumerWidget {
                   playMusicQueue(context, ref, songs.value!, startIndex: i),
             ),
           ),
+        if (_has(books))
+          section(l10n.searchBooks, ServerPosterShelf(items: books)),
+        if (_has(audiobooks))
+          section(l10n.searchAudiobooks, ServerPosterShelf(items: audiobooks)),
         // A section still on its way, under the ones that have arrived.
         if (loading)
           const Padding(

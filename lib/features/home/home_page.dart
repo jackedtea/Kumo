@@ -107,6 +107,12 @@ class HomePage extends ConsumerWidget {
               items: ref.watch(serverNextUpProvider),
               cards: true,
             ),
+            // Covers, not cards: a book has no still to put on a card, and
+            // the cover is what a reader looks for.
+            _Section(
+              title: l10n.continueReading,
+              items: ref.watch(homeResumeBooksProvider),
+            ),
             // Below what is in progress and above what is new: starred is a
             // choice to come back to, which is closer to the first than the
             // second.

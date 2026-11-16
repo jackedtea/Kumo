@@ -295,6 +295,30 @@ final homeResumeProvider = FutureProvider<List<ServerItem>>((ref) async {
   return source.resumable(limit: 10);
 });
 
+/// Books part-way through, for Home's "Continue reading" row. A server with
+/// no books library is not asked.
+final homeResumeBooksProvider = FutureProvider<List<ServerItem>>((ref) async {
+  final source = ref.watch(connectedServerProvider);
+  if (source == null) return const <ServerItem>[];
+  ref.watch(playbackStopsProvider);
+  final views = await ref.watch(serverViewsProvider.future);
+  if (!views.any((v) => v.kind == 'books')) return const <ServerItem>[];
+  try {
+    return await source.resumableBooks(limit: 20);
+  } on ServerException {
+    return const <ServerItem>[];
+  }
+});
+
+/// Books part-way through inside one books library, for its Suggestions tab.
+final resumeBooksInViewProvider =
+    FutureProvider.family<List<ServerItem>, String>((ref, viewId) async {
+  final source = ref.watch(activeServerProvider);
+  if (source == null) return const <ServerItem>[];
+  ref.watch(playbackStopsProvider);
+  return source.resumableBooks(limit: 20, viewId: viewId);
+});
+
 /// The libraries hidden from Home's "Recently added" rows.
 ///
 /// Kept on the server, in the user's own configuration, so it is the same list
@@ -672,7 +696,9 @@ final seriesEpisodesProvider =
 /// is made.
 void openServerItem(BuildContext context, ServerItem item) {
   final albumId = item.albumId;
-  if (item.kind == ServerItemKind.musicAlbum) {
+  if (item.kind.isBook) {
+    context.push('/library/book', extra: item.id);
+  } else if (item.kind == ServerItemKind.musicAlbum) {
     context.push('/library/album', extra: item.id);
   } else if (item.kind == ServerItemKind.musicArtist) {
     openMusicArtist(context, ServerArtistRef(name: item.title, id: item.id));
@@ -976,6 +1002,12 @@ double _tileProgress(ServerItem item) {
 /// The line under a library card's title: the year — a series' span of them
 /// once it has ended — and whether a series is still running.
 String cardCaption(ServerItem item, AppLocalizations l10n, LibraryCardInfo info) {
+  // Who wrote it says more about a book than when: a shelf of one author's
+  // novels is told apart by their titles, a shelf of many by the names.
+  if (item.kind.isBook) {
+    final author = item.authorLine;
+    if (author != null) return author;
+  }
   final parts = <String>[];
   final year = item.year;
   if (info.year && year != null) {

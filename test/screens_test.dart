@@ -46,6 +46,9 @@ const _routes = <String>[
   '/library/person',
   '/library/album',
   '/library/artist',
+  '/library/book',
+  // No book handed over, which it has to say with a way back out.
+  '/reader',
   // Nothing playing, which it has to say rather than draw empty controls.
   '/now-playing',
   // With nothing signed in these draw their guard rather than a dashboard,
