@@ -800,6 +800,51 @@ class JellyfinSource implements MediaLibrarySource {
     await _post('/DisplayPreferences/$viewId', prefs, _displayQuery);
   }
 
+  @override
+  Future<({ServerSort sort, SortOrder? order})?> librarySort(
+    String viewId,
+  ) async =>
+      librarySortFromDisplayPrefs(await _displayPreferences(viewId));
+
+  @override
+  Future<void> setLibrarySort(
+    String viewId,
+    ServerSort sort,
+    SortOrder? order,
+  ) async {
+    final prefs = await _displayPreferences(viewId);
+    prefs['SortBy'] = sortByFor(sort);
+    prefs['SortOrder'] = sortOrderFor(sort, order);
+    await _post('/DisplayPreferences/$viewId', prefs, _displayQuery);
+  }
+
+  /// The id Jellyfin's own web client keeps its account-wide settings under;
+  /// with this app's client name beside it, the two never share a record.
+  static const _accountPrefsId = 'usersettings';
+
+  @override
+  Future<Map<String, String>?> accountPrefs() async {
+    final custom = (await _displayPreferences(_accountPrefsId))['CustomPrefs'];
+    if (custom is! Map) return const <String, String>{};
+    return <String, String>{
+      for (final MapEntry<dynamic, dynamic> e in custom.entries)
+        if (e.key is String && e.value is String)
+          e.key as String: e.value as String,
+    };
+  }
+
+  @override
+  Future<void> setAccountPrefs(Map<String, String> changes) async {
+    if (changes.isEmpty) return;
+    final prefs = await _displayPreferences(_accountPrefsId);
+    final custom = prefs['CustomPrefs'];
+    prefs['CustomPrefs'] = <String, dynamic>{
+      if (custom is Map<String, dynamic>) ...custom,
+      ...changes,
+    };
+    await _post('/DisplayPreferences/$_accountPrefsId', prefs, _displayQuery);
+  }
+
   /// This client's preferences for one library. A server that has none yet
   /// answers with its defaults rather than a 404.
   Future<Map<String, dynamic>> _displayPreferences(String viewId) async =>

@@ -264,8 +264,8 @@ class ServerMark extends StatelessWidget {
 
 /// A row title, with [ServerMark] after it when [onServer].
 ///
-/// The mark is part of the text run, so a title that wraps carries it at the
-/// end of its last line rather than pushing it to a column of its own.
+/// The title stays a plain [Text] beside the mark rather than one span of a
+/// rich text: what reads and finds a row by its title keeps finding it.
 class SettingsTitle extends StatelessWidget {
   const SettingsTitle(this.title, {super.key, this.onServer = false});
 
@@ -276,19 +276,12 @@ class SettingsTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!onServer) return Text(title);
 
-    return Text.rich(
-      TextSpan(
-        children: <InlineSpan>[
-          TextSpan(text: title),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(start: context.spacing.sm),
-              child: const ServerMark(),
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      children: <Widget>[
+        Flexible(child: Text(title)),
+        SizedBox(width: context.spacing.sm),
+        const ServerMark(),
+      ],
     );
   }
 }

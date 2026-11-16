@@ -15,6 +15,7 @@ import '../../servers/media_library_source.dart';
 import '../libraries/last_library.dart';
 import '../music/music_actions.dart';
 import '../music/music_listing.dart';
+import '../settings/settings_widgets.dart' show ServerMarkLegend, SettingsTitle;
 import '../../widgets/gradient_art.dart';
 import '../../widgets/poster_tile.dart';
 import '../../widgets/remote_art.dart';
@@ -108,7 +109,30 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
       ? LibraryFilter.none
       : LibraryFilter(genres: <String>{widget.genre!});
 
-  LibraryOrdering _ordering = const LibraryOrdering(ServerSort.name);
+  /// What the user picked on this visit, which wins over what was saved.
+  LibraryOrdering? _chosenOrdering;
+
+  static const _defaultOrdering = LibraryOrdering(ServerSort.name);
+
+  /// Only a library's own grid keeps its sort: a box set or a playlist
+  /// drilled into is a different list, and a genre opens on its default.
+  bool get _savesSort =>
+      widget.browse == LibraryBrowse.library &&
+      widget.viewId != null &&
+      widget.genre == null;
+
+  /// The sort in force: this visit's pick, else the one the server holds for
+  /// this library, else by name. Read, not watched — whatever builds with it
+  /// watches [librarySortProvider] itself.
+  LibraryOrdering get _ordering {
+    final chosen = _chosenOrdering;
+    if (chosen != null) return chosen;
+    if (_savesSort) {
+      final saved = ref.read(librarySortProvider(widget.viewId!)).value;
+      if (saved != null) return LibraryOrdering(saved.sort, saved.order);
+    }
+    return _defaultOrdering;
+  }
 
   /// Whether the one filter the chip row draws directly is on.
   ///
@@ -350,6 +374,15 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
     }
 
     // Only a library groups: a box set's own grid is what the grouping opens.
+    if (_savesSort) {
+      // Waited for like the grouping, or the grid would load once by name and
+      // again by the saved sort.
+      final saved = ref.watch(librarySortProvider(widget.viewId!));
+      if (!saved.hasValue && _chosenOrdering == null) {
+        return const AsyncValue<List<ServerItem>>.loading();
+      }
+    }
+
     var group = false;
     if (widget.browse == LibraryBrowse.library) {
       final grouping = ref.watch(collectionGroupingProvider(viewId));
@@ -460,6 +493,7 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
 
   /// Albums, artists or songs, with the same chips over them as the main grid.
   Widget _musicTab(String viewId, MusicListing listing) {
+    if (_savesSort) ref.watch(librarySortProvider(widget.viewId!));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -598,10 +632,22 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
     );
 
     if (chosen == null || !mounted) return;
+    final sortChanged = chosen.ordering != _ordering;
     setState(() {
-      _ordering = chosen.ordering;
+      _chosenOrdering = chosen.ordering;
       _filter = chosen.filter;
     });
+
+    if (sortChanged && _savesSort) {
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        await ref
+            .read(librarySortProvider(widget.viewId!).notifier)
+            .set(chosen.ordering.sort, chosen.ordering.order);
+      } on ServerException catch (e) {
+        messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
   }
 }
 
@@ -1361,7 +1407,7 @@ class _ViewSheet extends ConsumerWidget {
             ),
             if (groupingId != null)
               SwitchListTile(
-                title: Text(l10n.groupByCollection),
+                title: SettingsTitle(l10n.groupByCollection, onServer: true),
                 subtitle: Text(l10n.groupByCollectionSub),
                 value:
                     ref.watch(collectionGroupingProvider(groupingId)).value ??
@@ -1370,22 +1416,23 @@ class _ViewSheet extends ConsumerWidget {
               ),
             heading(l10n.showOnCards),
             SwitchListTile(
-              title: Text(l10n.cardYear),
+              title: SettingsTitle(l10n.cardYear, onServer: true),
               value: info.year,
               onChanged: (on) => setInfo(info.copyWith(year: on)),
             ),
             SwitchListTile(
-              title: Text(l10n.cardCount),
+              title: SettingsTitle(l10n.cardCount, onServer: true),
               subtitle: Text(l10n.cardCountSub),
               value: info.count,
               onChanged: (on) => setInfo(info.copyWith(count: on)),
             ),
             SwitchListTile(
-              title: Text(l10n.cardStatus),
+              title: SettingsTitle(l10n.cardStatus, onServer: true),
               subtitle: Text(l10n.cardStatusSub),
               value: info.status,
               onChanged: (on) => setInfo(info.copyWith(status: on)),
             ),
+            const ServerMarkLegend(),
           ],
         ),
       ),

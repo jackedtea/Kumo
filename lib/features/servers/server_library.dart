@@ -134,6 +134,51 @@ final libraryItemsProvider =
 ///
 /// Kept on the server, in the display preferences of this client for that
 /// library, so it follows the user to another device running this app.
+/// The sort a library's grid was last left on, kept per library in the
+/// server's `DisplayPreferences` for this client — as Jellyfin's web client
+/// keeps its own. Null where nothing was saved, or the server will not say.
+final librarySortProvider = AsyncNotifierProvider.family<
+  LibrarySortController,
+  ({ServerSort sort, SortOrder? order})?,
+  String
+>(LibrarySortController.new);
+
+class LibrarySortController
+    extends AsyncNotifier<({ServerSort sort, SortOrder? order})?> {
+  LibrarySortController(this.viewId);
+
+  final String viewId;
+
+  @override
+  Future<({ServerSort sort, SortOrder? order})?> build() async {
+    final source = ref.watch(activeServerProvider);
+    if (source == null) return null;
+    try {
+      return await source.librarySort(viewId);
+    } on ServerException {
+      // The grid opens on the default sort rather than not at all.
+      return null;
+    }
+  }
+
+  /// Applied at once, and put back if the server refuses.
+  Future<void> set(ServerSort sort, SortOrder? order) async {
+    final source = ref.read(activeServerProvider);
+    if (source == null) return;
+    final previous = state.value;
+
+    state = AsyncValue<({ServerSort sort, SortOrder? order})?>.data(
+      (sort: sort, order: order),
+    );
+    try {
+      await source.setLibrarySort(viewId, sort, order);
+    } on ServerException {
+      state = AsyncValue<({ServerSort sort, SortOrder? order})?>.data(previous);
+      rethrow;
+    }
+  }
+}
+
 final collectionGroupingProvider =
     AsyncNotifierProvider.family<CollectionGrouping, bool, String>(
   CollectionGrouping.new,
@@ -1180,6 +1225,7 @@ void refreshLibraries(WidgetRef ref) {
   ref.invalidate(libraryItemCountProvider);
   ref.invalidate(libraryGroupedCountProvider);
   ref.invalidate(collectionGroupingProvider);
+  ref.invalidate(librarySortProvider);
   ref.invalidate(libraryFilterOptionsProvider);
   ref.invalidate(resumeInViewProvider);
   ref.invalidate(nextUpInViewProvider);

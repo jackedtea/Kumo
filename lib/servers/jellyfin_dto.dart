@@ -566,6 +566,35 @@ String sortByFor(ServerSort sort) {
   };
 }
 
+/// The [ServerSort] a saved `SortBy` names, or null for one this app does
+/// not offer.
+///
+/// Matched on the first field: [sortByFor] adds tie-breakers to some, and a
+/// value written by another client may carry its own.
+ServerSort? serverSortFromSortBy(String? sortBy) {
+  final head = sortBy?.split(',').first.trim();
+  if (head == null || head.isEmpty) return null;
+  for (final ServerSort sort in ServerSort.values) {
+    if (sortByFor(sort).split(',').first == head) return sort;
+  }
+  return null;
+}
+
+/// The sort a library's `DisplayPreferences` holds, or null when it names
+/// none this app offers.
+({ServerSort sort, SortOrder? order})? librarySortFromDisplayPrefs(
+  Map<String, dynamic> prefs,
+) {
+  final sort = serverSortFromSortBy(prefs['SortBy'] as String?);
+  if (sort == null) return null;
+  final order = switch (prefs['SortOrder']) {
+    'Ascending' => SortOrder.ascending,
+    'Descending' => SortOrder.descending,
+    _ => null,
+  };
+  return (sort: sort, order: order == sort.naturalOrder ? null : order);
+}
+
 /// The `sortOrder` value, given what the user asked for.
 ///
 /// [order] is null wherever nobody has chosen, and the sort's own natural

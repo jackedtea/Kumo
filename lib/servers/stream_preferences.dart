@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See the LICENSE file at the app root for the full notice.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show debugPrint, immutable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -366,9 +368,21 @@ class StreamPreferences {
 class BurnInSubtitlesController extends Notifier<bool> {
   static const _key = 'burn_in_image_subtitles_v1';
 
+  final Completer<void> _restored = Completer<void>();
+
+  /// Completes once the stored value has been read, so the account sync
+  /// (`account_prefs.dart`) does not take the restore for a choice.
+  Future<void> get ready => _restored.future;
+
   @override
   bool build() {
-    Future<void>.microtask(_restore);
+    Future<void>.microtask(() async {
+      try {
+        await _restore();
+      } finally {
+        if (!_restored.isCompleted) _restored.complete();
+      }
+    });
     return true;
   }
 

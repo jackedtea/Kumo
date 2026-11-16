@@ -27,6 +27,7 @@ import '../servers/servers_list_page.dart';
 import 'favorites_page.dart';
 import 'home_hero.dart';
 import '../servers/shelves.dart';
+import '../settings/settings_widgets.dart' show ServerMarkLegend, SettingsTitle;
 
 /// The Home tab, which has three faces and picks one rather than navigating.
 ///
@@ -751,11 +752,10 @@ class _HomeCustomizeSheet extends ConsumerWidget {
             title: Text(l10n.customizeHome, style: context.texts.titleLarge),
             subtitle: Text(l10n.customizeHomeSub),
           ),
-          // Not one of the server's rows — it has nowhere to store this one —
-          // so it says it is kept here.
+          // Not one of the server's rows, but kept on the account with them,
+          // in this app's own preferences there.
           SwitchListTile(
-            title: Text(l10n.favourites),
-            subtitle: Text(l10n.onThisDevice),
+            title: SettingsTitle(l10n.favourites, onServer: true),
             value: ref.watch(homeShowFavouritesProvider).value ?? true,
             onChanged: (on) =>
                 ref.read(homeShowFavouritesProvider.notifier).set(on),
@@ -775,10 +775,11 @@ class _HomeCustomizeSheet extends ConsumerWidget {
           else
             for (final LibraryView view in views)
               SwitchListTile(
-                title: Text(view.name),
+                title: SettingsTitle(view.name, onServer: true),
                 value: !excluded.contains(view.id),
                 onChanged: (shown) => _set(context, ref, view.id, shown),
               ),
+          const ServerMarkLegend(),
         ],
       ),
     );

@@ -54,6 +54,10 @@ class SearchHistoryController extends AsyncNotifier<List<String>> {
 
   Future<void> clear() => _save(const <String>[]);
 
+  /// The whole list, as another device left it.
+  Future<void> replace(List<String> history) =>
+      _save(history.take(limit).toList());
+
   Future<void> _save(List<String> next) async {
     state = AsyncValue<List<String>>.data(next);
     final prefs = await SharedPreferences.getInstance();

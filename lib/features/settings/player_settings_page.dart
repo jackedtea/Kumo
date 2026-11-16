@@ -61,6 +61,7 @@ class PlayerSettingsPage extends ConsumerWidget {
             settings.skipBack,
             (d) => save(settings.copyWith(skipBack: d)),
           ),
+          onServer: true,
         ),
         SettingsValueRow(
           title: AppLocalizations.of(context).skipForward,
@@ -70,6 +71,7 @@ class PlayerSettingsPage extends ConsumerWidget {
             settings.skipForward,
             (d) => save(settings.copyWith(skipForward: d)),
           ),
+          onServer: true,
         ),
         SettingsValueRow(
           title: AppLocalizations.of(context).audioDelay,
@@ -100,6 +102,7 @@ class PlayerSettingsPage extends ConsumerWidget {
             title: segmentKindLabel(context, kind),
             value: segmentActionLabel(context, settings.actionFor(kind)),
             onTap: () => _pickSegmentAction(context, settings, kind, save),
+            onServer: true,
           ),
         SettingsSection(title: AppLocalizations.of(context).screenAndGestures),
         // Both are Android behaviours with no desktop equivalent, so the rows

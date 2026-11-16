@@ -175,6 +175,23 @@ Also open:
   server (or a failed push) sets `player_server_prefs_pending_v1` and the next
   server is told instead of asked. The local copy stays as the offline cache.
   A new server-kept setting gets the mark too.
+  **Since 2026-11-16 most account-wide choices are on the server too**
+  (`features/settings/account_prefs.dart`): one key each in
+  `DisplayPreferences/usersettings` → `CustomPrefs`, client `Kumo` (the web
+  client keeps its own under `emby`, so the two never share a record).
+  Keys: `player` (skip lengths, segment actions, gapless, ReplayGain — JSON),
+  `burnInImageSubtitles`, `homeShowFavourites`, `libraryCardInfo`,
+  `lastLibrary` (this server's entry only), `searchHistory`,
+  `rememberedTracks`. Same rules: pull on open (a key the server lacks is
+  pushed), push on change, pending keys in `account_prefs_pending_v1`. Each
+  binding compares against the last value it saw, so a device-only field of
+  the same provider (swipe gestures) changing sends nothing. **Never rename a
+  key**: another device reads it. The local copies stay as the cache.
+  **Library sort** is per library in `DisplayPreferences/{viewId}`
+  (`SortBy`/`SortOrder`, `librarySortProvider`), as the web client keeps
+  it; the natural direction reads back as null, and the grid waits for it
+  like it waits for grouping. Only a library's own grid saves it (not a
+  genre, box set or playlist).
 - **Quick Connect sign-in** (add-server sheet): `POST /QuickConnect/Initiate`
   first (10.9+ is POST-only; GET only on a 405 for 10.8), then poll
   `/QuickConnect/Connect` until approved. The poll takes a `cancelled`

@@ -158,6 +158,17 @@ class RememberedTracksController
     }
   }
 
+  /// The whole map, as another device left it.
+  Future<void> replaceAll(Map<String, RememberedTracks> all) async {
+    final next = <String, RememberedTracks>{...all};
+    while (next.length > limit) {
+      next.remove(next.keys.first);
+    }
+    state = AsyncValue<Map<String, RememberedTracks>>.data(next);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsKey, encodeRememberedTracks(next));
+  }
+
   Future<RememberedTracks?> forGroup(String group) async =>
       (await future)[group];
 
@@ -199,12 +210,24 @@ class RememberedTracksController
     state = AsyncValue<Map<String, RememberedTracks>>.data(next);
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _prefsKey,
-      jsonEncode(<String, dynamic>{
-        for (final MapEntry<String, RememberedTracks> e in next.entries)
-          e.key: e.value.toJson(),
-      }),
-    );
+    await prefs.setString(_prefsKey, encodeRememberedTracks(next));
   }
+}
+
+/// The stored form of the remembered map, oldest first.
+String encodeRememberedTracks(Map<String, RememberedTracks> all) =>
+    jsonEncode(<String, dynamic>{
+      for (final MapEntry<String, RememberedTracks> e in all.entries)
+        e.key: e.value.toJson(),
+    });
+
+/// What [encodeRememberedTracks] wrote; anything unreadable is skipped.
+Map<String, RememberedTracks> decodeRememberedTracks(String raw) {
+  final decoded = jsonDecode(raw);
+  if (decoded is! Map<String, dynamic>) return const <String, RememberedTracks>{};
+  return <String, RememberedTracks>{
+    for (final MapEntry<String, dynamic> e in decoded.entries)
+      if (e.value is Map<String, dynamic>)
+        e.key: RememberedTracks.fromJson(e.value as Map<String, dynamic>),
+  };
 }

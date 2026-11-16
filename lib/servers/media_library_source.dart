@@ -954,6 +954,31 @@ abstract class MediaLibrarySource {
   /// Saves what [groupsCollections] reads.
   Future<void> setGroupsCollections(String viewId, bool group);
 
+  /// The sort [viewId]'s grid was last left on, or null when none was saved.
+  ///
+  /// [order] is null where the saved direction is the sort's natural one, so
+  /// the grid keeps following the sort rather than freezing a direction.
+  Future<({ServerSort sort, SortOrder? order})?> librarySort(String viewId);
+
+  /// Saves what [librarySort] reads.
+  Future<void> setLibrarySort(
+    String viewId,
+    ServerSort sort,
+    SortOrder? order,
+  );
+
+  /// This app's own preferences on the user's account: a flat map of string
+  /// values the server keeps for this client, or null where the server keeps
+  /// none.
+  ///
+  /// For the choices the server has no field of its own for — skip lengths,
+  /// segment actions, what the library cards show. The values are this app's
+  /// to define; the server stores them and nothing else reads them.
+  Future<Map<String, String>?> accountPrefs();
+
+  /// Writes [changes] into what [accountPrefs] reads, every other key kept.
+  Future<void> setAccountPrefs(Map<String, String> changes);
+
   /// The values a library can actually be filtered by.
   ///
   /// Asked of the server rather than derived from a page of items: the grid

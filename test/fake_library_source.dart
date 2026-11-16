@@ -171,6 +171,25 @@ class FakeLibrarySource implements MediaLibrarySource {
   Future<ServerPlaybackPreferences?> playbackPreferences() async => null;
 
   @override
+  Future<({ServerSort sort, SortOrder? order})?> librarySort(
+    String viewId,
+  ) async =>
+      null;
+
+  @override
+  Future<void> setLibrarySort(
+    String viewId,
+    ServerSort sort,
+    SortOrder? order,
+  ) async {}
+
+  @override
+  Future<Map<String, String>?> accountPrefs() async => null;
+
+  @override
+  Future<void> setAccountPrefs(Map<String, String> changes) async {}
+
+  @override
   Future<void> setPlaybackPreferences(
     ServerPlaybackPreferences preferences,
   ) async {}

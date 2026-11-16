@@ -275,6 +275,7 @@ class _SubtitleSettingsPageState extends ConsumerState<SubtitleSettingsPage> {
           subtitle: l10n.imageBasedOnly,
           value: ref.watch(burnInSubtitlesProvider),
           onChanged: (v) => ref.read(burnInSubtitlesProvider.notifier).set(v),
+          onServer: true,
         ),
         SettingsValueRow(
           title: l10n.syncOffset,

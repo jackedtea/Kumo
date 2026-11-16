@@ -72,12 +72,14 @@ class AudioSettingsPage extends ConsumerWidget {
           value: _label(context, settings.gapless),
           subtitle: l10n.gaplessSub,
           onTap: () => _pickGapless(context, settings, save),
+          onServer: true,
         ),
         SettingsValueRow(
           title: l10n.replayGain,
           value: _replayGainLabel(context, settings.replayGain),
           subtitle: l10n.replayGainSub,
           onTap: () => _pickReplayGain(context, settings, save),
+          onServer: true,
         ),
         SettingsSection(title: l10n.tracks),
         SettingsValueRow(
