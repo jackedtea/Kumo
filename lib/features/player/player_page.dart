@@ -36,6 +36,7 @@ import 'playback_controller.dart';
 import 'playback_state.dart';
 import 'player_ui_state.dart';
 import 'screenshot.dart';
+import 'segment_skipper.dart';
 import '../settings/player_settings.dart';
 import 'stats_overlay.dart';
 import 'track_dialog.dart';
@@ -596,6 +597,10 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
     final segment = state.currentSegment;
     if (segment == null) return null;
     if (_dismissed.has(state.media?.ref, segment)) return null;
+    if (settings.hideIntroBesideOpening &&
+        hiddenBySong(segment, state.segments, state.chapters)) {
+      return null;
+    }
 
     return settings.actionFor(segment.kind) == SegmentAction.askToSkip
         ? segment

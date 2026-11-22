@@ -378,4 +378,46 @@ void main() {
       );
     });
   });
+
+  group('hiddenBySong', () {
+    MediaChapter ch(String title, int from, int to) => MediaChapter(
+      title: title,
+      start: Duration(seconds: from),
+      end: Duration(seconds: to),
+    );
+    MediaSegment seg(MediaSegmentKind kind, int from, int to) => MediaSegment(
+      kind: kind,
+      start: Duration(seconds: from),
+      end: Duration(seconds: to),
+    );
+    final chapters = [
+      ch('Intro', 0, 60),
+      ch('OP', 60, 150),
+      ch('Part A', 150, 1200),
+      ch('Credits', 1200, 1250),
+      ch('ED', 1250, 1340),
+    ];
+    final intro = seg(MediaSegmentKind.intro, 0, 60);
+    final op = seg(MediaSegmentKind.intro, 60, 150);
+    final credits = seg(MediaSegmentKind.outro, 1200, 1250);
+    final ed = seg(MediaSegmentKind.outro, 1250, 1340);
+    final all = [intro, op, credits, ed];
+
+    test(
+      'an intro stands down beside an opening, credits beside an ending',
+      () {
+        expect(hiddenBySong(intro, all, chapters), isTrue);
+        expect(hiddenBySong(credits, all, chapters), isTrue);
+      },
+    );
+
+    test('the songs themselves are never hidden', () {
+      expect(hiddenBySong(op, all, chapters), isFalse);
+      expect(hiddenBySong(ed, all, chapters), isFalse);
+    });
+
+    test('an intro with no opening in the file stays', () {
+      expect(hiddenBySong(intro, [intro, credits], chapters), isFalse);
+    });
+  });
 }

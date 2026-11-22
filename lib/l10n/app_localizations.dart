@@ -3956,6 +3956,18 @@ abstract class AppLocalizations {
   /// **'Skip ending'**
   String get skipEnding;
 
+  /// No description provided for @hideIntroBesideOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Skip intro beside an opening'**
+  String get hideIntroBesideOpening;
+
+  /// No description provided for @hideIntroBesideOpeningSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No Skip intro or Skip credits button in a video that also has an opening or an ending'**
+  String get hideIntroBesideOpeningSub;
+
   /// No description provided for @skipCredits.
   ///
   /// In en, this message translates to:

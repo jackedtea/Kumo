@@ -708,6 +708,8 @@
   "skipIntro": "Skip intro",
   "skipOpening": "Skip opening",
   "skipEnding": "Skip ending",
+  "hideIntroBesideOpening": "Hide Skip intro beside an opening",
+  "hideIntroBesideOpeningSub": "No Skip intro or Skip credits button in a video that also has an opening or an ending",
   "skipCredits": "Skip credits",
   "skipRecap": "Skip recap",
   "skipPreview": "Skip preview",

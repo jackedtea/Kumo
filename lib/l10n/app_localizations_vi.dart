@@ -2144,6 +2144,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get skipEnding => 'Bỏ qua ending';
 
   @override
+  String get hideIntroBesideOpening => 'Ẩn Bỏ qua intro khi có opening';
+
+  @override
+  String get hideIntroBesideOpeningSub =>
+      'Không hiện nút Bỏ qua intro hay Bỏ qua credit nếu video đã có opening hoặc ending';
+
+  @override
   String get skipCredits => 'Bỏ qua credit';
 
   @override

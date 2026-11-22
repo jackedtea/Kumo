@@ -154,6 +154,7 @@ class PlayerSettings {
     this.skipForward = const Duration(seconds: 30),
     this.autoPlayNext = true,
     this.segmentActions = defaultSegmentActions,
+    this.hideIntroBesideOpening = true,
     this.swipeGestures = true,
     this.pipOnLeave = false,
     this.backgroundAudio = false,
@@ -186,6 +187,7 @@ class PlayerSettings {
         json['segmentActions'],
         autoSkipIntro: json['autoSkipIntro'] == true,
       ),
+      hideIntroBesideOpening: json['hideIntroBesideOpening'] as bool? ?? true,
       swipeGestures: json['swipeGestures'] as bool? ?? true,
       pipOnLeave: json['pipOnLeave'] as bool? ?? false,
       backgroundAudio: json['backgroundAudio'] as bool? ?? false,
@@ -234,6 +236,11 @@ class PlayerSettings {
   /// What to do with a segment of [kind], defaulting to leaving it alone.
   SegmentAction actionFor(MediaSegmentKind kind) =>
       segmentActions[kind] ?? SegmentAction.nothing;
+
+  /// No "Skip intro" or "Skip credits" button in a file that also has an
+  /// opening or an ending to offer one for. Only the button: a segment set to
+  /// skip by itself still does.
+  final bool hideIntroBesideOpening;
 
   /// Brightness and volume drags. Off makes the player ignore them entirely.
   final bool swipeGestures;
@@ -349,6 +356,7 @@ class PlayerSettings {
               in segmentActions.entries)
             e.key.name: e.value.name,
         },
+        'hideIntroBesideOpening': hideIntroBesideOpening,
         'swipeGestures': swipeGestures,
         'pipOnLeave': pipOnLeave,
         'backgroundAudio': backgroundAudio,
@@ -374,6 +382,7 @@ class PlayerSettings {
     Duration? skipForward,
     bool? autoPlayNext,
     Map<MediaSegmentKind, SegmentAction>? segmentActions,
+    bool? hideIntroBesideOpening,
     bool? swipeGestures,
     bool? pipOnLeave,
     bool? backgroundAudio,
@@ -399,6 +408,8 @@ class PlayerSettings {
       skipForward: skipForward ?? this.skipForward,
       autoPlayNext: autoPlayNext ?? this.autoPlayNext,
       segmentActions: segmentActions ?? this.segmentActions,
+      hideIntroBesideOpening:
+          hideIntroBesideOpening ?? this.hideIntroBesideOpening,
       swipeGestures: swipeGestures ?? this.swipeGestures,
       pipOnLeave: pipOnLeave ?? this.pipOnLeave,
       backgroundAudio: backgroundAudio ?? this.backgroundAudio,

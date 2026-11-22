@@ -104,6 +104,13 @@ class PlayerSettingsPage extends ConsumerWidget {
             onTap: () => _pickSegmentAction(context, settings, kind, save),
             onServer: true,
           ),
+        SettingsSwitchRow(
+          title: AppLocalizations.of(context).hideIntroBesideOpening,
+          subtitle: AppLocalizations.of(context).hideIntroBesideOpeningSub,
+          value: settings.hideIntroBesideOpening,
+          onChanged: (v) => save(settings.copyWith(hideIntroBesideOpening: v)),
+          onServer: true,
+        ),
         SettingsSection(title: AppLocalizations.of(context).screenAndGestures),
         // Both are Android behaviours with no desktop equivalent, so the rows
         // are absent rather than present and inert.

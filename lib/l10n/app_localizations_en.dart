@@ -2159,6 +2159,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skipEnding => 'Skip ending';
 
   @override
+  String get hideIntroBesideOpening => 'Hide Skip intro beside an opening';
+
+  @override
+  String get hideIntroBesideOpeningSub =>
+      'No Skip intro or Skip credits button in a video that also has an opening or an ending';
+
+  @override
   String get skipCredits => 'Skip credits';
 
   @override

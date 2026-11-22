@@ -696,6 +696,8 @@
   "skipIntro": "Bỏ qua intro",
   "skipOpening": "Bỏ qua opening",
   "skipEnding": "Bỏ qua ending",
+  "hideIntroBesideOpening": "Ẩn Bỏ qua intro khi có opening",
+  "hideIntroBesideOpeningSub": "Không hiện nút Bỏ qua intro hay Bỏ qua credit nếu video đã có opening hoặc ending",
   "skipCredits": "Bỏ qua credit",
   "skipRecap": "Bỏ qua tóm tắt",
   "skipPreview": "Bỏ qua giới thiệu",

@@ -76,6 +76,7 @@ const _playerKeys = <String>[
   'skipBackSeconds',
   'skipForwardSeconds',
   'segmentActions',
+  'hideIntroBesideOpening',
   'gapless',
   'replayGain',
 ];

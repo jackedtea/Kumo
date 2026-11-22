@@ -186,6 +186,33 @@ SkipLabel skipLabelFor(MediaSegment segment, List<MediaChapter> chapters) {
 
 /// Whether [chapter] is titled as a song, and not as the plain titles that
 /// share its first word — "Opening credits" and "Ending credits" are credits.
+/// Whether [segment]'s pill should stand down for a song elsewhere in the
+/// file: an intro where the file also has an opening, or credits where it
+/// also has an ending.
+///
+/// For a release that marks both a cold open or title card ("Intro") and the
+/// opening song ("OP"): the song is the one worth a button, and two offers an
+/// episode apart read as the player not knowing which it meant.
+bool hiddenBySong(
+  MediaSegment segment,
+  List<MediaSegment> segments,
+  List<MediaChapter> chapters,
+) {
+  final SkipLabel song;
+  switch (skipLabelFor(segment, chapters)) {
+    case SkipLabel.intro:
+      song = SkipLabel.opening;
+    case SkipLabel.credits:
+      song = SkipLabel.ending;
+    default:
+      return false;
+  }
+  for (final MediaSegment other in segments) {
+    if (other != segment && skipLabelFor(other, chapters) == song) return true;
+  }
+  return false;
+}
+
 bool _isSong(MediaChapter? chapter, RegExp song, RegExp plain) {
   if (chapter == null) return false;
   final t = chapter.title.trim().toLowerCase();
