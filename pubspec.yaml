@@ -62,6 +62,9 @@ dependencies:
   crypto: ^3.0.7
   # Wi-Fi-only downloads: whether the network the device is on is metered.
   connectivity_plus: ^7.3.2
+  # The download folder, chosen by the user on Windows and Linux. Opens no
+  # media: the local sources stay gone.
+  file_selector: ^1.0.3
   # Asking Windows whether this is an MSIX (core/install_source.dart).
   # Already in the tree through path_provider.
   ffi: ^2.2.0

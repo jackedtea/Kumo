@@ -82,6 +82,42 @@ class DownloadSettingsController extends Notifier<DownloadSettings> {
   }
 }
 
+/// The folder the copies are kept in, or null until the user has chosen one.
+///
+/// Nothing downloads without it: where gigabytes land is the user's call,
+/// not a default they find out about from a full disk. Device-local like the
+/// rest here — a path means nothing on another machine.
+final downloadFolderProvider =
+    AsyncNotifierProvider<DownloadFolderController, String?>(
+  DownloadFolderController.new,
+);
+
+class DownloadFolderController extends AsyncNotifier<String?> {
+  static const _key = 'downloads_folder_v1';
+
+  @override
+  Future<String?> build() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_key);
+      return saved == null || saved.isEmpty ? null : saved;
+    } catch (e) {
+      debugPrint('Could not read the download folder: $e');
+      return null;
+    }
+  }
+
+  Future<void> set(String folder) async {
+    state = AsyncData<String?>(folder);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_key, folder);
+    } catch (e) {
+      debugPrint('Could not save the download folder: $e');
+    }
+  }
+}
+
 /// What the network the device is on means for a download.
 enum DownloadNetwork { unmetered, metered, none }
 

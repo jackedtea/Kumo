@@ -19,20 +19,29 @@ import '../l10n/app_localizations.dart';
 import '../servers/media_library_source.dart';
 import '../servers/server_registry.dart';
 import 'download_engine.dart';
+import 'download_folder.dart';
 import 'download_models.dart';
 import 'download_platform.dart';
 import 'download_settings.dart';
 import 'download_snapshot.dart';
 import 'download_store.dart';
 
-/// Where the copies live: application support, not documents.
-///
-/// Documents is the user's own folder on desktop, and a film dropped into
-/// it under a GUID would read as clutter. Support is the app's, is kept
-/// across updates, and is never offered to a cleaner the way a cache is.
-final downloadStoreProvider = FutureProvider<DownloadStore>((ref) async {
+/// Where copies lived before the folder was the user's to choose, and one
+/// of the places they may still choose: application support.
+Future<Directory> appDownloadsDirectory() async {
   final base = await getApplicationSupportDirectory();
-  return DownloadStore(Directory(p.join(base.path, 'downloads')));
+  return Directory(p.join(base.path, 'downloads'));
+}
+
+/// Where the copies live: the folder the user chose.
+///
+/// Until one is chosen this is the old place in application support, so
+/// copies made before the choice existed still play — but nothing new is
+/// queued into it; see `ensureDownloadFolder`.
+final downloadStoreProvider = FutureProvider<DownloadStore>((ref) async {
+  final chosen = await ref.watch(downloadFolderProvider.future);
+  if (chosen != null) return DownloadStore(Directory(chosen));
+  return DownloadStore(await appDownloadsDirectory());
 });
 
 final downloadEngineProvider = FutureProvider<DownloadEngine>((ref) async {
@@ -286,6 +295,7 @@ class DownloadsController extends Notifier<List<DownloadEntry>> {
     if (!ref.mounted || store == null || engine == null || _running != null) {
       return;
     }
+    if (_relocating) return;
     if (ref.read(downloadHoldProvider) != null) return;
 
     final sources = ref.read(downloadSourceProvider);
@@ -355,6 +365,62 @@ class DownloadsController extends Notifier<List<DownloadEntry>> {
     if (_running == null) return;
     _suspended = true;
     _cancel?.cancel();
+  }
+
+  /// Set while the copies are being moved to another folder.
+  bool _relocating = false;
+
+  /// Makes [folder] the place copies are kept, taking the ones there are
+  /// along.
+  ///
+  /// The file under way is stopped first and goes back in the queue, to
+  /// carry on from the same byte in the new place. Copies already listed in
+  /// [folder] — a folder used before and chosen again — are kept beside the
+  /// ones arriving. Throws, with the old folder still in use and whole, when
+  /// the new one cannot be written or the move fails.
+  Future<void> moveTo(String folder) async {
+    await _ready;
+    final old = _store;
+    if (old == null) throw const FileSystemException('The downloads are not open');
+    if (sameFolder(old.root.path, folder)) {
+      await ref.read(downloadFolderProvider.notifier).set(folder);
+      return;
+    }
+    if (_relocating) return;
+
+    _relocating = true;
+    try {
+      _suspend();
+      while (_running != null) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      await old.settled;
+
+      final target = Directory(folder);
+      await target.create(recursive: true);
+      final already = await DownloadStore(target).load();
+
+      if (state.isNotEmpty || _unreported.isNotEmpty) {
+        await moveFolderContents(old.root, target);
+      }
+
+      await ref.read(downloadFolderProvider.notifier).set(folder);
+      ref.invalidate(downloadStoreProvider);
+      final store = await ref.read(downloadStoreProvider.future);
+      _store = store;
+      _engine = await ref.read(downloadEngineProvider.future);
+
+      final here = await store.load();
+      final keys = <String>{for (final e in here) e.key};
+      await _set(<DownloadEntry>[
+        ...here,
+        for (final e in already)
+          if (!keys.contains(e.key)) e,
+      ]);
+    } finally {
+      _relocating = false;
+      unawaited(_pump());
+    }
   }
 
   /// What the notification last said, so it is only told when that changes.

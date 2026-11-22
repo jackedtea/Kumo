@@ -1401,6 +1401,7 @@ class LibraryFilter {
     this.parentalRatings = const <String>{},
     this.tags = const <String>{},
     this.years = const <int>{},
+    this._text = '',
   });
 
   /// Nothing narrowed — what a library opens on. Hiding most of a collection
@@ -1415,6 +1416,14 @@ class LibraryFilter {
   final Set<String> tags;
   final Set<int> years;
 
+  /// Words the title has to contain — the server's `searchTerm`, matched
+  /// within this library only. Blank means no search.
+  final String _text;
+
+  /// Trimmed, so a search of a stray space is no search and two spellings
+  /// differing only in padding are one request.
+  String get text => _text.trim();
+
   bool get isEmpty => count == 0;
 
   /// How many constraints are on — the number on the filter button, which is
@@ -1426,7 +1435,8 @@ class LibraryFilter {
       genres.length +
       parentalRatings.length +
       tags.length +
-      years.length;
+      years.length +
+      (text.isEmpty ? 0 : 1);
 
   LibraryFilter copyWith({
     Set<ItemFilter>? flags,
@@ -1436,6 +1446,7 @@ class LibraryFilter {
     Set<String>? parentalRatings,
     Set<String>? tags,
     Set<int>? years,
+    String? text,
   }) {
     return LibraryFilter(
       flags: flags ?? this.flags,
@@ -1445,6 +1456,7 @@ class LibraryFilter {
       parentalRatings: parentalRatings ?? this.parentalRatings,
       tags: tags ?? this.tags,
       years: years ?? this.years,
+      text: text ?? this.text,
     );
   }
 
@@ -1467,7 +1479,8 @@ class LibraryFilter {
       setEquals(other.genres, genres) &&
       setEquals(other.parentalRatings, parentalRatings) &&
       setEquals(other.tags, tags) &&
-      setEquals(other.years, years);
+      setEquals(other.years, years) &&
+      other.text == text;
 
   @override
   int get hashCode => Object.hash(
@@ -1478,6 +1491,7 @@ class LibraryFilter {
         Object.hashAllUnordered(parentalRatings),
         Object.hashAllUnordered(tags),
         Object.hashAllUnordered(years),
+        text,
       );
 }
 

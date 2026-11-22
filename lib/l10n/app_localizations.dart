@@ -5780,6 +5780,18 @@ abstract class AppLocalizations {
   /// **'Years'**
   String get filterYears;
 
+  /// No description provided for @filterSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search this library'**
+  String get filterSearch;
+
+  /// No description provided for @filterSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get filterSearchClear;
+
   /// No description provided for @filterPlayed.
   ///
   /// In en, this message translates to:
@@ -6031,6 +6043,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete a copy once it has been watched to the end on this device'**
   String get downloadRemoveWatchedSub;
+
+  /// No description provided for @downloadFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Download folder'**
+  String get downloadFolder;
+
+  /// No description provided for @downloadFolderNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not chosen yet. Nothing downloads until you choose one.'**
+  String get downloadFolderNone;
+
+  /// No description provided for @downloadFolderChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose download folder'**
+  String get downloadFolderChoose;
+
+  /// No description provided for @downloadFolderDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get downloadFolderDevice;
+
+  /// No description provided for @downloadFolderCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory card'**
+  String get downloadFolderCard;
+
+  /// No description provided for @downloadFolderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a download folder first.'**
+  String get downloadFolderRequired;
+
+  /// No description provided for @downloadFolderMoving.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving your downloads…'**
+  String get downloadFolderMoving;
+
+  /// No description provided for @downloadFolderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That folder could not be used. Your downloads stay where they were.'**
+  String get downloadFolderFailed;
 
   /// No description provided for @downloadStorage.
   ///

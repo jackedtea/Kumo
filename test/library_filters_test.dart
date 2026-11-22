@@ -135,6 +135,15 @@ void main() {
 
       expect(a, b);
     });
+
+    test("a search is the server's searchTerm, trimmed", () {
+      expect(
+        filterParams(const LibraryFilter(text: '  dune ')),
+        <String, String>{'searchTerm': 'dune'},
+      );
+      // Blank is no search at all, not a search for nothing.
+      expect(filterParams(const LibraryFilter(text: '   ')), isEmpty);
+    });
   });
 
   group('sorting', () {
@@ -207,6 +216,16 @@ void main() {
       expect(filter.count, 4);
       expect(filter.isEmpty, isFalse);
       expect(LibraryFilter.none.isEmpty, isTrue);
+    });
+
+    test('a search counts once, and padding does not make it another', () {
+      const a = LibraryFilter(text: 'dune');
+      const b = LibraryFilter(text: ' dune  ');
+
+      expect(a.count, 1);
+      expect(a, b);
+      expect(a.hashCode, b.hashCode);
+      expect(const LibraryFilter(text: ' ').isEmpty, isTrue);
     });
   });
 
@@ -308,6 +327,35 @@ void main() {
 
       expect(server.asked.last.filter.genres, isEmpty);
       expect(server.asked.last.filter.flags, <ItemFilter>{ItemFilter.favourite});
+    });
+
+    testWidgets('a search typed in the dialog reaches the server on Enter',
+        (tester) async {
+      final server = _RecordingServer();
+      await pumpLibrary(tester, server: server);
+
+      await openOptions(tester);
+      await tester.enterText(find.byType(TextField), 'arr');
+      await tester.pumpAndSettle();
+      // Typing is part of the draft like a chip: no request per letter.
+      expect(server.asked.length, 1);
+
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+
+      expect(server.asked.last.filter.text, 'arr');
+      final chip = find.widgetWithText(InputChip, 'arr');
+      expect(chip, findsOneWidget);
+
+      // The delete glyph — the search icon is the chip's first.
+      await tester.tap(
+        find.descendant(of: chip, matching: find.byType(Icon)).last,
+      );
+      await tester.pumpAndSettle();
+      // Back to the unfiltered grid — the first request, answered from the
+      // cache, so the chip going is what shows it.
+      expect(chip, findsNothing);
+      expect(find.text('Arrival'), findsOneWidget);
     });
 
     testWidgets('the direction carries across a change of field',

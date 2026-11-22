@@ -170,6 +170,10 @@ class DownloadStore {
     }
   }
 
+  /// Resolves once no index or report write is under way — what moving the
+  /// folder waits for, so a rename does not race the file it is renaming.
+  Future<void> get settled => _writing;
+
   File get _pending => File(p.join(root.path, _pendingName));
 
   /// Where offline playback stopped, keyed by [DownloadEntry.keyOf], for

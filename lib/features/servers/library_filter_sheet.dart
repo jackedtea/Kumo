@@ -153,7 +153,21 @@ class _OptionsDialogState extends ConsumerState<_OptionsDialog> {
   late LibraryOrdering _ordering = widget.ordering;
   late LibraryFilter _draft = widget.filter;
 
+  /// The search box. Its text is the draft's [LibraryFilter.text], kept in
+  /// step on every keystroke so Reset and Apply see what is typed.
+  late final TextEditingController _search =
+      TextEditingController(text: widget.filter.text);
+
   void _edit(LibraryFilter next) => setState(() => _draft = next);
+
+  void _apply() =>
+      Navigator.of(context).pop((ordering: _ordering, filter: _draft));
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   static const _defaultOrdering = LibraryOrdering(ServerSort.name);
 
@@ -203,6 +217,40 @@ class _OptionsDialogState extends ConsumerState<_OptionsDialog> {
             shrinkWrap: true,
             padding: EdgeInsets.only(bottom: spacing.md),
             children: <Widget>[
+              // ---------------------------------------------- search
+              // First, since it is the quickest way to the one title wanted.
+              // Part of the draft like everything else: the server searches
+              // when Apply is pressed (or Enter), not on every letter.
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  spacing.lg,
+                  spacing.md,
+                  spacing.lg,
+                  0,
+                ),
+                child: TextField(
+                  controller: _search,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: l10n.filterSearch,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _draft.text.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.close_rounded),
+                            tooltip: l10n.filterSearchClear,
+                            onPressed: () {
+                              _search.clear();
+                              _edit(_draft.copyWith(text: ''));
+                            },
+                          ),
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => _edit(_draft.copyWith(text: v)),
+                  onSubmitted: (_) => _apply(),
+                ),
+              ),
               // ------------------------------------------------ sort
               _Heading(text: l10n.sortBy),
               _ChipWrap(
@@ -397,13 +445,13 @@ class _OptionsDialogState extends ConsumerState<_OptionsDialog> {
                       : () => setState(() {
                             _draft = LibraryFilter.none;
                             _ordering = _defaultOrdering;
+                            _search.clear();
                           }),
                   child: Text(l10n.filterReset),
                 ),
                 const Spacer(),
                 FilledButton(
-                  onPressed: () => Navigator.of(context)
-                      .pop((ordering: _ordering, filter: _draft)),
+                  onPressed: _apply,
                   child: Text(l10n.filterApply),
                 ),
               ],

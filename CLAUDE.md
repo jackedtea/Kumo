@@ -273,7 +273,7 @@ Also open:
   at any width, the banner, larger tiles, and an autofocused Resume.
   The manifest declares leanback optional and adds `LEANBACK_LAUNCHER`;
   `android:banner` is `@drawable/tv_banner` (xhdpi 320×180, xxhdpi 480×270:
-  the icon's gradient, the cloud and the name). Those PNGs are drawn by
+  the icon's blue, the cloud and the name). Those PNGs are drawn by
   `tool/make_icons.py` — rerun it rather than editing them.
 - **Player keys** (`_handleKey`): while the player's own node is focused, or
   the chrome is hidden, arrows seek and Enter/Select plays-pauses (the first
@@ -431,6 +431,21 @@ shared bits (`download_ui.dart`: `watchDownload`, `DownloadBadge`,
   past 90 % of its runtime on this device is deleted after the stop is
   reported, retrying while Windows still has the file open), space used and
   remove all.
+- **The folder is the user's choice, and required** (2026-11-16,
+  `downloadFolderProvider`, key `downloads_folder_v1`, device-local).
+  `ensureDownloadFolder` (`features/downloads/download_folder_picker.dart`)
+  guards both `enqueue` call sites in `item_actions.dart`: no folder opens
+  the picker, backing out queues nothing. Windows/Linux pick any folder
+  (`file_selector`, back for this alone) and copies go in a `Kumo` folder
+  inside it; elsewhere the choice is a list of places the app may write
+  (its own storage, each SD card) — a SAF tree is not a path the engine or
+  libmpv can use. With none chosen the store still opens the old
+  `<app support>/downloads`, so earlier copies play. Choosing or changing
+  goes through `DownloadsController.moveTo`: stop the running file, move the
+  tree (`moveFolderContents`: rename, else copy and delete, put back on
+  failure), merge with an index already there. Never invalidate
+  `downloadsProvider` for this — the offline source holds its notifier.
+  Unverified: an SD card on a real device, a chosen drive that has gone.
 - **Deliberately not built:** downloading a transcoded copy (a transcode is
   a stream with no stable byte length, so `Range` resume and the saved
   track indexes both stop meaning anything) and a storage cap (the space
@@ -1048,8 +1063,8 @@ with the local sources rather than waiting for a schema that is not coming.
 
 ## Launcher icons
 
-The mark is a **white cloud (kumo, 雲) with a play triangle cut out of it**, on a sky
-gradient (`#6CB8FF` → `#3A62E0`). It is defined once, in `tool/make_icons.py`, which
+The mark is a **white cloud (kumo, 雲) with a play triangle cut out of it**, on a **flat**
+sky blue (`#4A8CF7`, no gradient since 2026-11-16). It is defined once, in `tool/make_icons.py`, which
 writes `icon.svg`, every PNG under `assets/icon/`, the Linux hicolor icons and the TV
 banner. Change the shapes there, never a PNG. Regenerate with:
 
@@ -1063,7 +1078,7 @@ Four PNGs under `assets/icon/` feed it, and each exists for a reason:
 
 - `icon.png` — the rounded squircle, used for Windows, macOS and the legacy Android mipmaps.
 - `icon_background.png` / `icon_foreground.png` — the Android adaptive layers. The
-  background is a **full-bleed gradient with no rounding** (the launcher applies the mask);
+  background is a **full-bleed flat fill with no rounding** (the launcher applies the mask);
   the foreground is the marks alone on transparent, scaled to **66%** so nothing lands
   outside the 72/108dp safe zone. The foreground doubles as the monochrome layer.
 - `icon_ios.png` — a **square, un-rounded, already-opaque** copy. iOS applies its own

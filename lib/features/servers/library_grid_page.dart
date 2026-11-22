@@ -203,6 +203,7 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
     // the sheet belongs on top of that, not under a route on its way out.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      _closeViewSheet();
       final chosen = await showLibraryPicker(context, currentId: viewId);
       if (chosen != null && mounted) _switchTo(chosen);
     });
@@ -211,6 +212,7 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
   /// Opens [viewId] in place of the library on screen.
   void _switchTo(String viewId) {
     if (viewId == widget.viewId) return;
+    _closeViewSheet();
 
     final inTab = widget.onSwitchLibrary;
     if (inTab != null) {
@@ -536,25 +538,41 @@ class _LibraryGridPageState extends ConsumerState<LibraryGridPage>
   ///
   /// Everything applies as it is changed, with the grid behind the sheet
   /// redrawing under it — a choice about how cards look is judged by looking.
-  Future<void> _pickView() {
+  Future<void> _pickView() async {
     final kind = _collectionKind();
-    return showModalBottomSheet<void>(
+    await showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,
       // As tall as its rows: the default stops at 9/16 of the window, which
       // on a phone hides the last switch below the fold.
       isScrollControlled: true,
-      builder: (_) => _ViewSheet(
-        // Only where a film or a series can belong to a box set. A plain folder
-        // calls itself `unknown` and may hold either.
-        groupingViewId:
-            _hasTabs &&
-                (kind == 'movies' || kind == 'tvshows' || kind == 'unknown')
-            ? widget.viewId
-            : null,
-      ),
+      builder: (sheetContext) {
+        _viewSheet = ModalRoute.of(sheetContext);
+        return _ViewSheet(
+          // Only where a film or a series can belong to a box set. A plain
+          // folder calls itself `unknown` and may hold either.
+          groupingViewId:
+              _hasTabs &&
+                  (kind == 'movies' || kind == 'tvshows' || kind == 'unknown')
+              ? widget.viewId
+              : null,
+        );
+      },
     );
+    _viewSheet = null;
+  }
+
+  /// The View options sheet while it is open. It sits on the branch's
+  /// navigator, so the navigation bar stays live beside it — re-tapping
+  /// Libraries can switch the library with the sheet still up.
+  ModalRoute<dynamic>? _viewSheet;
+
+  /// Closes the View options sheet, which describes the library being left.
+  void _closeViewSheet() {
+    final route = _viewSheet;
+    _viewSheet = null;
+    if (route != null && route.isActive) route.navigator?.removeRoute(route);
   }
 
   /// The library's own name, once the views have loaded.
@@ -1726,6 +1744,14 @@ class _ActiveFilters extends StatelessWidget {
     );
 
     final chips = <Widget>[
+      if (filter.text.isNotEmpty)
+        InputChip(
+          avatar: const Icon(Icons.search_rounded),
+          label: Text(filter.text),
+          onDeleted: () => onChanged(filter.copyWith(text: '')),
+          deleteButtonTooltipMessage: l10n.filterSearchClear,
+          visualDensity: VisualDensity.compact,
+        ),
       for (final ItemFilter flag in filter.flags)
         chip(
           flagLabel(flag, l10n),

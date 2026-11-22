@@ -11,6 +11,7 @@ import '../../downloads/download_settings.dart';
 import '../../downloads/downloads_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../settings/settings_widgets.dart';
+import 'download_folder_picker.dart';
 import 'download_ui.dart';
 
 /// Settings › Downloads: when the queue may run, what happens to a copy
@@ -23,6 +24,7 @@ class DownloadSettingsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(downloadSettingsProvider);
     final controller = ref.read(downloadSettingsProvider.notifier);
+    final folder = ref.watch(downloadFolderProvider).value;
     final entries = ref.watch(downloadsProvider);
     final used = entries.fold<int>(0, (sum, e) => sum + e.receivedBytes);
     final scheme = context.colors;
@@ -30,6 +32,13 @@ class DownloadSettingsPage extends ConsumerWidget {
     return SettingsScaffold(
       title: l10n.downloadSettings,
       children: <Widget>[
+        ListTile(
+          contentPadding: context.spacing.screenPadding(context.windowSize),
+          leading: const Icon(Icons.folder_outlined),
+          title: Text(l10n.downloadFolder),
+          subtitle: Text(folder ?? l10n.downloadFolderNone),
+          onTap: () => chooseDownloadFolder(context, ref),
+        ),
         SettingsSwitchRow(
           title: l10n.downloadWifiOnly,
           subtitle: l10n.downloadWifiOnlySub,
